@@ -7,13 +7,11 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface WorkspaceService {
-    List<WorkspaceDTO> getWorkspaces();
-    WorkspaceDTO createWorkspace(WorkspaceDTO workspaceDTO);
-    WorkspaceDTO getWorkspaceByName(String name);
-    WorkspaceDTO updateWorkspace(WorkspaceDTO workspaceDTO,String name);
+
 
     List<WorkspaceDTO> getWorkspaceByIdAccount(Integer id);
     WorkspaceDTO createdWorkspaceByIdAccount(WorkspaceDTO workspaceDTO ,Integer id);
-//    ResponseEntity<Object> create(WorkspaceEntity model);
-//    ResponseEntity<Object> deleteWorkspace(String name);
+    WorkspaceDTO updateWorkspaceByIdWorkspace(WorkspaceDTO workspaceDTO,Integer idWorkspace,Integer idAccount);
+    void deleteWorkspaceByIdWorkspace(Integer id);
+    List<WorkspaceDTO> searchWorkspaceByName(String name);
 }

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -23,7 +24,7 @@ public class ProjectEntity extends BaseEnity{
     private Boolean isActivate;
 
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "projectEntity")
-    private List<TimeEntity> timeEntities;
+    private List<TimeEntity> timeEntities = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "workspace_id")
     private WorkspaceEntity workspaceEntityProject;

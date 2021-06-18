@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.springframework.data.repository.cdi.Eager;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -32,5 +33,5 @@ public class ResourceEntity extends BaseEnity{
     private WorkspaceEntity workspaceEntityResource;
 
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "resourceEntity")
-    private List<TimeEntity> timeEntities;
+    private List<TimeEntity> timeEntities = new ArrayList<>();
 }

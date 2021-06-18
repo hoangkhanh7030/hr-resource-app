@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -20,6 +21,6 @@ public class RoleEntity extends BaseEnity{
 
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY,mappedBy = "roleEntity")
 
-    private List<AccountWorkspaceRoleEntity> entityList;
+    private List<AccountWorkspaceRoleEntity> entityList = new ArrayList<>();
 
 }

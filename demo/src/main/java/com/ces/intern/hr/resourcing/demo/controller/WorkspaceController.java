@@ -1,55 +1,66 @@
 package com.ces.intern.hr.resourcing.demo.controller;
 
 import com.ces.intern.hr.resourcing.demo.dto.WorkspaceDTO;
-import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
+
+import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.WorkspaceService;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping(value = "/workspace")
+
 public class WorkspaceController {
     private final WorkspaceService workspaceService;
+    private final WorkspaceRepository workspaceRepository;
     @Autowired
-    public WorkspaceController(WorkspaceService workspaceService) {
+    public WorkspaceController(WorkspaceService workspaceService,
+                               WorkspaceRepository workspaceRepository) {
+
         this.workspaceService = workspaceService;
+        this.workspaceRepository=workspaceRepository;
     }
 
 
 
 
-    @GetMapping(value = "/getWorkspaces")
-    private List<WorkspaceDTO> getWorkspaces(){
-        return workspaceService.getWorkspaces();
-    }
-    @PostMapping(value = "/createWorkspace")
-    private WorkspaceDTO createWorkspace(@RequestBody WorkspaceDTO workspaceDTO){
-        return workspaceService.createWorkspace(workspaceDTO);
-    }
 
-    @GetMapping(value = "/getWorkspaceByName")
-    private WorkspaceDTO getWorkspaceByName(@RequestParam String name){
-        return workspaceService.getWorkspaceByName(name);
-    }
-    @PutMapping(value = "/updateWorkspace")
-    private WorkspaceDTO updateWorkspace(@RequestParam String name,@RequestBody WorkspaceDTO workspaceDTO){
-        return workspaceService.updateWorkspace(workspaceDTO,name);
-    }
     @GetMapping(value = "/getWorkspaces/{idAccount}")
     private List<WorkspaceDTO> getWorkspaceByIdAccount(@PathVariable Integer idAccount){
         return workspaceService.getWorkspaceByIdAccount(idAccount);
     }
-//    @PostMapping(value = "/create")
-//    private ResponseEntity<Object> create(@RequestBody WorkspaceEntity model){
-//        return workspaceService.create(model);
-//    }
-//    @DeleteMapping(value = "/delete")
-//    private ResponseEntity<Object> delete(@RequestParam String name){
-//        return workspaceService.deleteWorkspace(name);
-//    }
+
+    @PostMapping(value = "/createdWorkspace/{idAccount}")
+    private WorkspaceDTO createWorkspaceByIdAccount(@PathVariable Integer idAccount,@RequestBody WorkspaceDTO workspaceDTO){
+        return workspaceService.createdWorkspaceByIdAccount(workspaceDTO,idAccount);
+    }
+
+    @PutMapping(value = "/updateWorkspace/{idWorkspace}/{idAccount}")
+    private ResponseEntity<Object> updateWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
+                                                                @RequestBody WorkspaceDTO workspaceDTO,
+                                                                @PathVariable Integer idAccount){
+        workspaceService.updateWorkspaceByIdWorkspace(workspaceDTO,idWorkspace,idAccount);
+        if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()){
+           return ResponseEntity.ok("update Successing");
+        }else return ResponseEntity.unprocessableEntity().body("update Fail");
+    }
+    @DeleteMapping(value = "/deleteWorkspaceByIdWorkspace/{idWorkspace}")
+    private ResponseEntity<String> deleteWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace){
+        workspaceService.deleteWorkspaceByIdWorkspace(idWorkspace);
+        if(workspaceRepository.findById(idWorkspace).isPresent()){
+           return ResponseEntity.unprocessableEntity().body("Delete Fail");
+        }else return ResponseEntity.ok("Delete Successing");
+    }
+
+    @GetMapping(value = "/searchWorkspace/{name}")
+    private List<WorkspaceDTO> search(@PathVariable String name){
+        return workspaceService.searchWorkspaceByName(name);
+    }
+
 
 
 }

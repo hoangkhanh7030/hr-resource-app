@@ -15,6 +15,6 @@ public class WorkspaceDTO extends BaseDTO{
     private String name;
     private List<ProjectDTO> projectList;
     private List<ResourceDTO> resourceList;
-    private Integer idAccount;
+
 
 }

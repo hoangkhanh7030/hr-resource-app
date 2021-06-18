@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 @Getter
 @Setter
@@ -18,14 +19,14 @@ public class WorkspaceEntity extends BaseEnity{
     private String name;
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY,mappedBy = "workspaceEntity")
 
-    private List<AccountWorkspaceRoleEntity> entityList;
+    private List<AccountWorkspaceRoleEntity> entityList = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "workspaceEntityResource")
-    private List<ResourceEntity> resourceEntities;
+    private List<ResourceEntity> resourceEntities =  new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "workspaceEntityProject")
 
-    private List<ProjectEntity> projectEntities;
+    private List<ProjectEntity> projectEntities = new ArrayList<>();
 
 
 

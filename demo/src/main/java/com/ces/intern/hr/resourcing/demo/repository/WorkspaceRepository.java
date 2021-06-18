@@ -10,9 +10,11 @@ import java.util.Optional;
 public interface WorkspaceRepository extends JpaRepository<WorkspaceEntity,Integer> {
 
 
-
+     Optional<WorkspaceEntity> findById(int id);
 
      Optional<WorkspaceEntity> findByName(String name);
+
+     List<WorkspaceEntity> findAllByNameContainingIgnoreCase(String name);
 
 
 }
