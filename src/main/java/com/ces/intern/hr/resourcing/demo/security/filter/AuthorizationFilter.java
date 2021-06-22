@@ -25,38 +25,38 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
     public AuthorizationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
     }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws
-            IOException, ServletException {
-        String header = request.getHeader(SecurityContact.HEADER_STRING);
-        if (header == null || header.isEmpty()) {
-            chain.doFilter(request, response);
-            return;
-        }
+            IOException, ServletException{
+        String header =request.getHeader(SecurityContact.HEADER_STRING);
+
         Authentication authentication = null;
         try {
-            authentication = getAuthentication(header);
+            authentication= getAuthentication(header);
 
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        chain.doFilter(request, response);
+        chain.doFilter(request,response);
     }
-
-    private Authentication getAuthentication(String header) throws IllegalAccessException {
+    private Authentication getAuthentication(String header) throws IllegalAccessException{
+        String token = header.replace(SecurityContact.TOKEN_PREFIX,"");
         try {
-
-            Claims claims = Jwts.parser().setSigningKey(SecurityContact.TOKEN_SECRET).parseClaimsJws(header).getBody();
-            String email = claims.getSubject();
+//            Jws<Claims> claimsJws = Jwts.parserBuilder()
+//                    .setSigningKey(SecurityContact.TOKEN_SECRET)
+//                    .build().parseClaimsJws(token);
+//
+//            Claims claims = claimsJws.getBody();
+            Claims claims =Jwts.parser().setSigningKey(SecurityContact.TOKEN_SECRET).parseClaimsJws(token).getBody();
+            String email =claims.getSubject();
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     email,
                     null,
                     new ArrayList<>()
             );
             return authentication;
-        } catch (JwtException e) {
+        }catch (JwtException e){
             throw new IllegalAccessException("Token cant be truest");
         }
     }

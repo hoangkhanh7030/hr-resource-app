@@ -11,6 +11,5 @@ public interface AccoutRepository extends JpaRepository<AccountEntity,Integer> {
 
     Optional<AccountEntity> findByEmail(String email);
     Integer countByEmail(String email);
-    Integer countByFullname(String name);
-    Optional<AccountEntity> findByFullname(String name);
+
 }

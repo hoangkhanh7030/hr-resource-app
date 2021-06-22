@@ -1,42 +1,28 @@
 package com.ces.intern.hr.resourcing.demo.utils;
 
+public enum Utils {
+    VIEW("VIEW",1),EDIT("EDIT",2),MANAGER("Manager",1),MEMBER("Member",2);
+    private String name;
+    private Integer code;
 
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.DayOfWeek;
-import java.util.Calendar;
-import java.util.Date;
-
-public class Utils {
-
-    public static String toFirtDayOfWeek(String date) throws ParseException{
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar calendar =Calendar.getInstance();
-        calendar.setTime(simpleDateFormat.parse(date));
-        int dayOfWeek =calendar.get(Calendar.DAY_OF_WEEK);
-        if (dayOfWeek==1){
-            calendar.add(Calendar.DATE,-6);
-        }
-        else {
-            calendar.add(Calendar.DATE,(2-dayOfWeek));
-        }
-        String firtDay=simpleDateFormat.format(calendar.getTime());
-        return firtDay;
-    }
-    public static String toEndDayOfWeek(String date) throws ParseException{
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Calendar calendar =Calendar.getInstance();
-        calendar.setTime(simpleDateFormat.parse(date));
-        int dayOfWeek =calendar.get(Calendar.DAY_OF_WEEK);
-        if (dayOfWeek==1){
-            calendar.add(Calendar.DATE,dayOfWeek);
-        }
-        else {
-            calendar.add(Calendar.DATE,(8-dayOfWeek));
-        }
-        String endDay=simpleDateFormat.format(calendar.getTime());
-        return endDay;
+    Utils(String name, Integer code) {
+        this.name = name;
+        this.code = code;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public void setCode(Integer code) {
+        this.code = code;
+    }
 }

@@ -1,4 +1,4 @@
-package com.ces.intern.hr.resourcing.demo.http.response;
+package com.ces.intern.hr.resourcing.demo.http.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectResponse extends BaseResponse{
+public class WorkspaceRequest {
     private String name;
-    private String color;
-    private boolean isActivate;
+
 }

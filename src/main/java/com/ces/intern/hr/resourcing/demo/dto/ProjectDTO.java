@@ -17,7 +17,7 @@ public class ProjectDTO extends BaseDTO{
     private String name;
     private String color;
     private Boolean isActivate;
-    private ResourceResponse accountManager;
-    private ResourceResponse projectManager;
+    private String AccountManager;
+    private String ProjectManager;
 
 }
