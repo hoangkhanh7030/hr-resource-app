@@ -21,12 +21,12 @@ public class ResourceEntity extends BaseEnity{
     private String name;
     @Column(name = "avatar")
     private String avatar;
+    @Column(name = "position")
+    private Integer positionCode;
     @ManyToOne
     @JoinColumn(name = "team_id")
     private TeamEntity teamEntity;
-    @ManyToOne
-    @JoinColumn(name = "position_id")
-    private PositionEnitity positionEnitity;
+
 
     @ManyToOne
     @JoinColumn(name = "workspace_id")

@@ -48,8 +48,8 @@ public class WorkspaceConverter {
                 projectDTO.setModifiedDate(workspaceEntity.getProjectEntities().get(i).getModifiedDate());
                 list.add(projectDTO);
         }
+        }
         return list;
-        }else return list;
     }
     public List<ResourceDTO> resourceDTOList(WorkspaceEntity workspaceEntity){
         List<ResourceDTO> list = new ArrayList<>();
@@ -65,7 +65,7 @@ public class WorkspaceConverter {
                 resourceDTO.setModifiedDate(workspaceEntity.getResourceEntities().get(i).getModifiedDate());
                 list.add(resourceDTO);
         }
+        }
         return list;
-        }else return list;
     }
 }

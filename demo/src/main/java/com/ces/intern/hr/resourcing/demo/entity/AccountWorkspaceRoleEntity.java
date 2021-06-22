@@ -16,6 +16,8 @@ public class AccountWorkspaceRoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column(name = "role")
+    private Integer codeRole;
 
     @ManyToOne
     @JoinColumn(name = "account_id")
@@ -23,8 +25,6 @@ public class AccountWorkspaceRoleEntity {
     @ManyToOne
     @JoinColumn(name = "workspace_id")
     private WorkspaceEntity workspaceEntity;
-    @ManyToOne
-    @JoinColumn(name = "role_id")
-    private RoleEntity roleEntity;
+
 
 }

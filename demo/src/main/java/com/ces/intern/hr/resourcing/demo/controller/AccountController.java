@@ -1,21 +1,30 @@
 package com.ces.intern.hr.resourcing.demo.controller;
 
-import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
+
+import com.ces.intern.hr.resourcing.demo.http.request.AccountRequest;
+import com.ces.intern.hr.resourcing.demo.http.response.AccountResponse;
 import com.ces.intern.hr.resourcing.demo.sevice.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping(value = "/account")
 public class AccountController {
-
+    final private AccountService accountService;
     @Autowired
-    private AccountService accountService;
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
+    }
+    @PostMapping(value = "/create")
+    public String create(@RequestBody AccountRequest accountRequest ){
+        return accountService.createdAccount(accountRequest);
 
-    @GetMapping(value = "/account/{id}")
-    private AccountDTO getAccount(@PathVariable int id){
-        return accountService.getAccount(id);
+    }
+    @PutMapping(value = "/update")
+
+    public AccountResponse updateAccount(@RequestBody AccountRequest accountRequest,
+                                         @RequestHeader(value = "AccountId") Integer accountId){
+        return accountService.update(accountRequest, accountId);
     }
 
 }

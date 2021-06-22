@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 
@@ -48,9 +48,10 @@ public class WorkspaceController {
            return ResponseEntity.ok("update Successing");
         }else return ResponseEntity.unprocessableEntity().body("update Fail");
     }
-    @DeleteMapping(value = "/deleteWorkspaceByIdWorkspace/{idWorkspace}")
-    private ResponseEntity<String> deleteWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace){
-        workspaceService.deleteWorkspaceByIdWorkspace(idWorkspace);
+    @DeleteMapping(value = "/deleteWorkspaceByIdWorkspace/{idWorkspace}/{idAccount}")
+    private ResponseEntity<String> deleteWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
+                                                                @PathVariable Integer idAccount){
+        workspaceService.deleteWorkspaceByIdWorkspace(idWorkspace,idAccount);
         if(workspaceRepository.findById(idWorkspace).isPresent()){
            return ResponseEntity.unprocessableEntity().body("Delete Fail");
         }else return ResponseEntity.ok("Delete Successing");
