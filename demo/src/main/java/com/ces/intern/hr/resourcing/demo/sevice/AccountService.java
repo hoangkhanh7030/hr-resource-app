@@ -10,5 +10,6 @@ public interface AccountService {
     String createdAccount(AccountRequest accountRequest);
     AccountDTO validateAccount(String email,String password);
     AccountResponse update(AccountRequest accountRequest,Integer modifiedBy);
+    AccountResponse getAccount(Integer idAccount);
 
 }

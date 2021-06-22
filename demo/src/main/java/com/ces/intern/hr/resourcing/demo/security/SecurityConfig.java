@@ -4,6 +4,7 @@ import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import com.ces.intern.hr.resourcing.demo.security.filter.AuthorizationFilter;
 import com.ces.intern.hr.resourcing.demo.security.jwtAccount.CustomAccountService;
 import com.ces.intern.hr.resourcing.demo.security.oauth.AccoutService;
+import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2Account;
 import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,14 +17,20 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Arrays;
 
 
@@ -64,21 +71,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST,SecurityContact.SIGN_IN_URL).permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .addFilter(new AuthorizationFilter(authenticationManager()));
-//                .and()
-//                .oauth2Login()
-//                    .userInfoEndpoint()
-//                        .userService(customOAuth2AccountService)
-//                .and()
-//                .successHandler(new AuthenticationSuccessHandler() {
-//                    @Override
-//                    public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
-//                        CustomOAuth2Account oAuth2Account =(CustomOAuth2Account) authentication.getPrincipal();
-//                        accoutService.processOAuthPostLogin(oAuth2Account.getEmail(),oAuth2Account.getName(),oAuth2Account.getAvatar());
-//
-//                        httpServletResponse.sendRedirect("/api/random");
-//                    }
-//                });
+                .oauth2Login()
+                    .userInfoEndpoint()
+                        .userService(customOAuth2AccountService)
+                .and()
+                .successHandler(new AuthenticationSuccessHandler() {
+                    @Override
+                    public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
+                        CustomOAuth2Account oAuth2Account =(CustomOAuth2Account) authentication.getPrincipal();
+                        accoutService.processOAuthPostLogin(oAuth2Account.getEmail(),oAuth2Account.getName(),oAuth2Account.getAvatar());
+
+                    }
+                });
+        http.addFilter(new AuthorizationFilter(authenticationManager()));
 
     }
     @Bean
