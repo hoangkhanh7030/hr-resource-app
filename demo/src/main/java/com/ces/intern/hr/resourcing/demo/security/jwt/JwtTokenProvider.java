@@ -20,11 +20,7 @@ import java.util.List;
 @Slf4j
 public class JwtTokenProvider {
 
-
-
-
-
-    public static List<String> generateToken(AccountDTO accountDTO){
+    public List<String> generateToken(AccountDTO accountDTO){
         String token = Jwts.builder()
                 .claim("email",accountDTO.getEmail())
                 .setIssuedAt(new Date())

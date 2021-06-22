@@ -36,4 +36,5 @@ public class CustomOAuth2Account implements OAuth2User {
     public String getAvatar(){
         return oAuth2User.getAttribute("picture");
     }
+
 }

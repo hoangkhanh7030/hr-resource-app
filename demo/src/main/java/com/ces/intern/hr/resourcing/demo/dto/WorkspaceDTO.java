@@ -13,8 +13,11 @@ import java.util.List;
 @NoArgsConstructor
 public class WorkspaceDTO extends BaseDTO{
     private String name;
-    private List<ProjectDTO> projectList;
-    private List<ResourceDTO> resourceList;
+    private String Role;
+//    private List<ProjectDTO> projectList;
+//    private List<ResourceDTO> resourceList;
+    private Integer projectListLength;
+    private Integer resourceListLength;
 
 
 }

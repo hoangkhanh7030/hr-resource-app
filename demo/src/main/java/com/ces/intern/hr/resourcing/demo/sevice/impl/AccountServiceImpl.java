@@ -88,5 +88,13 @@ public class AccountServiceImpl implements AccountService {
         return modelMapper.map(accountDTO,AccountResponse.class);
     }
 
+    @Override
+    public AccountResponse getAccount(Integer idAccount) {
+
+        AccountEntity accountEntity = accoutRepository.findById(idAccount)
+                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        return modelMapper.map(accountEntity,AccountResponse.class);
+    }
+
 
 }

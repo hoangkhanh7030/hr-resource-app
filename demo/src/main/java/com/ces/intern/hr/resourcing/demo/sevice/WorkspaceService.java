@@ -13,4 +13,6 @@ public interface WorkspaceService {
     void updateWorkspaceByIdWorkspace(WorkspaceDTO workspaceDTO, Integer idWorkspace, Integer idAccount);
     void deleteWorkspaceByIdWorkspace(Integer idWorkspace,Integer idAccount);
     List<WorkspaceDTO> searchWorkspaceByName(String name);
+
+
 }

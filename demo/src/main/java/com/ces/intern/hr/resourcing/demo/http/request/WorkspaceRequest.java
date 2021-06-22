@@ -1,4 +1,4 @@
-package com.ces.intern.hr.resourcing.demo.security;
+package com.ces.intern.hr.resourcing.demo.http.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RandomStaff {
-    private String message;
+public class WorkspaceRequest {
+    private String name;
+
 }
