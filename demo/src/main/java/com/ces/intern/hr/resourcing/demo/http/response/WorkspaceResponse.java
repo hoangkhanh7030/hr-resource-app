@@ -1,4 +1,4 @@
-package com.ces.intern.hr.resourcing.demo.dto;
+package com.ces.intern.hr.resourcing.demo.http.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,11 +11,9 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectDTO extends BaseDTO{
+public class WorkspaceResponse extends BaseResponse{
     private String name;
-    private String color;
-    private Boolean isActivate;
-    private String AccountManager;
-    private String ProjectManager;
+    private List<ProjectResponse> projectList;
+    private String Role;
 
 }

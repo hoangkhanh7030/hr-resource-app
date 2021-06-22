@@ -1,21 +1,16 @@
-package com.ces.intern.hr.resourcing.demo.dto;
+package com.ces.intern.hr.resourcing.demo.http.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectDTO extends BaseDTO{
+public class ProjectResponse extends BaseResponse{
     private String name;
     private String color;
-    private Boolean isActivate;
-    private String AccountManager;
-    private String ProjectManager;
-
+    private boolean isActivate;
 }

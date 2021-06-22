@@ -26,7 +26,7 @@ public class AccountConverter {
         accountDTO.setId(accountEntity.getId());
         accountDTO.setEmail(accountEntity.getEmail());
         accountDTO.setFullname(accountEntity.getFullname());
-        accountDTO.setRoles(roleDTOList(accountEntity));
+
         accountDTO.setWorkspaceDto(workspaceDTOList(accountEntity));
         return accountDTO;
 
@@ -44,14 +44,5 @@ public class AccountConverter {
         }
         return list;
     }
-    public List<RoleDTO> roleDTOList(AccountEntity accountEntity){
-        List<RoleDTO> list = new ArrayList<>();
-        for(int i=0;i<accountEntity.getEntityAccoutWorkspaceRoleList().size();i++){
-            RoleDTO roleDTO = new RoleDTO();
-            roleDTO.setId(accountEntity.getEntityAccoutWorkspaceRoleList().get(i).getRoleEntity().getId());
-            roleDTO.setName(accountEntity.getEntityAccoutWorkspaceRoleList().get(i).getRoleEntity().getName());
-            list.add(roleDTO);
-        }
-        return list;
-    }
+
 }
