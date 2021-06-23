@@ -61,7 +61,7 @@ public class WorkspaceController {
         }else return ResponseEntity.ok("Delete Successing");
     }
 
-    @GetMapping(value = "/searchWorkspace/{name}")
+    @GetMapping(value = "/search/{name}")
     private List<WorkspaceDTO> search(@PathVariable String name){
         return workspaceService.searchWorkspaceByName(name);
     }

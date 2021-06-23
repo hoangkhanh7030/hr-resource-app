@@ -6,7 +6,6 @@ import com.ces.intern.hr.resourcing.demo.http.exception.LoginException;
 import com.ces.intern.hr.resourcing.demo.http.request.AccountLoginRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.AccountResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.ErrorResponse;
-import com.ces.intern.hr.resourcing.demo.security.RandomStaff;
 import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import com.ces.intern.hr.resourcing.demo.security.jwt.JwtTokenProvider;
 
@@ -58,16 +57,10 @@ public class LoginController {
         AccountResponse accountResponse = mapper.map(accountDTO,AccountResponse.class);
 
 
+
         return new ResponseEntity<>(accountResponse, responseHeader, HttpStatus.OK);
 
     }
-    @GetMapping(value = "/random")
-    @ResponseStatus(value = HttpStatus.OK)
-    public RandomStaff randomStaff(){
-
-        return new RandomStaff("hop le");
-    }
-
 
     @ExceptionHandler({LoginException.class})
     public ResponseEntity<Object> loginError(Exception ex, HttpServletRequest request){
