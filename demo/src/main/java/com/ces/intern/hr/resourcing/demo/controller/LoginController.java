@@ -6,6 +6,7 @@ import com.ces.intern.hr.resourcing.demo.http.exception.LoginException;
 import com.ces.intern.hr.resourcing.demo.http.request.AccountLoginRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.AccountResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.ErrorResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.LoginResponse;
 import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import com.ces.intern.hr.resourcing.demo.security.jwt.JwtTokenProvider;
 
@@ -44,21 +45,15 @@ public class LoginController {
     }
 
     @PostMapping(value = "/login")
-    public ResponseEntity<AccountResponse> authenticateUser(@RequestBody AccountLoginRequest accountLoginRequest){
+    public LoginResponse authenticateUser(@RequestBody AccountLoginRequest accountLoginRequest){
         if(StringUtils.isEmpty(accountLoginRequest.getEmail())||StringUtils.isEmpty(accountLoginRequest.getPassword())){
             throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
         }
         AccountDTO accountDTO = accountService.validateAccount(accountLoginRequest.getEmail(),accountLoginRequest.getPassword());
 
-        final List<String> jwt = tokenProvider.generateToken(accountDTO);
-        HttpHeaders responseHeader = new HttpHeaders();
-        responseHeader.add(SecurityContact.HEADER_STRING,SecurityContact.TOKEN_PREFIX + jwt.get(0));
-        responseHeader.add(SecurityContact.HEADER_USERID,jwt.get(1));
-        AccountResponse accountResponse = mapper.map(accountDTO,AccountResponse.class);
+        String jwt = tokenProvider.generateToken(accountDTO);
 
-
-
-        return new ResponseEntity<>(accountResponse, responseHeader, HttpStatus.OK);
+        return new LoginResponse(jwt,accountDTO.getId());
 
     }
 
