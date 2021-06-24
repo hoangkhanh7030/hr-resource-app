@@ -3,6 +3,7 @@ package com.ces.intern.hr.resourcing.demo.security;
 import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
+import com.ces.intern.hr.resourcing.demo.http.response.LoginResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import com.ces.intern.hr.resourcing.demo.security.filter.AuthorizationFilter;
@@ -12,6 +13,7 @@ import com.ces.intern.hr.resourcing.demo.security.oauth.AccoutService;
 import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2Account;
 import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2AccountService;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
+import com.google.gson.Gson;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -89,17 +91,15 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
+        http
                 .cors()
                 .and()
+                .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/login","/signup","oauth2/login/**").permitAll()
+                .antMatchers("oauth2/login/**").permitAll()
                 .antMatchers(HttpMethod.POST,SecurityContact.SIGN_UP_URL).permitAll()
                 .antMatchers(HttpMethod.POST,SecurityContact.SIGN_IN_URL).permitAll()
                 .anyRequest().authenticated()
-                .and().addFilter(new AuthorizationFilter(authenticationManager()))
-                .cors()
                 .and()
                 .oauth2Login()
                     .userInfoEndpoint()
@@ -107,18 +107,21 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
                 .and()
                 .successHandler(new AuthenticationSuccessHandler() {
                     @Override
-                    public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
+                    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
                         CustomOAuth2Account oAuth2Account =(CustomOAuth2Account) authentication.getPrincipal();
                         accoutService.processOAuthPostLogin(oAuth2Account.getEmail(),oAuth2Account.getName(),oAuth2Account.getAvatar());
                         AccountEntity accountEntity = accoutRepository.findByEmail(oAuth2Account.getEmail())
                                 .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
                         AccountDTO accountDTO=modelMapper.map(accountEntity,AccountDTO.class);
-                        List<String> jwt =tokenProvider.generateToken(accountDTO);
-                        httpServletResponse.addHeader(SecurityContact.HEADER_STRING,SecurityContact.TOKEN_PREFIX+jwt.get(0));
-                        httpServletResponse.addHeader(SecurityContact.HEADER_USERID,jwt.get(1));
+                        String jwt =tokenProvider.generateToken(accountDTO);
+                        String json = new Gson().toJson(new LoginResponse(jwt,accountDTO.getId()));
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write(json);
+
                     }
                 });
-
+        http.addFilter(new AuthorizationFilter(authenticationManager()));
 
     }
     @Bean
