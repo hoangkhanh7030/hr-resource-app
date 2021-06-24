@@ -29,7 +29,10 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws
             IOException, ServletException{
         String header =request.getHeader(SecurityContact.HEADER_STRING);
-
+        if (header==null || header.isEmpty()){
+            chain.doFilter(request,response);
+            return;
+        }
         Authentication authentication = null;
         try {
             authentication= getAuthentication(header);
@@ -41,14 +44,9 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
         chain.doFilter(request,response);
     }
     private Authentication getAuthentication(String header) throws IllegalAccessException{
-        String token = header.replace(SecurityContact.TOKEN_PREFIX,"");
         try {
-//            Jws<Claims> claimsJws = Jwts.parserBuilder()
-//                    .setSigningKey(SecurityContact.TOKEN_SECRET)
-//                    .build().parseClaimsJws(token);
-//
-//            Claims claims = claimsJws.getBody();
-            Claims claims =Jwts.parser().setSigningKey(SecurityContact.TOKEN_SECRET).parseClaimsJws(token).getBody();
+
+            Claims claims =Jwts.parser().setSigningKey(SecurityContact.TOKEN_SECRET).parseClaimsJws(header).getBody();
             String email =claims.getSubject();
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     email,

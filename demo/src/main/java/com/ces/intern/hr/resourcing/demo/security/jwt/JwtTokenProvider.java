@@ -20,14 +20,14 @@ import java.util.List;
 @Slf4j
 public class JwtTokenProvider {
 
-    public List<String> generateToken(AccountDTO accountDTO){
+    public String generateToken(AccountDTO accountDTO){
         String token = Jwts.builder()
                 .claim("email",accountDTO.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis()+SecurityContact.EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256,SecurityContact.TOKEN_SECRET)
                 .compact();
-        return Arrays.asList(token,accountDTO.getId()+"");
+        return token;
     }
 
 
