@@ -100,13 +100,8 @@
         </dependency>
 
 
-<<<<<<< HEAD:pom.xml
+
     </dependencies>
-=======
-
-
-	</dependencies>
->>>>>>> 0770e8e... build api login and api sign up and create jwt security:demo/pom.xml
 
 
 	<build>
