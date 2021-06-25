@@ -1,11 +1,9 @@
 package com.ces.intern.hr.resourcing.demo.security.oauth;
 
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
-import com.ces.intern.hr.resourcing.demo.entity.AuthenticationProvider;
+import com.ces.intern.hr.resourcing.demo.utils.AuthenticationProvider;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
-import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;

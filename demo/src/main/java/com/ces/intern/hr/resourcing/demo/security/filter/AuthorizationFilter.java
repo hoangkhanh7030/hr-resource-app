@@ -25,36 +25,38 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
     public AuthorizationFilter(AuthenticationManager authenticationManager) {
         super(authenticationManager);
     }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws
-            IOException, ServletException{
-        String header =request.getHeader(SecurityContact.HEADER_STRING);
-        if (header==null || header.isEmpty()){
-            chain.doFilter(request,response);
+            IOException, ServletException {
+        String header = request.getHeader(SecurityContact.HEADER_STRING);
+        if (header == null || header.isEmpty()) {
+            chain.doFilter(request, response);
             return;
         }
         Authentication authentication = null;
         try {
-            authentication= getAuthentication(header);
+            authentication = getAuthentication(header);
 
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        chain.doFilter(request,response);
+        chain.doFilter(request, response);
     }
-    private Authentication getAuthentication(String header) throws IllegalAccessException{
+
+    private Authentication getAuthentication(String header) throws IllegalAccessException {
         try {
 
-            Claims claims =Jwts.parser().setSigningKey(SecurityContact.TOKEN_SECRET).parseClaimsJws(header).getBody();
-            String email =claims.getSubject();
+            Claims claims = Jwts.parser().setSigningKey(SecurityContact.TOKEN_SECRET).parseClaimsJws(header).getBody();
+            String email = claims.getSubject();
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     email,
                     null,
                     new ArrayList<>()
             );
             return authentication;
-        }catch (JwtException e){
+        } catch (JwtException e) {
             throw new IllegalAccessException("Token cant be truest");
         }
     }

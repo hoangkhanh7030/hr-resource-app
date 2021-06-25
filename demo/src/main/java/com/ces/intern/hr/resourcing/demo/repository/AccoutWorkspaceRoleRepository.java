@@ -7,10 +7,10 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface AccoutWorkspaceRoleRepository extends JpaRepository<AccountWorkspaceRoleEntity,Integer> {
+public interface AccoutWorkspaceRoleRepository extends JpaRepository<AccountWorkspaceRoleEntity, Integer> {
     @Query(value = "select ac from AccountWorkspaceRoleEntity ac WHERE ac.workspaceEntity.id=:idWorkspace " +
             "and ac.accountEntity.id=:idAccount")
-    Optional<AccountWorkspaceRoleEntity> findByIdAndId(@Param("idWorkspace") Integer idWorkspace,@Param("idAccount") Integer idAccount);
+    Optional<AccountWorkspaceRoleEntity> findByIdAndId(@Param("idWorkspace") Integer idWorkspace, @Param("idAccount") Integer idAccount);
 
     @Query(value = "select ac from AccountWorkspaceRoleEntity ac WHERE ac.workspaceEntity.id=:idWorkspace")
     Optional<AccountWorkspaceRoleEntity> findByIdWorkspace(@Param("idWorkspace") Integer idWorkspace);

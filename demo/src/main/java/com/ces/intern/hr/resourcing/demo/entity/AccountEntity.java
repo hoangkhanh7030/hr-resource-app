@@ -1,5 +1,6 @@
 package com.ces.intern.hr.resourcing.demo.entity;
 
+import com.ces.intern.hr.resourcing.demo.utils.AuthenticationProvider;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

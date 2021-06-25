@@ -5,4 +5,8 @@ public class ResponseMessage {
     public static final String CREATE_SUCCESS = "Create successfully";
     public static final String UPDATE_SUCCESS = "Update successfully";
     public static final String ADD_SUCCESS = "Add successfully";
+    public static final String DELETE_FAIL = "Delete Fail";
+    public static final String CREATE_FAIL = "Created Fail";
+    public static final String UPDATE_FAIL = "Update Fail";
+    public static final String ADD_FAIL = "Add Fail";
 }

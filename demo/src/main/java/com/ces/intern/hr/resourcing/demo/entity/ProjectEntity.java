@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "project")
-public class ProjectEntity extends BaseEnity{
+public class ProjectEntity extends BaseEnity {
     @Column(name = "name")
     private String name;
     @Column(name = "color")
@@ -23,7 +23,7 @@ public class ProjectEntity extends BaseEnity{
     @Column(name = "is_activate")
     private Boolean isActivate;
 
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "projectEntity")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "projectEntity")
     private List<TimeEntity> timeEntities = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "workspace_id")
