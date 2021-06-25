@@ -2,12 +2,8 @@ package com.ces.intern.hr.resourcing.demo.sevice;
 
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.http.request.ActivateRequest;
-import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.ProjectResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.ResourceResponse;
 
-import java.rmi.AlreadyBoundException;
 import java.util.List;
 
 public interface ProjectService {

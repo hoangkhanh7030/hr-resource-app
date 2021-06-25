@@ -12,30 +12,30 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/account")
 public class AccountController {
-     private final AccountService accountService;
-     private final AccoutRepository accoutRepository;
+    private final AccountService accountService;
+    private final AccoutRepository accoutRepository;
+
     @Autowired
     public AccountController(AccountService accountService,
                              AccoutRepository accoutRepository) {
         this.accountService = accountService;
-        this.accoutRepository= accoutRepository;
+        this.accoutRepository = accoutRepository;
     }
+
     @PostMapping(value = "/create")
-    public String create(@RequestBody AccountRequest accountRequest ){
-
-
-
+    public String create(@RequestBody AccountRequest accountRequest) {
         return accountService.createdAccount(accountRequest);
 
     }
-    @PutMapping(value = "/update")
 
+    @PutMapping(value = "/update")
     public AccountResponse updateAccount(@RequestBody AccountRequest accountRequest,
-                                         @RequestHeader(value = "AccountId") Integer accountId){
+                                         @RequestHeader(value = "AccountId") Integer accountId) {
         return accountService.update(accountRequest, accountId);
     }
+
     @GetMapping(value = "")
-    public AccountResponse getAccount(@RequestHeader(value = "AccountId") Integer accountId){
+    public AccountResponse getAccount(@RequestHeader(value = "AccountId") Integer accountId) {
         return accountService.getAccount(accountId);
     }
 

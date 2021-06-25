@@ -5,12 +5,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectResponse extends BaseResponse{
+public class ProjectResponse extends  BaseResponse{
     private String name;
     private String color;
     private boolean isActivate;
+    private String accountManager;
+    private String projectManager;
+
 }

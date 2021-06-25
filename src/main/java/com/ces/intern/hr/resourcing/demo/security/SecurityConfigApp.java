@@ -57,34 +57,36 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
     private final AccoutRepository accoutRepository;
     private final ModelMapper modelMapper;
     private final JwtTokenProvider tokenProvider;
+
     @Autowired
     public SecurityConfigApp(CustomOAuth2AccountService customOAuth2AccountService,
                              AccoutService accoutService,
                              CustomAccountService accService,
                              AccoutRepository accoutRepository,
                              ModelMapper modelMapper,
-                             JwtTokenProvider tokenProvider){
-        this.customOAuth2AccountService=customOAuth2AccountService;
-        this.accoutService=accoutService;
-        this.accService=accService;
-        this.accoutRepository=accoutRepository;
-        this.modelMapper=modelMapper;
+                             JwtTokenProvider tokenProvider) {
+        this.customOAuth2AccountService = customOAuth2AccountService;
+        this.accoutService = accoutService;
+        this.accService = accService;
+        this.accoutRepository = accoutRepository;
+        this.modelMapper = modelMapper;
         this.tokenProvider = tokenProvider;
     }
 
 
-
     @Bean(BeanIds.AUTHENTICATION_MANAGER)
     @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception{
+    public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
+
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Override
-    protected void configure(AuthenticationManagerBuilder auth)throws Exception{
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(accService)
                 .passwordEncoder(passwordEncoder());
     }
@@ -97,24 +99,24 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("oauth2/login/**").permitAll()
-                .antMatchers(HttpMethod.POST,SecurityContact.SIGN_UP_URL).permitAll()
-                .antMatchers(HttpMethod.POST,SecurityContact.SIGN_IN_URL).permitAll()
+                .antMatchers(HttpMethod.POST, SecurityContact.SIGN_UP_URL).permitAll()
+                .antMatchers(HttpMethod.POST, SecurityContact.SIGN_IN_URL).permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
-                    .userInfoEndpoint()
-                        .userService(customOAuth2AccountService)
+                .userInfoEndpoint()
+                .userService(customOAuth2AccountService)
                 .and()
                 .successHandler(new AuthenticationSuccessHandler() {
                     @Override
                     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                        CustomOAuth2Account oAuth2Account =(CustomOAuth2Account) authentication.getPrincipal();
-                        accoutService.processOAuthPostLogin(oAuth2Account.getEmail(),oAuth2Account.getName(),oAuth2Account.getAvatar());
+                        CustomOAuth2Account oAuth2Account = (CustomOAuth2Account) authentication.getPrincipal();
+                        accoutService.processOAuthPostLogin(oAuth2Account.getEmail(), oAuth2Account.getName(), oAuth2Account.getAvatar());
                         AccountEntity accountEntity = accoutRepository.findByEmail(oAuth2Account.getEmail())
-                                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-                        AccountDTO accountDTO=modelMapper.map(accountEntity,AccountDTO.class);
-                        String jwt =tokenProvider.generateToken(accountDTO);
-                        String json = new Gson().toJson(new LoginResponse(jwt,accountDTO.getId()));
+                                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+                        AccountDTO accountDTO = modelMapper.map(accountEntity, AccountDTO.class);
+                        String jwt = tokenProvider.generateToken(accountDTO);
+                        String json = new Gson().toJson(new LoginResponse(jwt, accountDTO.getId()));
                         response.setContentType("application/json");
                         response.setCharacterEncoding("UTF-8");
                         response.getWriter().write(json);
@@ -124,15 +126,16 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
         http.addFilter(new AuthorizationFilter(authenticationManager()));
 
     }
+
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(){
-        final CorsConfiguration configuration  = new CorsConfiguration();
+    public CorsConfigurationSource corsConfigurationSource() {
+        final CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setExposedHeaders(Arrays.asList(SecurityContact.HEADER_STRING,SecurityContact.HEADER_USERID));
+        configuration.setExposedHeaders(Arrays.asList(SecurityContact.HEADER_STRING, SecurityContact.HEADER_USERID));
         final UrlBasedCorsConfigurationSource sourse = new UrlBasedCorsConfigurationSource();
         sourse.registerCorsConfiguration("/**", configuration);
         return sourse;

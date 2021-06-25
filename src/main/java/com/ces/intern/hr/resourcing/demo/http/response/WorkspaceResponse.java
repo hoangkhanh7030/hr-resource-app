@@ -5,15 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class WorkspaceResponse extends BaseResponse{
+public class WorkspaceResponse extends BaseResponse {
     private String name;
-    private List<ProjectResponse> projectList;
     private String Role;
-
+    private Integer projectListLength;
+    private Integer resourceListLength;
 }

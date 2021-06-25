@@ -17,16 +17,16 @@ public class CustomAccountService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        AccountEntity accountEntity= accoutRepository.findByEmail(email).orElse(null);
-        if (accountEntity==null){
+        AccountEntity accountEntity = accoutRepository.findByEmail(email).orElse(null);
+        if (accountEntity == null) {
             throw new UsernameNotFoundException(email);
         }
         return new CustomAccountDetails(accountEntity);
     }
 
-    public UserDetails loadUserById(Integer id) throws NotFoundException{
-        AccountEntity accountEntity =accoutRepository.findById(id).orElseThrow(
-                ()->new UsernameNotFoundException("User not found with id:" + id)
+    public UserDetails loadUserById(Integer id) throws NotFoundException {
+        AccountEntity accountEntity = accoutRepository.findById(id).orElseThrow(
+                () -> new UsernameNotFoundException("User not found with id:" + id)
         );
         return new CustomAccountDetails(accountEntity);
 

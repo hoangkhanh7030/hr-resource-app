@@ -5,9 +5,7 @@ import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ActivateRequest;
-import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
 
-import com.ces.intern.hr.resourcing.demo.http.response.ProjectResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.ResourceResponse;
 import com.ces.intern.hr.resourcing.demo.repository.*;
 import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;

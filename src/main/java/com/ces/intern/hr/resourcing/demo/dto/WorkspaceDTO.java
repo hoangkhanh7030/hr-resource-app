@@ -17,10 +17,9 @@ public class WorkspaceDTO extends BaseDTO{
     private String name;
     private String Role;
 
-//    private List<ProjectDTO> projectList;
-//    private List<ResourceDTO> resourceList;
-    private Integer projectListLength;
-    private Integer resourceListLength;
+    private List<ProjectResponse> projectList;
+    private List<ResourceResponse> resourceList;
+
 
 
 }
