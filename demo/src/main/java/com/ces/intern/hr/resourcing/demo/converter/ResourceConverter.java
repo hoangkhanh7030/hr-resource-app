@@ -2,31 +2,22 @@ package com.ces.intern.hr.resourcing.demo.converter;
 
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ResourceConverter {
+    @Autowired
+    private ModelMapper modelMapper;
     public ResourceDTO toDTO(ResourceEntity resourceEntity){
-        ResourceDTO resourceDTO = new ResourceDTO();
-        resourceDTO.setId(resourceEntity.getId());
-        resourceDTO.setName(resourceEntity.getName());
-        resourceDTO.setAvatar(resourceEntity.getAvatar());
+        ResourceDTO resourceDTO = modelMapper.map(resourceEntity,ResourceDTO.class);
         resourceDTO.setWorkspaceName(resourceEntity.getWorkspaceEntityResource().getName());
-        resourceDTO.setCreatedBy(resourceEntity.getCreatedBy());
-        resourceDTO.setCreatedDate(resourceEntity.getCreatedDate());
-        resourceDTO.setModifiedBy(resourceEntity.getModifiedBy());
-        resourceDTO.setModifiedDate(resourceEntity.getModifiedDate());
+
         return resourceDTO;
     }
     public ResourceEntity toEntity(ResourceDTO resourceDTO){
-        ResourceEntity resourceEntity = new ResourceEntity();
-        resourceEntity.setId(resourceDTO.getId());
-        resourceEntity.setName(resourceDTO.getName());
-        resourceEntity.setAvatar(resourceDTO.getAvatar());
-        resourceEntity.setCreatedBy(resourceDTO.getCreatedBy());
-        resourceEntity.setCreatedDate(resourceDTO.getCreatedDate());
-        resourceEntity.setModifiedBy(resourceDTO.getModifiedBy());
-        resourceEntity.setModifiedDate(resourceDTO.getModifiedDate());
+        ResourceEntity resourceEntity = modelMapper.map(resourceDTO,ResourceEntity.class);
         return resourceEntity;
     }
 }

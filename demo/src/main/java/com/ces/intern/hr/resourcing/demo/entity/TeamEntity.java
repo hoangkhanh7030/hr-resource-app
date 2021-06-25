@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -22,5 +23,5 @@ public class TeamEntity {
     private String name;
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "teamEntity")
 
-    private List<ResourceEntity> resourceEntities;
+    private List<ResourceEntity> resourceEntities = new ArrayList<>();
 }

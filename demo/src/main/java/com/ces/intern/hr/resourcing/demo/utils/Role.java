@@ -1,11 +1,11 @@
 package com.ces.intern.hr.resourcing.demo.utils;
 
-public enum Utils {
-    VIEW("VIEW",1),EDIT("EDIT",2),MANAGER("Manager",1),MEMBER("Member",2);
+public enum Role {
+    VIEW("VIEW",1),EDIT("EDIT",2);
     private String name;
     private Integer code;
 
-    Utils(String name, Integer code) {
+    Role(String name, Integer code) {
         this.name = name;
         this.code = code;
     }

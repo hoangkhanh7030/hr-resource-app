@@ -6,26 +6,22 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "account_workspace_role")
-public class AccountWorkspaceRoleEntity {
+@Table(name = "position")
+public class PositionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(name = "role")
-    private Integer codeRole;
+    @Column(name = "name")
+    private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id")
-    private AccountEntity accountEntity;
-    @ManyToOne
-    @JoinColumn(name = "workspace_id")
-    private WorkspaceEntity workspaceEntity;
-
-
+    @OneToMany(mappedBy = "positionEntity",cascade = CascadeType.ALL)
+    List<ResourceEntity> resourceEntityList = new ArrayList<>();
 }

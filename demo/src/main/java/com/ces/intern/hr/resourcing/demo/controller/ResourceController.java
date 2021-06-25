@@ -15,8 +15,8 @@ public class ResourceController {
     private ResourceService resourceService;
 
     @PostMapping(value = "/createResource")
-    private ResourceDTO createdResource(@RequestBody ResourceDTO resourceDTO){
-       return resourceService.createResource(resourceDTO);
+    private ResourceDTO createdResource(@RequestBody ResourceDTO resourceDTO) {
+        return resourceService.createResource(resourceDTO);
     }
 
 

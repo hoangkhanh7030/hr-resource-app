@@ -18,10 +18,11 @@ public class ResourceServiceImpl implements ResourceService {
     private WorkspaceRepository workspaceRepository;
     @Autowired
     private ResourceRepository resourceRepository;
+
     @Override
     public ResourceDTO createResource(ResourceDTO resourceDTO) {
         ResourceEntity resourceEntity = resourceConverter.toEntity(resourceDTO);
-        WorkspaceEntity workspaceEntity=workspaceRepository.findByName(resourceDTO.getWorkspaceName()).orElse(null);
+        WorkspaceEntity workspaceEntity = workspaceRepository.findByName(resourceDTO.getWorkspaceName()).orElse(null);
         resourceEntity.setWorkspaceEntityResource(workspaceEntity);
         resourceRepository.save(resourceEntity);
         return resourceConverter.toDTO(resourceEntity);

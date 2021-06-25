@@ -26,7 +26,6 @@ public class AccountConverter {
         accountDTO.setId(accountEntity.getId());
         accountDTO.setEmail(accountEntity.getEmail());
         accountDTO.setFullname(accountEntity.getFullname());
-
         accountDTO.setWorkspaceDto(workspaceDTOList(accountEntity));
         return accountDTO;
 
