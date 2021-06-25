@@ -35,7 +35,6 @@ public abstract class BaseEnity implements Serializable {
     private Integer modifiedBy;
 
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

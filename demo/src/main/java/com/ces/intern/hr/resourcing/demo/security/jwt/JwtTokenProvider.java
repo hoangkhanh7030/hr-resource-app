@@ -20,16 +20,15 @@ import java.util.List;
 @Slf4j
 public class JwtTokenProvider {
 
-    public String generateToken(AccountDTO accountDTO){
+    public String generateToken(AccountDTO accountDTO) {
         String token = Jwts.builder()
-                .claim("email",accountDTO.getEmail())
+                .claim("email", accountDTO.getEmail())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis()+SecurityContact.EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS256,SecurityContact.TOKEN_SECRET)
+                .setExpiration(new Date(System.currentTimeMillis() + SecurityContact.EXPIRATION_TIME))
+                .signWith(SignatureAlgorithm.HS256, SecurityContact.TOKEN_SECRET)
                 .compact();
         return token;
     }
-
 
 
 }

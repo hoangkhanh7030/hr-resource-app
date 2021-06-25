@@ -31,11 +31,10 @@ import java.util.List;
 public class LoginController {
 
 
-
-    private final   JwtTokenProvider tokenProvider;
-
+    private final JwtTokenProvider tokenProvider;
     private final ModelMapper mapper;
     private final AccountService accountService;
+
     @Autowired
     public LoginController(JwtTokenProvider tokenProvider, ModelMapper mapper,
                            AccountService accountService) {
@@ -45,27 +44,27 @@ public class LoginController {
     }
 
     @PostMapping(value = "/login")
-    public LoginResponse authenticateUser(@RequestBody AccountLoginRequest accountLoginRequest){
-        if(StringUtils.isEmpty(accountLoginRequest.getEmail())||StringUtils.isEmpty(accountLoginRequest.getPassword())){
+    public LoginResponse authenticateUser(@RequestBody AccountLoginRequest accountLoginRequest) {
+        if (StringUtils.isEmpty(accountLoginRequest.getEmail()) || StringUtils.isEmpty(accountLoginRequest.getPassword())) {
             throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
         }
-        AccountDTO accountDTO = accountService.validateAccount(accountLoginRequest.getEmail(),accountLoginRequest.getPassword());
+        AccountDTO accountDTO = accountService.validateAccount(accountLoginRequest.getEmail(), accountLoginRequest.getPassword());
 
         String jwt = tokenProvider.generateToken(accountDTO);
 
-        return new LoginResponse(jwt,accountDTO.getId());
+        return new LoginResponse(jwt, accountDTO.getId());
 
     }
 
     @ExceptionHandler({LoginException.class})
-    public ResponseEntity<Object> loginError(Exception ex, HttpServletRequest request){
+    public ResponseEntity<Object> loginError(Exception ex, HttpServletRequest request) {
         ErrorResponse response = new ErrorResponse();
         response.setError(ExceptionMessage.USERNAME_PASSWORD_INVALIDATE.getMessage());
         response.setMessage(ex.getMessage());
         response.setPath(request.getRequestURL().toString());
         response.setStatus(HttpStatus.NOT_FOUND.value());
         response.setTimestamp(new Date());
-        return new ResponseEntity<>(response,new HttpHeaders(),HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(response, new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 
 
