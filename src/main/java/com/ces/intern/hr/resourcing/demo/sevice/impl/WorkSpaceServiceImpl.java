@@ -108,17 +108,20 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         WorkspaceEntity workspaceEntity = workspaceConverter.toEntity(workspaceDTO);
 
         if (workspaceRepository.findByName(workspaceEntity.getName()).isPresent()) {
+            return null;
+        }else {
+            Date date = new Date();
+            workspaceEntity.setCreatedDate(date);
+            workspaceEntity.setCreatedBy(id);
+            AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = new AccountWorkspaceRoleEntity();
+            accountWorkspaceRoleEntity.setAccountEntity(accountEntity);
+            accountWorkspaceRoleEntity.setWorkspaceEntity(workspaceEntity);
+            accountWorkspaceRoleEntity.setCodeRole(Role.EDIT.getCode());
+            workspaceRepository.save(workspaceEntity);
+            accoutWorkspaceRoleRepository.save(accountWorkspaceRoleEntity);
+            return workspaceConverter.toDTO(workspaceEntity);
         }
-        Date date = new Date();
-        workspaceEntity.setCreatedDate(date);
-        workspaceEntity.setCreatedBy(id);
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = new AccountWorkspaceRoleEntity();
-        accountWorkspaceRoleEntity.setAccountEntity(accountEntity);
-        accountWorkspaceRoleEntity.setWorkspaceEntity(workspaceEntity);
-        accountWorkspaceRoleEntity.setCodeRole(Role.EDIT.getCode());
-        workspaceRepository.save(workspaceEntity);
-        accoutWorkspaceRoleRepository.save(accountWorkspaceRoleEntity);
-        return workspaceConverter.toDTO(workspaceEntity);
+
     }
 
     @Override
