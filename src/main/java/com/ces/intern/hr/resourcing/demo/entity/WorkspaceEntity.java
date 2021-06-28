@@ -1,0 +1,33 @@
+package com.ces.intern.hr.resourcing.demo.entity;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "workspace")
+public class WorkspaceEntity extends BaseEnity {
+    @Column(name = "name")
+    private String name;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "workspaceEntity")
+
+    private List<AccountWorkspaceRoleEntity> entityList = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "workspaceEntityResource")
+    private List<ResourceEntity> resourceEntities = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "workspaceEntityProject")
+
+    private List<ProjectEntity> projectEntities = new ArrayList<>();
+
+
+}
