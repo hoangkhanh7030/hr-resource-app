@@ -5,13 +5,15 @@ import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.response.WorkspaceResponse;
-import com.ces.intern.hr.resourcing.demo.repository.*;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import com.ces.intern.hr.resourcing.demo.converter.WorkspaceConverter;
 import com.ces.intern.hr.resourcing.demo.dto.WorkspaceDTO;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
+import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
+import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
+import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.WorkspaceService;
-import com.ces.intern.hr.resourcing.demo.utils.Utils;
+import com.ces.intern.hr.resourcing.demo.utils.Role;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -31,8 +33,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
     private final AccoutRepository accoutRepository;
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
     private final ModelMapper modelMapper;
-    private final ResourceRepository resourceRepository;
-    private final TimeRepository timeRepository;
+
 
 
     @Autowired
@@ -40,17 +41,13 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
                                 WorkspaceConverter workspaceConverter,
                                 AccoutRepository accoutRepository,
                                 AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
-                                ModelMapper modelMapper,
-                                ResourceRepository resourceRepository,
-                                TimeRepository timeRepository
+                                ModelMapper modelMapper
     ) {
         this.workspaceRepository = workspaceRepository;
         this.workspaceConverter = workspaceConverter;
         this.accoutRepository = accoutRepository;
         this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
         this.modelMapper = modelMapper;
-        this.resourceRepository=resourceRepository;
-        this.timeRepository=timeRepository;
 
     }
 
@@ -104,52 +101,16 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         return workspaceDTO;
     }
 
-//    @Override
-//    public WorkspaceDTO getWorkspaceWithToDay(Integer idWorkspace, Integer idAccount) {
-//        WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).orElse(null);
-//        List<ResourceEntity> resourceEntityList= resourceRepository.findAllByIdWorkspace(idWorkspace);
-//        List<ResourceResponse> resourceResponseList=resourceEntityList.stream().map(s->modelMapper.map(s,ResourceResponse.class)).collect(Collectors.toList());
-//
-//        Date now = new Date();
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTime(now);
-//        List<ProjectResponse> projectResponseList = new ArrayList<>();
-//        for (int i=0;i<workspaceEntity.getProjectEntities().size();i++){
-//            ProjectResponse projectResponse =modelMapper.map(
-//                    workspaceEntity.getProjectEntities().get(i),
-//                    ProjectResponse.class
-//            );
-//            List<TimeEntity> timeEntityList = timeRepository.findByToday(
-//                    calendar.get(Calendar.DAY_OF_MONTH),
-//                    workspaceEntity.getProjectEntities().get(i).getId()
-//            );
-//            List<ResourceResponse> list =new ArrayList<>();
-//            for (TimeEntity time : timeEntityList){
-//                ResourceResponse resourceResponse = modelMapper.map(
-//                        time.getResourceEntity(),ResourceResponse.class
-//                );
-//                list.add(resourceResponse);
-//            }
-//            projectResponse.setResourceResponseList(list);
-//            projectResponseList.add(projectResponse);
-//        }
-//        WorkspaceDTO workspaceDTO = modelMapper.map(
-//                workspaceEntity,WorkspaceDTO.class
-//        );
-//        workspaceDTO.setResourceList(resourceResponseList);
-//        workspaceDTO.setProjectList(projectResponseList);
-//       return workspaceDTO;
-//    }
-
-
-
-
     @Override
-    public void createdWorkspaceByIdAccount(WorkspaceDTO workspaceDTO, Integer id) {
+    public WorkspaceDTO createdWorkspaceByIdAccount(WorkspaceDTO workspaceDTO, Integer id) {
         AccountEntity accountEntity = accoutRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + "with" + id));
         WorkspaceEntity workspaceEntity = workspaceConverter.toEntity(workspaceDTO);
+
+        if (workspaceRepository.findByName(workspaceEntity.getName()).isPresent()) {
+            return null;
+        }else {
             Date date = new Date();
             workspaceEntity.setCreatedDate(date);
             workspaceEntity.setCreatedBy(id);
@@ -159,7 +120,8 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
             accountWorkspaceRoleEntity.setCodeRole(Role.EDIT.getCode());
             workspaceRepository.save(workspaceEntity);
             accoutWorkspaceRoleRepository.save(accountWorkspaceRoleEntity);
-
+            return workspaceConverter.toDTO(workspaceEntity);
+        }
 
     }
 
@@ -168,12 +130,17 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + " with " + idWorkspace));
+        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
+                        + " With idWorkspace " + idWorkspace + " and idAccount " + idAccount));
+        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             workspaceEntity.setName(workspaceDTO.getName());
             Date date = new Date();
             workspaceEntity.setModifiedDate(date);
             workspaceEntity.setModifiedBy(idAccount);
             workspaceRepository.save(workspaceEntity);
             workspaceConverter.toDTO(workspaceEntity);
+        }
 
     }
 
@@ -182,8 +149,12 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + " with " + idWorkspace));
-
+        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
+                        + " With idWorkspace " + idWorkspace + " and idAccount " + idAccount));
+        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             workspaceRepository.delete(workspaceEntity);
+        }
 
     }
 

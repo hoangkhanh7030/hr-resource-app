@@ -1,6 +1,6 @@
 package com.ces.intern.hr.resourcing.demo.http.response;
 
-import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @AllArgsConstructor
 public class LoginResponse {
     private String jwt;
-    private AccountDTO accountDTO;
-    private Integer status;
+
+    private Integer idAccount;
+
 }

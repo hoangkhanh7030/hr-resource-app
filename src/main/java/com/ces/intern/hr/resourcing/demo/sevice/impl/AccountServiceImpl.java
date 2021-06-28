@@ -3,7 +3,6 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.converter.AccountConverter;
 import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.utils.AuthenticationProvider;
 import com.ces.intern.hr.resourcing.demo.http.exception.AlreadyExistException;
 import com.ces.intern.hr.resourcing.demo.http.exception.LoginException;
@@ -37,8 +36,11 @@ public class AccountServiceImpl implements AccountService {
 
 
     @Override
-    public void createdAccount(AccountRequest accountRequest) {
-
+    public String createdAccount(AccountRequest accountRequest) throws AlreadyExistException {
+        accountRequest.setEmail(accountRequest.getEmail().toLowerCase());
+        if (accoutRepository.countByEmail(accountRequest.getEmail()) == 1) {
+            throw new AlreadyExistException(ExceptionMessage.EMAIL_ALREADY_EXIST.getMessage());
+        } else {
             String encodePassword = passwordEncoder.encode(accountRequest.getPassword());
             AccountEntity accountEntity = modelMapper.map(accountRequest, AccountEntity.class);
             accountEntity.setPassword(encodePassword);
@@ -50,7 +52,8 @@ public class AccountServiceImpl implements AccountService {
             accountEntity.setCreatedBy(accountEntity.getId());
             accountEntity.setModifiedBy(accountEntity.getId());
             accoutRepository.save(accountEntity);
-
+            return ResponseMessage.CREATE_SUCCESS;
+        }
 
 
     }
