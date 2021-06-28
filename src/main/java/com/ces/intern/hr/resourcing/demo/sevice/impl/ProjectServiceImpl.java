@@ -5,11 +5,13 @@ import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
+import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.ResourceResponse;
 import com.ces.intern.hr.resourcing.demo.repository.*;
 import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Position;
+import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Role;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,36 +71,32 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void createProject(ProjectRequest projectRequest, Integer idAccount, Integer idWorkspace) {
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity =accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,idAccount)
-                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        if(accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())){
-            projectRepository.findByName(projectRequest.getName());
-            WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
-                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-            ProjectEntity projectEntity = new ProjectEntity();
-            projectEntity.setName(projectRequest.getName());
-            projectEntity.setColor(projectRequest.getColor());
-            projectEntity.setIsActivate(true);
-            projectEntity.setCreatedDate(new Date());
-            projectEntity.setCreatedBy(idAccount);
-            projectEntity.setWorkspaceEntityProject(workspaceEntity);
-            projectRepository.save(projectEntity);
+
+                WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
+                        .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+                ProjectEntity projectEntity = new ProjectEntity();
+                projectEntity.setName(projectRequest.getName());
+                projectEntity.setColor(projectRequest.getColor());
+                projectEntity.setIsActivate(true);
+                projectEntity.setCreatedDate(new Date());
+                projectEntity.setCreatedBy(idAccount);
+                projectEntity.setWorkspaceEntityProject(workspaceEntity);
+                projectRepository.save(projectEntity);
 
 
-            projectEntity=projectRepository.findByName(projectRequest.getName()).orElse(null);
-            TimeEntity timeEntity = new TimeEntity();
-            timeEntity.setProjectEntity(projectEntity);
-            ResourceEntity resourceEntity = resourceRepository.findById(projectRequest.getIdProjectManager()).orElse(null);
-            timeEntity.setResourceEntity(resourceEntity);
-            timeRepository.save(timeEntity);
+                projectEntity=projectRepository.findByName(projectRequest.getName()).orElse(null);
+                TimeEntity timeEntity = new TimeEntity();
+                timeEntity.setProjectEntity(projectEntity);
+                ResourceEntity resourceEntity = resourceRepository.findById(projectRequest.getIdProjectManager()).orElse(null);
+                timeEntity.setResourceEntity(resourceEntity);
+                timeRepository.save(timeEntity);
 
-            TimeEntity time = new TimeEntity();
-            time.setProjectEntity(projectEntity);
-            resourceEntity=resourceRepository.findById(projectRequest.getIdAccountManager()).orElse(null);
-            time.setResourceEntity(resourceEntity);
-            timeRepository.save(time);
+                TimeEntity time = new TimeEntity();
+                time.setProjectEntity(projectEntity);
+                resourceEntity=resourceRepository.findById(projectRequest.getIdAccountManager()).orElse(null);
+                time.setResourceEntity(resourceEntity);
+                timeRepository.save(time);
 
-        }
 
     }
 

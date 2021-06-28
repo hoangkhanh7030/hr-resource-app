@@ -9,4 +9,6 @@ public class ResponseMessage {
     public static final String CREATE_FAIL = "Created Fail";
     public static final String UPDATE_FAIL = "Update Fail";
     public static final String ADD_FAIL = "Add Fail";
+    public static final String ALREADY_EXIST = "Already exist";
+    public static final String ROLE = "No edit permission";
 }
