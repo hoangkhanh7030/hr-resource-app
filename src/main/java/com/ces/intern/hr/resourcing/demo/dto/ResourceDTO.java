@@ -14,6 +14,9 @@ import java.util.List;
 public class ResourceDTO extends BaseDTO{
     private String name;
     private String avatar;
-    private String workspaceName;
+    private WorkspaceDTO workspaceName;
     private List<ProjectDTO> listProject;
+    private TeamDTO teamDTO;
+    private PositionDTO positionDTO;
+    private List<TimeDTO> listTime;
 }
