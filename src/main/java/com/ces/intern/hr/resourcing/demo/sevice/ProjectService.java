@@ -12,6 +12,8 @@ public interface ProjectService {
     void createProject(ProjectRequest projectRequest,Integer idAccount,Integer idWorkspace);
     List<ResourceResponse> getListPM(Integer idAccount,Integer idWorkspace);
     List<ResourceResponse> getListAM(Integer idAccount,Integer idWorkspace);
+    void updateProject(ProjectRequest projectRequest,Integer idAccount,Integer idWorkspace,Integer idProject);
+    List<ProjectDTO> search(String name);
 
 
 }

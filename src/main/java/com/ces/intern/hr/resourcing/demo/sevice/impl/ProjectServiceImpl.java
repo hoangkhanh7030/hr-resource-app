@@ -121,4 +121,23 @@ public class ProjectServiceImpl implements ProjectService {
             return list.stream().map(s->modelMapper.map(s,ResourceResponse.class)).collect(Collectors.toList());
         }return null;
     }
+
+    @Override
+    public void updateProject(ProjectRequest projectRequest, Integer idAccount, Integer idWorkspace,Integer idProject) {
+        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,idAccount)
+                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        if(accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())){
+            ProjectEntity projectEntity = projectRepository.findById(idProject)
+                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            projectEntity.setName(projectRequest.getName());
+            projectEntity.setColor(projectRequest.getColor());
+            ResourceEntity resourceEntity = resourceRepository.findById(projectRequest.getIdProjectManager()).orElse(null);
+
+        }
+    }
+
+    @Override
+    public List<ProjectDTO> search(String name) {
+        return null;
+    }
 }

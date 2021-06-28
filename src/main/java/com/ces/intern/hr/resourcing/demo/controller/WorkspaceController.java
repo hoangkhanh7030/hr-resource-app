@@ -2,6 +2,7 @@ package com.ces.intern.hr.resourcing.demo.controller;
 
 import com.ces.intern.hr.resourcing.demo.dto.WorkspaceDTO;
 
+import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.WorkspaceResponse;
 import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.WorkspaceService;
@@ -15,7 +16,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping(value = "workspace")
+@RequestMapping(value = "workspaces")
 public class WorkspaceController {
     private final WorkspaceService workspaceService;
     private final WorkspaceRepository workspaceRepository;
@@ -28,52 +29,53 @@ public class WorkspaceController {
         this.workspaceRepository = workspaceRepository;
     }
 
+    @GetMapping(value = "/{idWorkspace}")
+    private WorkspaceDTO getWorkspace(@RequestHeader("AccountId") Integer idAccount, @PathVariable Integer idWorkspace) {
+        return workspaceService.getWorkspace(idWorkspace, idAccount);
+    }
 
-    @GetMapping(value = "/getAll")
-    private List<WorkspaceResponse> getWorkspaceByIdAccount(@RequestHeader(value = "AccountId") Integer idAccount) {
+    @GetMapping(value = "")
+    private List<WorkspaceResponse> getAllWorkspace(@RequestHeader(value = "AccountId") Integer idAccount) {
 
 
         return workspaceService.getAllWorkspaceByIdAccount(idAccount);
     }
 
-    @GetMapping(value = "/getOne/{idWorkspace}")
-    private WorkspaceDTO getWorkspace(@RequestHeader("AccountId") Integer idAccount, @PathVariable Integer idWorkspace) {
-        return workspaceService.getWorkspace(idWorkspace, idAccount);
-    }
 
-    @PostMapping(value = "/created")
-    private ResponseEntity<Object> createWorkspaceByIdAccount(@RequestHeader("AccountId") Integer idAccount, @RequestBody WorkspaceDTO workspaceDTO) {
+
+    @PostMapping(value = "")
+    private MessageResponse createWorkspaceByIdAccount(@RequestHeader("AccountId") Integer idAccount, @RequestBody WorkspaceDTO workspaceDTO) {
 
 
         workspaceService.createdWorkspaceByIdAccount(workspaceDTO, idAccount);
         if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()) {
-            return ResponseEntity.ok(ResponseMessage.CREATE_SUCCESS);
+            return new MessageResponse(ResponseMessage.CREATE_SUCCESS);
 
         }
-        return ResponseEntity.unprocessableEntity().body(ResponseMessage.CREATE_FAIL);
+        return new MessageResponse(ResponseMessage.CREATE_FAIL);
     }
 
-    @PutMapping(value = "/update/{idWorkspace}")
-    private ResponseEntity<Object> updateWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
+    @PutMapping(value = "/{idWorkspace}")
+    private MessageResponse updateWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
                                                                 @RequestBody WorkspaceDTO workspaceDTO,
                                                                 @RequestHeader("AccountId") Integer idAccount) {
         workspaceService.updateWorkspaceByIdWorkspace(workspaceDTO, idWorkspace, idAccount);
         if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()) {
-            return ResponseEntity.ok(ResponseMessage.UPDATE_SUCCESS);
+            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS);
 
         }
-        return ResponseEntity.unprocessableEntity().body(ResponseMessage.UPDATE_FAIL);
+        return new MessageResponse(ResponseMessage.UPDATE_FAIL);
     }
 
-    @DeleteMapping(value = "/delete/{idWorkspace}")
-    private ResponseEntity<Object> deleteWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
+    @DeleteMapping(value = "/{idWorkspace}")
+    private MessageResponse deleteWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
                                                                 @RequestHeader("AccountId") Integer idAccount) {
         workspaceService.deleteWorkspaceByIdWorkspace(idWorkspace, idAccount);
         if (workspaceRepository.findById(idWorkspace).isPresent()) {
-            return ResponseEntity.unprocessableEntity().body(ResponseMessage.DELETE_FAIL);
+            return new MessageResponse(ResponseMessage.DELETE_FAIL);
 
         }
-        return ResponseEntity.ok(ResponseMessage.DELETE_SUCCESS);
+        return new MessageResponse(ResponseMessage.DELETE_SUCCESS);
     }
 
     @GetMapping(value = "/search/{name}")
