@@ -15,4 +15,21 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
     List<ResourceEntity> findAllByIdWorkspaceAndNamePosition(@Param("idWorkspace") Integer idWorkspace,
                                                              @Param("namePosition") String namePosition);
 
+    Optional<ResourceEntity> findByName(String name);
+
+    @Query("SELECT res FROM ResourceEntity res WHERE res.name LIKE concat('%', :name, '%') ")
+    List<ResourceEntity> search(@Param("name") String name);
+
+    List<ResourceEntity> findByNameContainingIgnoreCaseAndWorkspaceEntityResource_Id(String name, Integer id);
+
+    @Query("SELECT res FROM ResourceEntity res WHERE res.workspaceEntityResource.id = :id")
+    List<ResourceEntity> findResourcesOfWorkSpace(@Param("id") int id);
+
+    Optional<ResourceEntity> findByIdAndWorkspaceEntityResource_Id(int id, int workspaceId);
+
+    @Query("SELECT res from ResourceEntity res where res.positionEntity.id = 1 and res.workspaceEntityResource.id = :id")
+    List<ResourceEntity> findAllProductManagersOfWorkspace(@Param("id") int id);
+
+    @Query("SELECT res from ResourceEntity res where res.positionEntity.id = 2 and res.workspaceEntityResource.id = :id")
+    List<ResourceEntity> findAllAccountManagersOfWorkspace(@Param("id") int id);
 }

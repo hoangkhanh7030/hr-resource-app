@@ -4,8 +4,11 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
+import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.WorkspaceResponse;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
+import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
+import com.ces.intern.hr.resourcing.demo.utils.Role;
 import com.ces.intern.hr.resourcing.demo.converter.WorkspaceConverter;
 import com.ces.intern.hr.resourcing.demo.dto.WorkspaceDTO;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
@@ -102,15 +105,11 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
     }
 
     @Override
-    public WorkspaceDTO createdWorkspaceByIdAccount(WorkspaceDTO workspaceDTO, Integer id) {
+    public void createdWorkspaceByIdAccount(WorkspaceDTO workspaceDTO, Integer id) {
         AccountEntity accountEntity = accoutRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + "with" + id));
         WorkspaceEntity workspaceEntity = workspaceConverter.toEntity(workspaceDTO);
-
-        if (workspaceRepository.findByName(workspaceEntity.getName()).isPresent()) {
-            return null;
-        }else {
             Date date = new Date();
             workspaceEntity.setCreatedDate(date);
             workspaceEntity.setCreatedBy(id);
@@ -120,8 +119,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
             accountWorkspaceRoleEntity.setCodeRole(Role.EDIT.getCode());
             workspaceRepository.save(workspaceEntity);
             accoutWorkspaceRoleRepository.save(accountWorkspaceRoleEntity);
-            return workspaceConverter.toDTO(workspaceEntity);
-        }
+
 
     }
 
@@ -130,17 +128,12 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + " with " + idWorkspace));
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
-                        + " With idWorkspace " + idWorkspace + " and idAccount " + idAccount));
-        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             workspaceEntity.setName(workspaceDTO.getName());
             Date date = new Date();
             workspaceEntity.setModifiedDate(date);
             workspaceEntity.setModifiedBy(idAccount);
             workspaceRepository.save(workspaceEntity);
             workspaceConverter.toDTO(workspaceEntity);
-        }
 
     }
 
@@ -149,12 +142,8 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + " with " + idWorkspace));
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
-                        + " With idWorkspace " + idWorkspace + " and idAccount " + idAccount));
-        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
+
             workspaceRepository.delete(workspaceEntity);
-        }
 
     }
 
