@@ -12,6 +12,7 @@ import com.ces.intern.hr.resourcing.demo.security.jwt.JwtTokenProvider;
 
 import com.ces.intern.hr.resourcing.demo.sevice.AccountService;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
+import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -52,7 +53,7 @@ public class LoginController {
 
         String jwt = tokenProvider.generateToken(accountDTO);
 
-        return new LoginResponse(jwt, accountDTO.getId());
+        return new LoginResponse(jwt, accountDTO, Status.SUCCESS.getCode());
 
     }
 

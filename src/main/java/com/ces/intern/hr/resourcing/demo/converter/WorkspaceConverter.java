@@ -6,19 +6,27 @@ import com.ces.intern.hr.resourcing.demo.dto.WorkspaceDTO;
 import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import com.ces.intern.hr.resourcing.demo.http.response.ProjectResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.ResourceResponse;
-import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
+import com.ces.intern.hr.resourcing.demo.repository.TimeRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @Component
 public class WorkspaceConverter {
 
+    private final ModelMapper modelMapper;
+    private final TimeRepository timeRepository;
     @Autowired
-    private ModelMapper modelMapper;
+    public WorkspaceConverter(ModelMapper modelMapper, TimeRepository timeRepository) {
+        this.modelMapper = modelMapper;
+        this.timeRepository = timeRepository;
+    }
+
     public WorkspaceDTO toDTO(WorkspaceEntity workspaceEntity){
         WorkspaceDTO workspaceDTO = modelMapper.map(workspaceEntity,WorkspaceDTO.class);
         workspaceDTO.setProjectList(projectResponseList(workspaceEntity));
@@ -30,6 +38,8 @@ public class WorkspaceConverter {
         WorkspaceEntity workspaceEntity = modelMapper.map(workspaceDTO,WorkspaceEntity.class);
         return workspaceEntity;
     }
+
+
     public List<ProjectDTO> projectDTOList(WorkspaceEntity workspaceEntity){
         List<ProjectDTO> list = new ArrayList<>();
         int size =workspaceEntity.getProjectEntities().size();
