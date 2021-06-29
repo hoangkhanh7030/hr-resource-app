@@ -87,7 +87,7 @@ public class ResourceController {
     @DeleteMapping("/{workspaceId}/{resourceId}")
     public MessageResponse deleteResource(@PathVariable Integer resourceId,
                                           @PathVariable Integer workspaceId,
-                                          @RequestHeader int accountId){
+                                          @RequestHeader Integer accountId){
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId
                 (workspaceId, accountId).orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if(accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())){

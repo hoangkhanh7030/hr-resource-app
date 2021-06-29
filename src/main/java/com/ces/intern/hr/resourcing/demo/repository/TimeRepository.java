@@ -9,17 +9,14 @@ import java.util.List;
 import java.util.Optional;
 
 
-
 public interface TimeRepository extends JpaRepository<TimeEntity,Integer> {
 
     @Query(value = "select t from TimeEntity t where t.projectEntity.id=:idProject")
     List<TimeEntity> findAllByIdProject(@Param("idProject") Integer idProject);
 
-    @Query(value = "select * from time where project_id=:projectId and date_part('day',start_time)=:today",nativeQuery = true)
-    List<TimeEntity> findByToday(@Param("today") Integer today, @Param("projectId") Integer projectId);
-
-    @Query(value = "select t from TimeEntity t where t.projectEntity.id=:idProject and t.resourceEntity.positionEntity.name=:namePosition")
-    TimeEntity findByIdProjectAndnamePosition (@Param("idProject") Integer idProject,
-                                               @Param("namePosition") String name);
+    @Query(value = "SELECT * FROM `time` where date_part('year', start_time) = :year AND date_part('month', start_time)" +
+            " = :month AND date_part('day',start_time) = :day AND id = :resourceId", nativeQuery = true)
+    Optional<List<TimeEntity>> findShiftOfResource(@Param("year") int year, @Param("month") int month,
+                                                   @Param("day") int day, @Param("resourceId") int id);
 
 }
