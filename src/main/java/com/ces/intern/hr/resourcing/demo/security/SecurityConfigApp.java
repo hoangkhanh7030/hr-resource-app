@@ -128,19 +128,19 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
 
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        final CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setExposedHeaders(Arrays.asList(SecurityContact.HEADER_STRING, SecurityContact.HEADER_USERID));
-        final UrlBasedCorsConfigurationSource sourse = new UrlBasedCorsConfigurationSource();
-        sourse.registerCorsConfiguration("/**", configuration);
-        return sourse;
-
-    }
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        final CorsConfiguration configuration = new CorsConfiguration();
+//
+//        configuration.setAllowedOrigins(Arrays.asList("*"));
+//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//        configuration.setAllowCredentials(true);
+//        configuration.setAllowedHeaders(Arrays.asList("*"));
+//        configuration.setExposedHeaders(Arrays.asList(SecurityContact.HEADER_STRING, SecurityContact.HEADER_USERID));
+//        final UrlBasedCorsConfigurationSource sourse = new UrlBasedCorsConfigurationSource();
+//        sourse.registerCorsConfiguration("/**", configuration);
+//        return sourse;
+//
+//    }
 
 }
