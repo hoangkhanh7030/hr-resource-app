@@ -25,7 +25,7 @@ public class AccountController {
         this.accoutRepository = accoutRepository;
     }
 
-    @PostMapping(value = "/create")
+    @PostMapping(value = "")
     public MessageResponse create(@RequestBody AccountRequest accountRequest) {
         accountRequest.setEmail(accountRequest.getEmail().toLowerCase());
         if (accoutRepository.countByEmail(accountRequest.getEmail()) == 1) {
@@ -39,7 +39,7 @@ public class AccountController {
 
     }
 
-    @PutMapping(value = "/update")
+    @PutMapping(value = "")
     public AccountResponse updateAccount(@RequestBody AccountRequest accountRequest,
                                          @RequestHeader(value = "AccountId") Integer accountId) {
         return accountService.update(accountRequest, accountId);

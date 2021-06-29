@@ -16,6 +16,8 @@ public interface WorkspaceService {
     void deleteWorkspaceByIdWorkspace(Integer idWorkspace,Integer idAccount);
     List<WorkspaceDTO> searchWorkspaceByName(String name);
     WorkspaceDTO getWorkspace(Integer idWorkspace,Integer idAccount);
+    WorkspaceDTO getWorkspaceWithToDay(Integer idWorkspace,Integer idAccount);
+    WorkspaceDTO getWorkspaceWithWeek(Integer idWorkspace,Integer idAccount);
 
 
 }
