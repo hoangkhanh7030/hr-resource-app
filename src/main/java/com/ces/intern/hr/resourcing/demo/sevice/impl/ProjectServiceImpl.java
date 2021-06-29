@@ -50,7 +50,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDTO> getAllProjects(Integer idAccount, Integer idWorkspace) {
-        List<ProjectEntity> projectEntities = projectRepository.findAll();
+        List<ProjectEntity> projectEntities = projectRepository.findAllById(idWorkspace);
         List<ProjectDTO> projectDTOS = new ArrayList<>();
         for (ProjectEntity projectEntity : projectEntities) {
             ProjectDTO projectDTO = modelMapper.map(projectEntity, ProjectDTO.class);

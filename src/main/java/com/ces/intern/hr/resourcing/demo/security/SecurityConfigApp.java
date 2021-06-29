@@ -13,6 +13,7 @@ import com.ces.intern.hr.resourcing.demo.security.oauth.AccoutService;
 import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2Account;
 import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2AccountService;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
+import com.ces.intern.hr.resourcing.demo.utils.Status;
 import com.google.gson.Gson;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,7 +117,7 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
                                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
                         AccountDTO accountDTO = modelMapper.map(accountEntity, AccountDTO.class);
                         String jwt = tokenProvider.generateToken(accountDTO);
-                        String json = new Gson().toJson(new LoginResponse(jwt, accountDTO.getId()));
+                        String json = new Gson().toJson(new LoginResponse(jwt, accountDTO, Status.SUCCESS.getCode()));
                         response.setContentType("application/json");
                         response.setCharacterEncoding("UTF-8");
                         response.getWriter().write(json);

@@ -22,7 +22,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping(value = "workspaces")
+@RequestMapping(value = "api/v1/workspaces")
 public class WorkspaceController {
     private final WorkspaceService workspaceService;
     private final WorkspaceRepository workspaceRepository;
@@ -48,6 +48,11 @@ public class WorkspaceController {
 
 
         return workspaceService.getAllWorkspaceByIdAccount(idAccount);
+    }
+    @GetMapping(value = "/today/{idWorkspace}")
+    private WorkspaceDTO getWorkspaceWithToday(@RequestHeader("AccountId") Integer idAccount,
+                                               @PathVariable Integer idWorkspace){
+        return workspaceService.getWorkspaceWithToDay(idWorkspace,idAccount);
     }
 
 

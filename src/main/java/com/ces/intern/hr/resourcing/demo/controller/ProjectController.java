@@ -21,7 +21,7 @@ import java.rmi.AlreadyBoundException;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "project")
+@RequestMapping(value = "api/v1/project")
 public class ProjectController {
     private final ProjectService projectService;
     private final ProjectRepository projectRepository;
@@ -36,11 +36,11 @@ public class ProjectController {
         this.accoutWorkspaceRoleRepository=accoutWorkspaceRoleRepository;
     }
 
-    @GetMapping(value = "/getAll/{idWorkspace}")
+    @GetMapping(value = "/{idWorkspace}")
     private List<ProjectDTO> getAll(@RequestHeader("AccountId") Integer idAccount, @PathVariable Integer idWorkspace) {
         return projectService.getAllProjects(idAccount, idWorkspace);
     }
-    @PostMapping(value = "/create/{idWorkspace}")
+    @PostMapping(value = "/{idWorkspace}")
     private MessageResponse createdProject(@RequestHeader("AccountId") Integer idAccount,
                                                   @PathVariable Integer idWorkspace,
                                                   @RequestBody ProjectRequest projectRequest){
@@ -60,15 +60,13 @@ public class ProjectController {
             }
         }else return new MessageResponse(ResponseMessage.ROLE,Status.FAIL.getCode());
     }
-    @GetMapping(value = "getAllPM/{idWorkspace}")
-
+    @GetMapping(value = "pm/{idWorkspace}")
     private List<ResourceResponse> getAllProjectManager(@RequestHeader("AccountId") Integer idAccount,
                                                         @PathVariable Integer idWorkspace){
         return projectService.getListPM(idAccount,idWorkspace);
     }
 
-    @GetMapping(value = "getAllAM/{idWorkspace}")
-
+    @GetMapping(value = "am/{idWorkspace}")
     private List<ResourceResponse> getAllAccountManager(@RequestHeader("AccountId") Integer idAccount,
                                                         @PathVariable Integer idWorkspace){
         return projectService.getListAM(idAccount,idWorkspace);
