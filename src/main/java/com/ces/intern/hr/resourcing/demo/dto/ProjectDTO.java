@@ -17,5 +17,5 @@ public class ProjectDTO extends BaseDTO{
     private Boolean isActivate;
     private String AccountManager;
     private String ProjectManager;
-
+    private List<TimeDTO> timeDTOList;
 }
