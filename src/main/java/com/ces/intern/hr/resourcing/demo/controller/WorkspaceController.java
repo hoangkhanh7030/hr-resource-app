@@ -49,11 +49,11 @@ public class WorkspaceController {
 
         return workspaceService.getAllWorkspaceByIdAccount(idAccount);
     }
-    @GetMapping(value = "/today/{idWorkspace}")
-    private WorkspaceDTO getWorkspaceWithToday(@RequestHeader("AccountId") Integer idAccount,
-                                               @PathVariable Integer idWorkspace){
-        return workspaceService.getWorkspaceWithToDay(idWorkspace,idAccount);
-    }
+//    @GetMapping(value = "/today/{idWorkspace}")
+//    private WorkspaceDTO getWorkspaceWithToday(@RequestHeader("AccountId") Integer idAccount,
+//                                               @PathVariable Integer idWorkspace){
+//        return workspaceService.getWorkspaceWithToDay(idWorkspace,idAccount);
+//    }
 
 
 

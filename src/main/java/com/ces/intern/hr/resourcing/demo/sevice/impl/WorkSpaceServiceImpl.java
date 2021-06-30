@@ -111,52 +111,44 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         return workspaceDTO;
     }
 
-    @Override
-    public WorkspaceDTO getWorkspaceWithToDay(Integer idWorkspace, Integer idAccount) {
-        WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).orElse(null);
-        List<ResourceEntity> resourceEntityList= resourceRepository.findAllByIdWorkspace(idWorkspace);
-        List<ResourceResponse> resourceResponseList=resourceEntityList.stream().map(s->modelMapper.map(s,ResourceResponse.class)).collect(Collectors.toList());
-
-        Date now = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(now);
-        List<ProjectResponse> projectResponseList = new ArrayList<>();
-        for (int i=0;i<workspaceEntity.getProjectEntities().size();i++){
-            ProjectResponse projectResponse =modelMapper.map(
-                    workspaceEntity.getProjectEntities().get(i),
-                    ProjectResponse.class
-            );
-            List<TimeEntity> timeEntityList = timeRepository.findByToday(
-                    calendar.get(Calendar.DAY_OF_MONTH),
-                    workspaceEntity.getProjectEntities().get(i).getId()
-            );
-            List<ResourceResponse> list =new ArrayList<>();
-            for (TimeEntity time : timeEntityList){
-                ResourceResponse resourceResponse = modelMapper.map(
-                        time.getResourceEntity(),ResourceResponse.class
-                );
-                list.add(resourceResponse);
-            }
-            projectResponse.setResourceResponseList(list);
-            projectResponseList.add(projectResponse);
-        }
-        WorkspaceDTO workspaceDTO = modelMapper.map(
-                workspaceEntity,WorkspaceDTO.class
-        );
-        workspaceDTO.setResourceList(resourceResponseList);
-        workspaceDTO.setProjectList(projectResponseList);
-       return workspaceDTO;
-    }
-
-    @Override
-    public WorkspaceDTO getWorkspaceWithWeek(Integer idWorkspace, Integer idAccount) {
-        Date now = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(now);
+//    @Override
+//    public WorkspaceDTO getWorkspaceWithToDay(Integer idWorkspace, Integer idAccount) {
+//        WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).orElse(null);
+//        List<ResourceEntity> resourceEntityList= resourceRepository.findAllByIdWorkspace(idWorkspace);
+//        List<ResourceResponse> resourceResponseList=resourceEntityList.stream().map(s->modelMapper.map(s,ResourceResponse.class)).collect(Collectors.toList());
+//
+//        Date now = new Date();
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTime(now);
+//        List<ProjectResponse> projectResponseList = new ArrayList<>();
+//        for (int i=0;i<workspaceEntity.getProjectEntities().size();i++){
+//            ProjectResponse projectResponse =modelMapper.map(
+//                    workspaceEntity.getProjectEntities().get(i),
+//                    ProjectResponse.class
+//            );
+//            List<TimeEntity> timeEntityList = timeRepository.findByToday(
+//                    calendar.get(Calendar.DAY_OF_MONTH),
+//                    workspaceEntity.getProjectEntities().get(i).getId()
+//            );
+//            List<ResourceResponse> list =new ArrayList<>();
+//            for (TimeEntity time : timeEntityList){
+//                ResourceResponse resourceResponse = modelMapper.map(
+//                        time.getResourceEntity(),ResourceResponse.class
+//                );
+//                list.add(resourceResponse);
+//            }
+//            projectResponse.setResourceResponseList(list);
+//            projectResponseList.add(projectResponse);
+//        }
+//        WorkspaceDTO workspaceDTO = modelMapper.map(
+//                workspaceEntity,WorkspaceDTO.class
+//        );
+//        workspaceDTO.setResourceList(resourceResponseList);
+//        workspaceDTO.setProjectList(projectResponseList);
+//       return workspaceDTO;
+//    }
 
 
-        return null;
-    }
 
 
     @Override

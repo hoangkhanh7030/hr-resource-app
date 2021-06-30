@@ -16,6 +16,7 @@ public class ProjectResponse extends  BaseResponse{
     private String name;
     private String color;
     private boolean isActivate;
-    private List<ResourceResponse> resourceResponseList;
+    private ResourceResponse ProjectManager;
+    private ResourceResponse AccountManager;
 
 }
