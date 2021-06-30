@@ -17,4 +17,8 @@ public interface TimeRepository extends JpaRepository<TimeEntity,Integer> {
     @Query(value = "select * from time where project_id=:projectId and date_part('day',start_time)=:today",nativeQuery = true)
     List<TimeEntity> findByToday(@Param("today") Integer today, @Param("projectId") Integer projectId);
 
+    @Query(value = "select t from TimeEntity t where t.projectEntity.id=:idProject and t.resourceEntity.positionEntity.name=:namePosition")
+    TimeEntity findByIdProjectAndnamePosition (@Param("idProject") Integer idProject,
+                                               @Param("namePosition") String name);
+
 }
