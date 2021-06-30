@@ -5,6 +5,7 @@ import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ResourceService {
     List<ResourceDTO> searchByName(String name, Integer id);
@@ -22,4 +23,6 @@ public interface ResourceService {
     List<ResourceDTO> getProductManagers(Integer id);
 
     List<ResourceDTO> getAccountManagers(Integer id);
+
+    ResourceDTO getResourceInfo(Integer resourceId, Integer workspaceId);
 }

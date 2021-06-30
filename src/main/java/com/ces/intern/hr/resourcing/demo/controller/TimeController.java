@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@RestController("/booking")
 public class TimeController {
     private final ProjectService projectService;
     private final ResourceService resourceService;
@@ -31,21 +31,26 @@ public class TimeController {
         this.timeService = timeService;
     }
 
-    @GetMapping("/addBooking/{workspaceId}")
+    @GetMapping("/{workspaceId}/add")
     public List<ResourceDTO> sendListResource(@PathVariable Integer workspaceId){
         return resourceService.getResourcesOfWorkSpace(workspaceId);
     }
 
-    @GetMapping("/addBooking/{workspaceId}")
+    @GetMapping("/{workspaceId}/add")
     public List<ProjectDTO> sendListProject(@PathVariable Integer workspaceId, @RequestHeader Integer idAccount){
         return projectService.getAllProjects(idAccount, workspaceId);
     }
 
     @PostMapping("/{resourceId}/")
     public void addNewBooking(@RequestBody TimeRequest timeRequest,
-                              @RequestParam Integer start,
-                              @RequestParam Integer end,
                               @PathVariable Integer resourceId){
-        timeService.addNewBooking(timeRequest, start, end);
+        timeRequest.setResourceId(resourceId);
+        timeService.addNewBooking(timeRequest);
+    }
+
+    @PutMapping("/{timeId}")
+    public void editBooking(@RequestBody TimeRequest timeRequest,
+                            @PathVariable Integer timeId){
+        //timeRequest
     }
 }

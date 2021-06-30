@@ -147,4 +147,15 @@ public class ResourceServiceImpl implements ResourceService {
         }
         return list;
     }
+
+    @Override
+    public ResourceDTO getResourceInfo(Integer resourceId, Integer workspaceId){
+        if (resourceRepository.findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).isPresent()){
+            return resourceConverter.convertToDto(resourceRepository
+                    .findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).get());
+        }
+        else {
+            return null;
+        }
+    }
 }
