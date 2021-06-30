@@ -1,6 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.dto;
 
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
+import com.ces.intern.hr.resourcing.demo.http.response.ResourceResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ public class ProjectDTO extends BaseDTO{
     private String name;
     private String color;
     private Boolean isActivate;
-    private String accountManager;
-    private String projectManager;
+    private ResourceResponse accountManager;
+    private ResourceResponse projectManager;
 
 }
