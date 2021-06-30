@@ -1,10 +1,15 @@
 package com.ces.intern.hr.resourcing.demo.utils;
 
+
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.util.Calendar;
+import java.util.Date;
 
 public class Utils {
+
     public static String toFirtDayOfWeek(String date) throws ParseException{
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Calendar calendar =Calendar.getInstance();
