@@ -69,7 +69,11 @@ public class ResourceController {
         return resourceService.searchByName(name, workspaceId);
     }
 
-
+    @GetMapping("/{workspaceId}/{resourceId}")
+    public ResourceDTO getOneResourceInfo(@PathVariable Integer resourceId,
+                                          @PathVariable Integer workspaceId){
+        return resourceService.getResourceInfo(resourceId, workspaceId);
+    }
 
     @PutMapping("/{workspaceId}/{resourceId}")
     public MessageResponse updateResource(@RequestBody ResourceRequest resourceRequest,

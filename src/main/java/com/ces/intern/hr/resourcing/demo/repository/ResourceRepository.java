@@ -25,7 +25,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
     @Query("SELECT res FROM ResourceEntity res WHERE res.workspaceEntityResource.id = :id")
     List<ResourceEntity> findResourcesOfWorkSpace(@Param("id") int id);
 
-    Optional<ResourceEntity> findByIdAndWorkspaceEntityResource_Id(int id, int workspaceId);
+    //Optional<ResourceEntity> findByIdAndWorkspaceEntityResource_Id(int id, int workspaceId);
 
     @Query("SELECT res from ResourceEntity res where res.positionEntity.id = 1 and res.workspaceEntityResource.id = :id")
     List<ResourceEntity> findAllProductManagersOfWorkspace(@Param("id") int id);
@@ -33,9 +33,5 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
     @Query("SELECT res from ResourceEntity res where res.positionEntity.id = 2 and res.workspaceEntityResource.id = :id")
     List<ResourceEntity> findAllAccountManagersOfWorkspace(@Param("id") int id);
 
-    @Query("select res from ResourceEntity res where res.workspaceEntityResource.id=:idWorkspace")
-    List<ResourceEntity> findAllByIdWorkspace(@Param("idWorkspace") Integer idWorkspace);
-
-    @Query("select res from ResourceEntity res where res.teamEntity.id=:teamId and res.id=:idResource")
-    Optional<ResourceEntity> findByIdTeamandIdResource(@Param("teamId") Integer teamId,@Param("idResource") Integer idResource);
+    Optional<ResourceEntity> findByIdAndWorkspaceEntityResource_Id(Integer resourceId, Integer workspaceId);
 }

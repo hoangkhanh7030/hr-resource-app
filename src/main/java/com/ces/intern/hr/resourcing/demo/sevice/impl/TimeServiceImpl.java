@@ -42,47 +42,81 @@ public class TimeServiceImpl implements TimeService {
 
 
     @Override
-    public void addNewBooking(TimeRequest timeRequest, Integer start, Integer end){
+    public void addNewBooking(TimeRequest timeRequest){
         TimeEntity timeEntity = new TimeEntity();
+        int start = timeRequest.getStartHour();
+        int end = timeRequest.getEndHour();
         timeEntity.setProjectEntity(projectRepository.findById(timeRequest.getProjectId()).orElse(null));
         timeEntity.setResourceEntity(resourceRepository.findById(timeRequest.getResourceId()).orElse(null));
-        Date date = timeRequest.getDate();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        if (start >= START_HOUR && start < END_HOUR && end > START_HOUR && end <= END_HOUR && start < end) {
+        calendar.setTime(timeRequest.getDate());
+        if (start >= START_HOUR && end <= END_HOUR && start < end) {
             if (!timeRepository.findShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
                     calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId()).isPresent()) {
                 setShift(timeEntity, start, end, calendar);
                 timeRepository.save(timeEntity);
             } else {
-                List<TimeEntity> listTime = timeRepository.findShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                        calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId()).get();
-                boolean check = true;
-                Calendar shiftStart = Calendar.getInstance();
-                Calendar shiftEnd = Calendar.getInstance();
-                for (TimeEntity t : listTime) {
-                    shiftStart.setTime(t.getStartTime());
-                    shiftEnd.setTime(t.getEndTime());
-                    if (shiftStart.get(Calendar.HOUR_OF_DAY) > start && shiftStart.get(Calendar.HOUR_OF_DAY) < end) {
-                        check = false;
-                        break;
-                    } else if (shiftEnd.get(Calendar.HOUR_OF_DAY) > start && shiftEnd.get(Calendar.HOUR_OF_DAY) < end) {
-                        check = false;
-                        break;
-                    } else if (start > shiftStart.get(Calendar.HOUR_OF_DAY) && start < shiftEnd.get(Calendar.HOUR_OF_DAY)) {
-                        check = false;
-                        break;
-                    } else if (end > shiftStart.get(Calendar.HOUR_OF_DAY) && end < shiftEnd.get(Calendar.HOUR_OF_DAY)) {
-                        check = false;
-                        break;
-                    }
-                }
-                if(check){
+                if(TimeCheck(timeRequest, timeEntity, start, end, calendar)){
                     setShift(timeEntity, start, end, calendar);
                     timeRepository.save(timeEntity);
                 }
             }
         }
+    }
+
+    @Override
+    public void updateBooking(TimeRequest timeRequest, Integer timeId){
+        TimeEntity timeEntity = new TimeEntity();
+        if(timeRepository.findById(timeId).isPresent()
+        && projectRepository.findById(timeRequest.getProjectId()).isPresent()
+        && resourceRepository.findById(timeRequest.getResourceId()).isPresent()){
+            timeEntity.setResourceEntity(resourceRepository.findById(timeRequest.getResourceId()).get());
+            timeEntity.setProjectEntity(projectRepository.findById(timeRequest.getProjectId()).get());
+            timeEntity.setId(timeId);
+        }
+        int start = timeRequest.getStartHour();
+        int end = timeRequest.getEndHour();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(timeRequest.getDate());
+        if(start >= START_HOUR && end <= END_HOUR && start < end){
+            if (timeRepository.findShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
+                    calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId()).isPresent()){
+                if(TimeCheck(timeRequest, timeEntity, start, end, calendar)){
+                    setShift(timeEntity, start, end, calendar);
+                    timeRepository.save(timeEntity);
+                }
+            }
+        }
+    }
+
+    private boolean TimeCheck(TimeRequest timeRequest, TimeEntity timeEntity, int start, int end, Calendar calendar) {
+        List<TimeEntity> listTime = timeRepository.findShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
+                calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId()).get();
+        boolean check = true;
+        Calendar shiftStart = Calendar.getInstance();
+        Calendar shiftEnd = Calendar.getInstance();
+        for (TimeEntity t : listTime) {
+            shiftStart.setTime(t.getStartTime());
+            shiftEnd.setTime(t.getEndTime());
+            if (shiftStart.get(Calendar.HOUR_OF_DAY) > start && shiftStart.get(Calendar.HOUR_OF_DAY) < end) {
+                check = false;
+                break;
+            } else if (shiftEnd.get(Calendar.HOUR_OF_DAY) > start && shiftEnd.get(Calendar.HOUR_OF_DAY) < end) {
+                check = false;
+                break;
+            } else if (start > shiftStart.get(Calendar.HOUR_OF_DAY) && start < shiftEnd.get(Calendar.HOUR_OF_DAY)) {
+                check = false;
+                break;
+            } else if (end > shiftStart.get(Calendar.HOUR_OF_DAY) && end < shiftEnd.get(Calendar.HOUR_OF_DAY)) {
+                check = false;
+                break;
+            }
+        }
+//        if(check){
+//            setShift(timeEntity, start, end, calendar);
+//            timeRepository.save(timeEntity);
+//        }
+        return check;
     }
 
     private void setShift(TimeEntity timeEntity, Integer start, Integer end, Calendar calendar) {
