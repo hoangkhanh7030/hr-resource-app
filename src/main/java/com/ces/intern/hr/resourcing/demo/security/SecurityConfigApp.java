@@ -4,6 +4,7 @@ import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.response.LoginResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import com.ces.intern.hr.resourcing.demo.security.filter.AuthorizationFilter;
@@ -36,9 +37,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -99,7 +102,7 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("oauth2/login/**").permitAll()
+                .antMatchers("oauth2/login/**","/login/google").permitAll()
                 .antMatchers(HttpMethod.POST, SecurityContact.SIGN_UP_URL).permitAll()
                 .antMatchers(HttpMethod.POST, SecurityContact.SIGN_IN_URL).permitAll()
                 .anyRequest().authenticated()
@@ -117,10 +120,12 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
                                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
                         AccountDTO accountDTO = modelMapper.map(accountEntity, AccountDTO.class);
                         String jwt = tokenProvider.generateToken(accountDTO);
-                        String json = new Gson().toJson(new LoginResponse(jwt, accountDTO, Status.SUCCESS.getCode()));
-                        response.setContentType("application/json");
-                        response.setCharacterEncoding("UTF-8");
-                        response.getWriter().write(json);
+
+                        response.setHeader("Authorization",jwt);
+                        response.setIntHeader("AccountId",accountDTO.getId());
+                        response.sendRedirect("/login/google");
+
+
 
                     }
                 });
