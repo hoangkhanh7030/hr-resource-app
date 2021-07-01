@@ -157,7 +157,30 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDTO> search(String name) {
-        return null;
+        List<ProjectEntity> projectEntities = projectRepository.findAllByNameContainingIgnoreCase(name);
+        List<ProjectDTO> projectDTOList = new ArrayList<>();
+        for (int i=0;i<projectEntities.size();i++){
+
+            ProjectDTO projectDTO = modelMapper.map(projectEntities.get(i),ProjectDTO.class);
+            TimeEntity timeEntityPM = timeRepository.findByIdProjectAndnamePosition(projectDTO.getId(),Position.PROJECTMANAGER.getName());
+            ResourceEntity resourceEntity = resourceRepository.findById(timeEntityPM.getResourceEntity().getId())
+                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            ResourceResponse resourceResponsePM =modelMapper.map(resourceEntity,ResourceResponse.class);
+            resourceResponsePM.setPosition(resourceEntity.getPositionEntity().getName());
+            resourceResponsePM.setTeam(resourceEntity.getTeamEntity().getName());
+            projectDTO.setProjectManager(resourceResponsePM);
+
+            TimeEntity timeEntityAM = timeRepository.findByIdProjectAndnamePosition(projectDTO.getId(),Position.ACCOUNTMANAGER.getName());
+            ResourceEntity resourceAM = resourceRepository.findById(timeEntityAM.getResourceEntity().getId())
+                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            ResourceResponse resourceResponseAM =modelMapper.map(resourceAM,ResourceResponse.class);
+            resourceResponseAM.setPosition(resourceAM.getPositionEntity().getName());
+            resourceResponseAM.setTeam(resourceAM.getTeamEntity().getName());
+            projectDTO.setAccountManager(resourceResponseAM);
+            projectDTOList.add(projectDTO);
+        }
+
+        return projectDTOList;
     }
 
     @Override
