@@ -7,4 +7,5 @@ import java.util.List;
 public interface TeamService {
     List<TeamDTO> getAll();
     void addResourceToTeam(Integer idTeam,Integer idResource);
+    void deleteTeam(Integer idTeam);
 }

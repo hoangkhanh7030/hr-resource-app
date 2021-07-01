@@ -24,6 +24,8 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "api/v1/workspaces")
 public class WorkspaceController {
+
+
     private final WorkspaceService workspaceService;
     private final WorkspaceRepository workspaceRepository;
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
@@ -60,7 +62,8 @@ public class WorkspaceController {
     @PostMapping(value = "")
     private MessageResponse createWorkspaceByIdAccount(@RequestHeader("AccountId") Integer idAccount, @RequestBody WorkspaceDTO workspaceDTO) {
         if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()) {
-            return new MessageResponse(workspaceDTO.getName() + " " + ResponseMessage.ALREADY_EXIST,Status.FAIL.getCode());
+            String ALREADY_EXIST =String.format(workspaceDTO.getName()," ",ResponseMessage.ALREADY_EXIST);
+            return new MessageResponse(ALREADY_EXIST,Status.FAIL.getCode());
         }else {
             workspaceService.createdWorkspaceByIdAccount(workspaceDTO, idAccount);
             if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()) {
@@ -75,9 +78,9 @@ public class WorkspaceController {
     private MessageResponse updateWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
                                                                 @RequestBody WorkspaceDTO workspaceDTO,
                                                                 @RequestHeader("AccountId") Integer idAccount) {
+        String NOT_FOUND_RECORD=String.format(ExceptionMessage.NOT_FOUND_RECORD.getMessage()," With idWorkspace ",idWorkspace," and idAccount ",idAccount);
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
-                        + " With idWorkspace " + idWorkspace + " and idAccount " + idAccount));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_RECORD));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
 
             workspaceService.updateWorkspaceByIdWorkspace(workspaceDTO, idWorkspace, idAccount);
@@ -93,9 +96,9 @@ public class WorkspaceController {
     @DeleteMapping(value = "/{idWorkspace}")
     private MessageResponse deleteWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
                                                                  @RequestHeader("AccountId") Integer idAccount) {
+        String NOT_FOUND_RECORD=String.format(ExceptionMessage.NOT_FOUND_RECORD.getMessage()," With idWorkspace ",idWorkspace," and idAccount ",idAccount);
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
-                        + " With idWorkspace " + idWorkspace + " and idAccount " + idAccount));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_RECORD));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             workspaceService.deleteWorkspaceByIdWorkspace(idWorkspace, idAccount);
             if (workspaceRepository.findById(idWorkspace).isPresent()) {
