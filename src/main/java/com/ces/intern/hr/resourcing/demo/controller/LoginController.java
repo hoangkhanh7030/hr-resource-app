@@ -71,14 +71,14 @@ public class LoginController {
         return new LoginResponse(jwt, accountDTO, Status.SUCCESS.getCode());
 
     }
-    @RequestMapping(value = "/user")
-    public LoginResponse user(Principal principal){
-        String name = principal.getName();
-        AccountEntity accountEntity = accoutRepository.findByFullname(name).orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        AccountDTO accountDTO = modelMapper.map(accountEntity, AccountDTO.class);
-        String jwt = tokenProvider.generateToken(accountDTO);
-        return new LoginResponse(jwt,accountDTO,Status.SUCCESS.getCode());
-    }
+//    @RequestMapping(value = "/user")
+//    public LoginResponse user(Principal principal){
+//        String name = principal.getName();
+//        AccountEntity accountEntity = accoutRepository.findByFullname(name).orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+//        AccountDTO accountDTO = modelMapper.map(accountEntity, AccountDTO.class);
+//        String jwt = tokenProvider.generateToken(accountDTO);
+//        return new LoginResponse(jwt,accountDTO,Status.SUCCESS.getCode());
+//    }
 
 
 
