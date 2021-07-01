@@ -92,7 +92,7 @@ public class WorkspaceController {
 
     @DeleteMapping(value = "/{idWorkspace}")
     private MessageResponse deleteWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
-                                                                @RequestHeader("AccountId") Integer idAccount) {
+                                                                 @RequestHeader("AccountId") Integer idAccount) {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + " With idWorkspace " + idWorkspace + " and idAccount " + idAccount));
