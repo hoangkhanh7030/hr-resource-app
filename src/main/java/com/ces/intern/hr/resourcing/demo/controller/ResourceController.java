@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/resources")
+@RequestMapping("api/v1/resources")
 public class ResourceController {
     private final ResourceService resourceService;
     private final ResourceConverter resourceConverter;
