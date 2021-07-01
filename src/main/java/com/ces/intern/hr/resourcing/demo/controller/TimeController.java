@@ -51,6 +51,11 @@ public class TimeController {
     @PutMapping("/{timeId}")
     public void editBooking(@RequestBody TimeRequest timeRequest,
                             @PathVariable Integer timeId){
-        //timeRequest
+        timeService.updateBooking(timeRequest, timeId);
+    }
+
+    @DeleteMapping("/{timeId}")
+    public void deleteBooking(@PathVariable Integer timeId){
+        timeService.deleteBooking(timeId);
     }
 }
