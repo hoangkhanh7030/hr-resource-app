@@ -92,16 +92,18 @@ public class ProjectController {
             }else return new MessageResponse(ResponseMessage.UPDATE_FAIL,Status.FAIL.getCode());
         }else return new MessageResponse(ResponseMessage.ROLE,Status.FAIL.getCode());
     }
-    @GetMapping(value = "pm/{idWorkspace}")
+    @GetMapping(value = "/pm/{idWorkspace}")
     private List<ResourceResponse> getAllProjectManager(@RequestHeader("AccountId") Integer idAccount,
                                                         @PathVariable Integer idWorkspace){
         return projectService.getListPM(idAccount,idWorkspace);
     }
-
-    @GetMapping(value = "am/{idWorkspace}")
+    @GetMapping(value = "/am/{idWorkspace}")
     private List<ResourceResponse> getAllAccountManager(@RequestHeader("AccountId") Integer idAccount,
                                                         @PathVariable Integer idWorkspace){
         return projectService.getListAM(idAccount,idWorkspace);
     }
-
+    @GetMapping(value = "/search/{name}")
+    private List<ProjectDTO> search(@PathVariable String name){
+        return projectService.search(name);
+    }
 }
