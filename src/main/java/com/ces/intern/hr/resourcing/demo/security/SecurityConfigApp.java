@@ -119,15 +119,16 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
                     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
                         CustomOAuth2Account oAuth2Account = (CustomOAuth2Account) authentication.getPrincipal();
                         accoutService.processOAuthPostLogin(oAuth2Account.getEmail(), oAuth2Account.getName(), oAuth2Account.getAvatar());
-//                        AccountEntity accountEntity = accoutRepository.findByEmail(oAuth2Account.getEmail())
-//                                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-//                        AccountDTO accountDTO = modelMapper.map(accountEntity, AccountDTO.class);
-//                        String jwt = tokenProvider.generateToken(accountDTO);
-//                        String json = new Gson().toJson(new LoginResponse(jwt,accountDTO,Status.SUCCESS.getCode()));
-//                        response.setContentType("application/json");
-//                        response.setCharacterEncoding("UTF-8");
-//                        response.getWriter().write(json);
-                        response.sendRedirect("/user");
+                        AccountEntity accountEntity = accoutRepository.findByEmail(oAuth2Account.getEmail())
+                                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+                        AccountDTO accountDTO = modelMapper.map(accountEntity, AccountDTO.class);
+                        String jwt = tokenProvider.generateToken(accountDTO);
+                        String json = new Gson().toJson(new LoginResponse(jwt,accountDTO,Status.SUCCESS.getCode()));
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write(json);
+
+
 
 
 
