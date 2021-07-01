@@ -14,6 +14,7 @@ import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.websocket.server.PathParam;
 import java.util.List;
 
 @RestController
@@ -45,8 +46,8 @@ public class TeamController {
         if(accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             teamService.addResourceToTeam(idTeam,idResource);
             if (resourceRepository.findByIdTeamandIdResource(idTeam,idResource).isPresent()){
-                return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
-            }else return new MessageResponse(ResponseMessage.UPDATE_FAIL,Status.FAIL.getCode());
+                return new MessageResponse(ResponseMessage.ADD_SUCCESS, Status.SUCCESS.getCode());
+            }else return new MessageResponse(ResponseMessage.ADD_FAIL,Status.FAIL.getCode());
         }else return new MessageResponse(ResponseMessage.ROLE,Status.FAIL.getCode());
     }
 }
