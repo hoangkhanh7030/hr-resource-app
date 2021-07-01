@@ -1,12 +1,15 @@
 package com.ces.intern.hr.resourcing.demo.controller;
 
 import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
+import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.BadRequestException;
 import com.ces.intern.hr.resourcing.demo.http.exception.LoginException;
+import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.AccountLoginRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.AccountResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.ErrorResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.LoginResponse;
+import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import com.ces.intern.hr.resourcing.demo.security.jwt.JwtTokenProvider;
 
@@ -26,6 +29,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 import java.util.Date;
 import java.util.List;
 
@@ -38,15 +42,21 @@ public class LoginController {
     private final ModelMapper mapper;
     private final AccountService accountService;
     private final CustomOAuth2AccountService customOAuth2AccountService;
+    private final AccoutRepository accoutRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public LoginController(JwtTokenProvider tokenProvider, ModelMapper mapper,
                            AccountService accountService,
-                           CustomOAuth2AccountService customOAuth2AccountService) {
+                           CustomOAuth2AccountService customOAuth2AccountService,
+                           AccoutRepository accoutRepository,
+                           ModelMapper modelMapper) {
         this.tokenProvider = tokenProvider;
         this.mapper = mapper;
         this.accountService = accountService;
         this.customOAuth2AccountService =customOAuth2AccountService;
+        this.accoutRepository=accoutRepository;
+        this.modelMapper=modelMapper;
     }
 
     @PostMapping(value = "/login")
@@ -61,6 +71,15 @@ public class LoginController {
         return new LoginResponse(jwt, accountDTO, Status.SUCCESS.getCode());
 
     }
+    @RequestMapping(value = "/user")
+    public LoginResponse user(Principal principal){
+        String name = principal.getName();
+        AccountEntity accountEntity = accoutRepository.findByFullname(name).orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        AccountDTO accountDTO = modelMapper.map(accountEntity, AccountDTO.class);
+        String jwt = tokenProvider.generateToken(accountDTO);
+        return new LoginResponse(jwt,accountDTO,Status.SUCCESS.getCode());
+    }
+
 
 
     @ExceptionHandler({LoginException.class})

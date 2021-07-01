@@ -28,7 +28,7 @@ public class AccountController {
     @PostMapping(value = "")
     public MessageResponse create(@RequestBody AccountRequest accountRequest) {
         accountRequest.setEmail(accountRequest.getEmail().toLowerCase());
-        if (accoutRepository.countByEmail(accountRequest.getEmail()) == 1) {
+        if (accoutRepository.countByEmail(accountRequest.getEmail()) == 1 && accoutRepository.countByFullname(accountRequest.getFullname())==1 ) {
             return new MessageResponse(accountRequest.getEmail() + " " + ResponseMessage.ALREADY_EXIST,Status.FAIL.getCode());
         }
             accountService.createdAccount(accountRequest);
