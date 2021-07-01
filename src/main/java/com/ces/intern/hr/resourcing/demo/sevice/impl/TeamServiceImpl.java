@@ -45,4 +45,12 @@ public class TeamServiceImpl implements TeamService {
         resourceRepository.save(resourceEntity);
 
     }
+
+    @Override
+    public void deleteTeam(Integer idTeam) {
+        TeamEntity teamEntity = teamRepository.findById(idTeam)
+                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        teamRepository.delete(teamEntity);
+    }
+
 }
