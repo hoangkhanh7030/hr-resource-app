@@ -10,6 +10,8 @@ import com.ces.intern.hr.resourcing.demo.http.response.LoginResponse;
 import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import com.ces.intern.hr.resourcing.demo.security.jwt.JwtTokenProvider;
 
+import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2Account;
+import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2AccountService;
 import com.ces.intern.hr.resourcing.demo.sevice.AccountService;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
@@ -35,13 +37,16 @@ public class LoginController {
     private final JwtTokenProvider tokenProvider;
     private final ModelMapper mapper;
     private final AccountService accountService;
+    private final CustomOAuth2AccountService customOAuth2AccountService;
 
     @Autowired
     public LoginController(JwtTokenProvider tokenProvider, ModelMapper mapper,
-                           AccountService accountService) {
+                           AccountService accountService,
+                           CustomOAuth2AccountService customOAuth2AccountService) {
         this.tokenProvider = tokenProvider;
         this.mapper = mapper;
         this.accountService = accountService;
+        this.customOAuth2AccountService =customOAuth2AccountService;
     }
 
     @PostMapping(value = "/login")
@@ -56,6 +61,7 @@ public class LoginController {
         return new LoginResponse(jwt, accountDTO, Status.SUCCESS.getCode());
 
     }
+
 
     @ExceptionHandler({LoginException.class})
     public ResponseEntity<Object> loginError(Exception ex, HttpServletRequest request) {
