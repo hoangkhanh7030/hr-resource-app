@@ -35,4 +35,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
 
     @Query("select res from ResourceEntity res where res.workspaceEntityResource.id=:idWorkspace")
     List<ResourceEntity> findAllByIdWorkspace(@Param("idWorkspace") Integer idWorkspace);
+
+    @Query("select res from ResourceEntity res where res.teamEntity.id=:teamId and res.id=:idResource")
+    Optional<ResourceEntity> findByIdTeamandIdResource(@Param("teamId") Integer teamId,@Param("idResource") Integer idResource);
 }
