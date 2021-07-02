@@ -6,10 +6,13 @@ import com.ces.intern.hr.resourcing.demo.dto.TimeDTO;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.entity.TimeEntity;
 import com.ces.intern.hr.resourcing.demo.http.request.TimeRequest;
+import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.ProjectRepository;
 import com.ces.intern.hr.resourcing.demo.repository.ResourceRepository;
 import com.ces.intern.hr.resourcing.demo.repository.TimeRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.TimeService;
+import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
+import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +47,7 @@ public class TimeServiceImpl implements TimeService {
 
 
     @Override
-    public void addNewBooking(TimeRequest timeRequest){
+    public MessageResponse addNewBooking(TimeRequest timeRequest){
         TimeEntity timeEntity = new TimeEntity();
         int start = timeRequest.getStartHour();
         int end = timeRequest.getEndHour();
@@ -57,17 +60,23 @@ public class TimeServiceImpl implements TimeService {
                     calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId()).isPresent()) {
                 setShift(timeEntity, start, end, calendar);
                 timeRepository.save(timeEntity);
+                return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
             } else {
                 if(TimeCheck(timeRequest, timeEntity, start, end, calendar)){
                     setShift(timeEntity, start, end, calendar);
                     timeRepository.save(timeEntity);
+                    return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
+                }
+                else {
+                    return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
                 }
             }
         }
+        return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
     }
 
     @Override
-    public void updateBooking(TimeRequest timeRequest, Integer timeId){
+    public MessageResponse updateBooking(TimeRequest timeRequest, Integer timeId){
         TimeEntity timeEntity = new TimeEntity();
         if(timeRepository.findById(timeId).isPresent()
         && projectRepository.findById(timeRequest.getProjectId()).isPresent()
@@ -75,6 +84,9 @@ public class TimeServiceImpl implements TimeService {
             timeEntity.setResourceEntity(resourceRepository.findById(timeRequest.getResourceId()).get());
             timeEntity.setProjectEntity(projectRepository.findById(timeRequest.getProjectId()).get());
             timeEntity.setId(timeId);
+        }
+        else {
+            return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
         }
         int start = timeRequest.getStartHour();
         int end = timeRequest.getEndHour();
@@ -86,9 +98,17 @@ public class TimeServiceImpl implements TimeService {
                 if(TimeCheck(timeRequest, timeEntity, start, end, calendar)){
                     setShift(timeEntity, start, end, calendar);
                     timeRepository.save(timeEntity);
+                    return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+                }
+                else {
+                    return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
                 }
             }
+            else {
+                return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+            }
         }
+        return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
     }
 
     private boolean TimeCheck(TimeRequest timeRequest, TimeEntity timeEntity, int start, int end, Calendar calendar) {
@@ -122,10 +142,12 @@ public class TimeServiceImpl implements TimeService {
     }
 
     @Override
-    public void deleteBooking(Integer id){
+    public MessageResponse deleteBooking(Integer id){
         if(timeRepository.findById(id).isPresent()){
             timeRepository.deleteById(id);
+            return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
         }
+        return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
     }
 
     @Override
