@@ -23,31 +23,33 @@ public class TeamController {
     private final TeamService teamService;
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
     private final ResourceRepository resourceRepository;
+
     @Autowired
     public TeamController(TeamService teamService,
                           AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
                           ResourceRepository resourceRepository) {
         this.teamService = teamService;
-        this.accoutWorkspaceRoleRepository=accoutWorkspaceRoleRepository;
-        this.resourceRepository=resourceRepository;
+        this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
+        this.resourceRepository = resourceRepository;
     }
 
     @GetMapping(value = "")
-    private List<TeamDTO> getAll(){
+    private List<TeamDTO> getAll() {
         return teamService.getAll();
     }
+
     @PutMapping("/idWorkspace/{idTeam}/{idResource}")
     private MessageResponse addTeamToMember(@RequestHeader("AccountId") Integer idAccount,
                                             @PathVariable Integer idWorkspace,
                                             @PathVariable Integer idTeam,
-                                            @PathVariable Integer idResource){
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity =accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,idAccount)
-                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        if(accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
-            teamService.addResourceToTeam(idTeam,idResource);
-            if (resourceRepository.findByIdTeamandIdResource(idTeam,idResource).isPresent()){
+                                            @PathVariable Integer idResource) {
+        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
+            teamService.addResourceToTeam(idTeam, idResource);
+            if (resourceRepository.findByIdTeamandIdResource(idTeam, idResource).isPresent()) {
                 return new MessageResponse(ResponseMessage.ADD_SUCCESS, Status.SUCCESS.getCode());
-            }else return new MessageResponse(ResponseMessage.ADD_FAIL,Status.FAIL.getCode());
-        }else return new MessageResponse(ResponseMessage.ROLE,Status.FAIL.getCode());
+            } else return new MessageResponse(ResponseMessage.ADD_FAIL, Status.FAIL.getCode());
+        } else return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 }
