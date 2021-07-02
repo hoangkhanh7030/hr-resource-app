@@ -11,5 +11,8 @@ public class ResponseMessage {
     public static final String ADD_FAIL = "Add Fail";
     public static final String ALREADY_EXIST = "Already exist";
     public static final String ROLE = "No edit permission";
+<<<<<<< HEAD
     public static final String IS_EMPTY="Name is Empty";
+=======
+>>>>>>> 76ad45103058c10d3ebc03adb71b43029f58b5ca
 }

@@ -61,9 +61,11 @@ public class WorkspaceController {
 
     @PostMapping(value = "")
     private MessageResponse createWorkspaceByIdAccount(@RequestHeader("AccountId") Integer idAccount, @RequestBody WorkspaceDTO workspaceDTO) {
+
         if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()||workspaceDTO.getName().isEmpty()||workspaceDTO.getName()==null) {
 
             return new MessageResponse(ResponseMessage.ALREADY_EXIST,Status.FAIL.getCode());
+
         }else {
             workspaceService.createdWorkspaceByIdAccount(workspaceDTO, idAccount);
             if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()) {
@@ -78,6 +80,7 @@ public class WorkspaceController {
     private MessageResponse updateWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
                                                                 @RequestBody WorkspaceDTO workspaceDTO,
                                                                 @RequestHeader("AccountId") Integer idAccount) {
+
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
 
@@ -87,6 +90,7 @@ public class WorkspaceController {
             }else {
                 workspaceService.updateWorkspaceByIdWorkspace(workspaceDTO, idWorkspace, idAccount);
             }
+
 
             if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()) {
                 return new MessageResponse(ResponseMessage.UPDATE_SUCCESS,Status.SUCCESS.getCode());
@@ -100,8 +104,10 @@ public class WorkspaceController {
     @DeleteMapping(value = "/{idWorkspace}")
     private MessageResponse deleteWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
                                                                  @RequestHeader("AccountId") Integer idAccount) {
+
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             workspaceService.deleteWorkspaceByIdWorkspace(idWorkspace, idAccount);
             if (workspaceRepository.findById(idWorkspace).isPresent()) {

@@ -51,8 +51,10 @@ public class ProjectController {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity =accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,idAccount)
                 .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if(accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
+
             if (projectRepository.findByName(projectRequest.getName()).isPresent()||projectRequest.getName().isEmpty()
                 ||projectRequest.getColor().isEmpty()) {
+
                 return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
             } else {
 
@@ -73,11 +75,13 @@ public class ProjectController {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity =accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,idAccount)
                 .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if(accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
+
             if (projectRequest.getName().isEmpty()||projectRequest.getColor().isEmpty()){
                 return new MessageResponse(ResponseMessage.IS_EMPTY,Status.FAIL.getCode());
             }else {
                 projectService.updateProject(projectRequest,idAccount,idWorkspace,idProject);
             }
+
 
             if (projectRepository.findByName(projectRequest.getName()).isPresent()){
                 return new MessageResponse(ResponseMessage.UPDATE_SUCCESS,Status.SUCCESS.getCode());
