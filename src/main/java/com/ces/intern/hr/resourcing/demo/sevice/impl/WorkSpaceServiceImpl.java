@@ -153,6 +153,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
 
     @Override
     public void createdWorkspaceByIdAccount(WorkspaceDTO workspaceDTO, Integer id) {
+
         AccountEntity accountEntity = accoutRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + "with" + id));
