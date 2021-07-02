@@ -49,13 +49,13 @@ public class ProjectController {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
 
-            if (projectRepository.findByName(projectRequest.getName()).isPresent() || projectRequest.getName().isEmpty()
-                    || projectRequest.getColor().isEmpty()) {
+            if (projectRepository.findByName(projectRequest.getName()).isPresent()) {
+
                 return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
             } else {
-
-
-                projectService.createProject(projectRequest, idAccount, idWorkspace);
+                    if (projectRequest.getName().isEmpty() || projectRequest.getColor().isEmpty()){
+                        return new MessageResponse(ResponseMessage.IS_EMPTY,Status.FAIL.getCode());
+                    }projectService.createProject(projectRequest, idAccount, idWorkspace);
                 if (projectRepository.findByName(projectRequest.getName()).isPresent()) {
                     return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
                 }
