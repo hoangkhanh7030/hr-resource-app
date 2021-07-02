@@ -61,9 +61,11 @@ public class WorkspaceController {
 
     @PostMapping(value = "")
     private MessageResponse createWorkspaceByIdAccount(@RequestHeader("AccountId") Integer idAccount, @RequestBody WorkspaceDTO workspaceDTO) {
-        if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()) {
-            String ALREADY_EXIST =String.format(workspaceDTO.getName()," ",ResponseMessage.ALREADY_EXIST);
-            return new MessageResponse(ALREADY_EXIST,Status.FAIL.getCode());
+
+        if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()||workspaceDTO.getName().isEmpty()||workspaceDTO.getName()==null) {
+
+            return new MessageResponse(ResponseMessage.ALREADY_EXIST,Status.FAIL.getCode());
+
         }else {
             workspaceService.createdWorkspaceByIdAccount(workspaceDTO, idAccount);
             if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()) {
@@ -78,12 +80,18 @@ public class WorkspaceController {
     private MessageResponse updateWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
                                                                 @RequestBody WorkspaceDTO workspaceDTO,
                                                                 @RequestHeader("AccountId") Integer idAccount) {
-        String NOT_FOUND_RECORD=String.format(ExceptionMessage.NOT_FOUND_RECORD.getMessage()," With idWorkspace ",idWorkspace," and idAccount ",idAccount);
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_RECORD));
-        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
 
-            workspaceService.updateWorkspaceByIdWorkspace(workspaceDTO, idWorkspace, idAccount);
+        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+
+        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
+            if (workspaceDTO.getName().isEmpty()||workspaceDTO.getName()==null){
+                return new MessageResponse(ResponseMessage.IS_EMPTY,Status.FAIL.getCode());
+            }else {
+                workspaceService.updateWorkspaceByIdWorkspace(workspaceDTO, idWorkspace, idAccount);
+            }
+
+
             if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()) {
                 return new MessageResponse(ResponseMessage.UPDATE_SUCCESS,Status.SUCCESS.getCode());
 
@@ -96,9 +104,10 @@ public class WorkspaceController {
     @DeleteMapping(value = "/{idWorkspace}")
     private MessageResponse deleteWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
                                                                  @RequestHeader("AccountId") Integer idAccount) {
-        String NOT_FOUND_RECORD=String.format(ExceptionMessage.NOT_FOUND_RECORD.getMessage()," With idWorkspace ",idWorkspace," and idAccount ",idAccount);
+
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_RECORD));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             workspaceService.deleteWorkspaceByIdWorkspace(idWorkspace, idAccount);
             if (workspaceRepository.findById(idWorkspace).isPresent()) {
