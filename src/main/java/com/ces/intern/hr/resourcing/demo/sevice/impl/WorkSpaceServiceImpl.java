@@ -5,17 +5,18 @@ import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.ProjectResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.ResourceResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.WorkspaceResponse;
+import com.ces.intern.hr.resourcing.demo.repository.*;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Role;
 import com.ces.intern.hr.resourcing.demo.converter.WorkspaceConverter;
 import com.ces.intern.hr.resourcing.demo.dto.WorkspaceDTO;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
-import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
-import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
-import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.WorkspaceService;
+import com.ces.intern.hr.resourcing.demo.utils.Utils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +37,8 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
     private final AccoutRepository accoutRepository;
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
     private final ModelMapper modelMapper;
+    private final ResourceRepository resourceRepository;
+    private final TimeRepository timeRepository;
 
 
     @Autowired
@@ -42,13 +46,17 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
                                 WorkspaceConverter workspaceConverter,
                                 AccoutRepository accoutRepository,
                                 AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
-                                ModelMapper modelMapper
+                                ModelMapper modelMapper,
+                                ResourceRepository resourceRepository,
+                                TimeRepository timeRepository
     ) {
         this.workspaceRepository = workspaceRepository;
         this.workspaceConverter = workspaceConverter;
         this.accoutRepository = accoutRepository;
         this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
         this.modelMapper = modelMapper;
+        this.resourceRepository=resourceRepository;
+        this.timeRepository=timeRepository;
 
     }
 
@@ -102,8 +110,49 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         return workspaceDTO;
     }
 
+//    @Override
+//    public WorkspaceDTO getWorkspaceWithToDay(Integer idWorkspace, Integer idAccount) {
+//        WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).orElse(null);
+//        List<ResourceEntity> resourceEntityList= resourceRepository.findAllByIdWorkspace(idWorkspace);
+//        List<ResourceResponse> resourceResponseList=resourceEntityList.stream().map(s->modelMapper.map(s,ResourceResponse.class)).collect(Collectors.toList());
+//
+//        Date now = new Date();
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTime(now);
+//        List<ProjectResponse> projectResponseList = new ArrayList<>();
+//        for (int i=0;i<workspaceEntity.getProjectEntities().size();i++){
+//            ProjectResponse projectResponse =modelMapper.map(
+//                    workspaceEntity.getProjectEntities().get(i),
+//                    ProjectResponse.class
+//            );
+//            List<TimeEntity> timeEntityList = timeRepository.findByToday(
+//                    calendar.get(Calendar.DAY_OF_MONTH),
+//                    workspaceEntity.getProjectEntities().get(i).getId()
+//            );
+//            List<ResourceResponse> list =new ArrayList<>();
+//            for (TimeEntity time : timeEntityList){
+//                ResourceResponse resourceResponse = modelMapper.map(
+//                        time.getResourceEntity(),ResourceResponse.class
+//                );
+//                list.add(resourceResponse);
+//            }
+//            projectResponse.setResourceResponseList(list);
+//            projectResponseList.add(projectResponse);
+//        }
+//        WorkspaceDTO workspaceDTO = modelMapper.map(
+//                workspaceEntity,WorkspaceDTO.class
+//        );
+//        workspaceDTO.setResourceList(resourceResponseList);
+//        workspaceDTO.setProjectList(projectResponseList);
+//       return workspaceDTO;
+//    }
+
+
+
+
     @Override
     public void createdWorkspaceByIdAccount(WorkspaceDTO workspaceDTO, Integer id) {
+
         AccountEntity accountEntity = accoutRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + "with" + id));

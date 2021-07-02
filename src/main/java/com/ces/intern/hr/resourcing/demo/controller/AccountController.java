@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @RestController
 @RequestMapping(value = "/account")
 public class AccountController {
@@ -25,21 +28,29 @@ public class AccountController {
         this.accoutRepository = accoutRepository;
     }
 
-    @PostMapping(value = "/create")
+    @PostMapping(value = "")
     public MessageResponse create(@RequestBody AccountRequest accountRequest) {
-        accountRequest.setEmail(accountRequest.getEmail().toLowerCase());
-        if (accoutRepository.countByEmail(accountRequest.getEmail()) == 1) {
-            return new MessageResponse(accountRequest.getEmail() + " " + ResponseMessage.ALREADY_EXIST,Status.FAIL.getCode());
-        }
-            accountService.createdAccount(accountRequest);
-            if (accoutRepository.findByEmail(accountRequest.getEmail()).isPresent()){
-                return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
-            }return new MessageResponse(ResponseMessage.CREATE_FAIL,Status.FAIL.getCode());
+        String emailRegex ="^(.+)@(.+)$";
 
 
+        String passwordRegex="^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
+        if (accountRequest.getEmail().matches(emailRegex)) {
+            if (accountRequest.getPassword().matches(passwordRegex)) {
+                accountRequest.setEmail(accountRequest.getEmail().toLowerCase());
+                if (accoutRepository.countByEmail(accountRequest.getEmail()) == 1 && accoutRepository.countByFullname(accountRequest.getFullname()) == 1) {
+                    return new MessageResponse(accountRequest.getEmail() + " " + ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
+                }
+                accountService.createdAccount(accountRequest);
+                if (accoutRepository.findByEmail(accountRequest.getEmail()).isPresent()) {
+                    return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
+                }
+                return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
+            }
+            return new MessageResponse(ResponseMessage.INCRECT_PASSWORD, Status.FAIL.getCode());
+        }return new MessageResponse(ResponseMessage.INCRECT_EMAIL,Status.FAIL.getCode());
     }
 
-    @PutMapping(value = "/update")
+    @PutMapping(value = "")
     public AccountResponse updateAccount(@RequestBody AccountRequest accountRequest,
                                          @RequestHeader(value = "AccountId") Integer accountId) {
         return accountService.update(accountRequest, accountId);

@@ -4,15 +4,14 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
+import com.ces.intern.hr.resourcing.demo.http.request.ActivateRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
+
+import com.ces.intern.hr.resourcing.demo.http.response.ProjectResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.ResourceResponse;
 import com.ces.intern.hr.resourcing.demo.repository.*;
 import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;
-import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
-import com.ces.intern.hr.resourcing.demo.utils.Position;
-import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
-import com.ces.intern.hr.resourcing.demo.utils.Role;
+import com.ces.intern.hr.resourcing.demo.utils.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,25 +48,36 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDTO> getAllProjects(Integer idAccount, Integer idWorkspace) {
-        List<ProjectEntity> projectEntities = projectRepository.findAll();
+    public List<ProjectDTO> getAllProjects( Integer idWorkspace) {
+
+        List<ProjectEntity> projectEntities = projectRepository.findAllById(idWorkspace);
         List<ProjectDTO> projectDTOS = new ArrayList<>();
-        for (ProjectEntity projectEntity : projectEntities) {
-            ProjectDTO projectDTO = modelMapper.map(projectEntity, ProjectDTO.class);
-            List<TimeEntity> timeEntityList = timeRepository.findAllByIdProject(projectDTO.getId());
-            for (TimeEntity timeEntity : timeEntityList) {
-                if (timeEntity.getResourceEntity().getPositionEntity().getName().equals(Position.PROJECTMANAGER.getName())) {
-                    projectDTO.setProjectManager(timeEntity.getResourceEntity().getName());
-                } else if (timeEntity.getResourceEntity().getPositionEntity().getName().equals(Position.ACCOUNTMANAGER.getName())) {
-                    projectDTO.setAccountManager(timeEntity.getResourceEntity().getName());
-                }
-            }
+        for (int i=0;i<projectEntities.size();i++){
+
+            ProjectDTO projectDTO = modelMapper.map(projectEntities.get(i),ProjectDTO.class);
+            TimeEntity timeEntityPM = timeRepository.findByIdProjectAndnamePosition(projectDTO.getId(),Position.PROJECTMANAGER.getName());
+            ResourceEntity resourceEntity = resourceRepository.findById(timeEntityPM.getResourceEntity().getId())
+                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            ResourceResponse resourceResponsePM =modelMapper.map(resourceEntity,ResourceResponse.class);
+            resourceResponsePM.setPosition(resourceEntity.getPositionEntity().getName());
+            resourceResponsePM.setTeam(resourceEntity.getTeamEntity().getName());
+            projectDTO.setProjectManager(resourceResponsePM);
+
+            TimeEntity timeEntityAM = timeRepository.findByIdProjectAndnamePosition(projectDTO.getId(),Position.ACCOUNTMANAGER.getName());
+            ResourceEntity resourceAM = resourceRepository.findById(timeEntityAM.getResourceEntity().getId())
+                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            ResourceResponse resourceResponseAM =modelMapper.map(resourceAM,ResourceResponse.class);
+            resourceResponseAM.setPosition(resourceAM.getPositionEntity().getName());
+            resourceResponseAM.setTeam(resourceAM.getTeamEntity().getName());
+            projectDTO.setAccountManager(resourceResponseAM);
             projectDTOS.add(projectDTO);
         }
-        return projectDTOS;
 
-
+       return projectDTOS;
     }
+
+
+
 
     @Override
     public void createProject(ProjectRequest projectRequest, Integer idAccount, Integer idWorkspace) {
@@ -122,20 +132,63 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void updateProject(ProjectRequest projectRequest, Integer idAccount, Integer idWorkspace,Integer idProject) {
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,idAccount)
-                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        if(accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())){
+
             ProjectEntity projectEntity = projectRepository.findById(idProject)
                     .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
             projectEntity.setName(projectRequest.getName());
             projectEntity.setColor(projectRequest.getColor());
-            ResourceEntity resourceEntity = resourceRepository.findById(projectRequest.getIdProjectManager()).orElse(null);
+            projectEntity.setModifiedBy(idAccount);
+            projectEntity.setModifiedDate(new Date());
 
-        }
+            ResourceEntity resourceEntityPM = resourceRepository.findById(projectRequest.getIdProjectManager())
+                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            TimeEntity timeEntityPM =timeRepository.findByIdProjectAndnamePosition(projectEntity.getId(),Position.PROJECTMANAGER.getName());
+            timeEntityPM.setResourceEntity(resourceEntityPM);
+            timeRepository.save(timeEntityPM);
+
+            ResourceEntity resourceEntityAM = resourceRepository.findById(projectRequest.getIdAccountManager())
+                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            TimeEntity timeEntityAM =timeRepository.findByIdProjectAndnamePosition(projectEntity.getId(),Position.ACCOUNTMANAGER.getName());
+            timeEntityAM.setResourceEntity(resourceEntityAM);
+            timeRepository.save(timeEntityAM);
+            projectRepository.save(projectEntity);
     }
+
 
     @Override
     public List<ProjectDTO> search(String name) {
-        return null;
+        List<ProjectEntity> projectEntities = projectRepository.findAllByNameContainingIgnoreCase(name);
+        List<ProjectDTO> projectDTOList = new ArrayList<>();
+        for (int i=0;i<projectEntities.size();i++){
+
+            ProjectDTO projectDTO = modelMapper.map(projectEntities.get(i),ProjectDTO.class);
+            TimeEntity timeEntityPM = timeRepository.findByIdProjectAndnamePosition(projectDTO.getId(),Position.PROJECTMANAGER.getName());
+            ResourceEntity resourceEntity = resourceRepository.findById(timeEntityPM.getResourceEntity().getId())
+                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            ResourceResponse resourceResponsePM =modelMapper.map(resourceEntity,ResourceResponse.class);
+            resourceResponsePM.setPosition(resourceEntity.getPositionEntity().getName());
+            resourceResponsePM.setTeam(resourceEntity.getTeamEntity().getName());
+            projectDTO.setProjectManager(resourceResponsePM);
+
+            TimeEntity timeEntityAM = timeRepository.findByIdProjectAndnamePosition(projectDTO.getId(),Position.ACCOUNTMANAGER.getName());
+            ResourceEntity resourceAM = resourceRepository.findById(timeEntityAM.getResourceEntity().getId())
+                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            ResourceResponse resourceResponseAM =modelMapper.map(resourceAM,ResourceResponse.class);
+            resourceResponseAM.setPosition(resourceAM.getPositionEntity().getName());
+            resourceResponseAM.setTeam(resourceAM.getTeamEntity().getName());
+            projectDTO.setAccountManager(resourceResponseAM);
+            projectDTOList.add(projectDTO);
+        }
+
+        return projectDTOList;
+    }
+
+    @Override
+    public void Activate(ActivateRequest activateRequest,Integer idWorkspace, Integer idProject) {
+        ProjectEntity projectEntity = projectRepository.findByIdWorkspaceAndIdProject(idWorkspace,idProject)
+                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        projectEntity.setIsActivate(activateRequest.isActivate());
+        projectEntity.setModifiedDate(new Date());
+        projectRepository.save(projectEntity);
     }
 }
