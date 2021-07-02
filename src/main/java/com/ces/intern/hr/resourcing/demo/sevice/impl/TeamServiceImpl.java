@@ -53,4 +53,13 @@ public class TeamServiceImpl implements TeamService {
         teamRepository.delete(teamEntity);
     }
 
+    @Override
+    public void renameTeam(Integer idTeam, String name) {
+        TeamEntity teamEntity = teamRepository.findById(idTeam)
+                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        teamEntity.setName(name);
+        teamRepository.save(teamEntity);
+
+    }
+
 }

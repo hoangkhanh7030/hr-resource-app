@@ -13,5 +13,7 @@ public class ResponseMessage {
     public static final String ROLE = "No edit permission";
 
     public static final String IS_EMPTY="Name is Empty";
+    public static final String INCRECT_PASSWORD="Password Increct";
+    public static final String INCRECT_EMAIL="Email Increct";
 
 }
