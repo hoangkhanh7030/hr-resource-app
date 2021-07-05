@@ -18,6 +18,8 @@ import java.util.List;
 public class ProjectEntity extends BaseEnity {
     @Column(name = "name")
     private String name;
+//    @Column(name = "client")
+//    private String client;
     @Column(name = "color")
     private String color;
     @Column(name = "is_activate")

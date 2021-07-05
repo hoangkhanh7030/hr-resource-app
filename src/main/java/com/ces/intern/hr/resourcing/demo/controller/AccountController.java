@@ -12,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.*;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 @RestController
 @RequestMapping(value = "/account")
@@ -30,24 +29,25 @@ public class AccountController {
 
     @PostMapping(value = "")
     public MessageResponse create(@RequestBody AccountRequest accountRequest) {
-        String emailRegex ="^(.+)@(.+)$";
-
-
-        String passwordRegex="^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
+        String emailRegex = "^(.+)@(codeengine.com)$";
+        String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
         if (accountRequest.getEmail().matches(emailRegex)) {
             if (accountRequest.getPassword().matches(passwordRegex)) {
-                accountRequest.setEmail(accountRequest.getEmail().toLowerCase());
-                if (accoutRepository.countByEmail(accountRequest.getEmail()) == 1 && accoutRepository.countByFullname(accountRequest.getFullname()) == 1) {
-                    return new MessageResponse(accountRequest.getEmail() + " " + ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
+
+                if (accoutRepository.findByEmail(accountRequest.getEmail()).isPresent()) {
+                    return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
+                } else {
+                    accountService.createdAccount(accountRequest);
                 }
-                accountService.createdAccount(accountRequest);
+
                 if (accoutRepository.findByEmail(accountRequest.getEmail()).isPresent()) {
                     return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
                 }
                 return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
             }
             return new MessageResponse(ResponseMessage.INCRECT_PASSWORD, Status.FAIL.getCode());
-        }return new MessageResponse(ResponseMessage.INCRECT_EMAIL,Status.FAIL.getCode());
+        }
+        return new MessageResponse(ResponseMessage.INCRECT_EMAIL, Status.FAIL.getCode());
     }
 
     @PutMapping(value = "")
