@@ -1,29 +1,18 @@
 package com.ces.intern.hr.resourcing.demo.security;
 
-import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
-import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
-import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
-import com.ces.intern.hr.resourcing.demo.http.response.LoginResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import com.ces.intern.hr.resourcing.demo.security.filter.AuthorizationFilter;
 import com.ces.intern.hr.resourcing.demo.security.jwt.JwtTokenProvider;
 import com.ces.intern.hr.resourcing.demo.security.jwtAccount.CustomAccountService;
 import com.ces.intern.hr.resourcing.demo.security.oauth.AccoutService;
-import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2Account;
 import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2AccountService;
-import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
-import com.ces.intern.hr.resourcing.demo.utils.Status;
-import com.google.gson.Gson;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
+
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -31,26 +20,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.util.UrlPathHelper;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.security.Principal;
-import java.util.Arrays;
-import java.util.List;
 
 
 @EnableWebSecurity
@@ -105,16 +76,15 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("oauth2/login/**","/login/google").permitAll()
+                .antMatchers("oauth2/login/**", "/login/google").permitAll()
                 .antMatchers(HttpMethod.POST, SecurityContact.SIGN_UP_URL).permitAll()
                 .antMatchers(HttpMethod.POST, SecurityContact.SIGN_IN_URL).permitAll()
-                .antMatchers(HttpMethod.POST,SecurityContact.GOOGLE_URL).permitAll()
+                .antMatchers(HttpMethod.POST, SecurityContact.GOOGLE_URL).permitAll()
                 .anyRequest().authenticated();
 
         http.addFilter(new AuthorizationFilter(authenticationManager()));
 
     }
-
 
 
 }

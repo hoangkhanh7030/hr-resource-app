@@ -14,11 +14,9 @@ public interface ProjectService {
     List<ProjectDTO> getAllProjects(Integer idWorkspace, PageSizeRequest pageSizeRequest);
 
     void createProject(ProjectRequest projectRequest,Integer idAccount, Integer idWorkspace);
-    List<ResourceResponse> getListPM(Integer idWorkspace);
-    List<ResourceResponse> getListAM(Integer idWorkspace);
-    void updateProject(ProjectRequest projectRequest,Integer idAccount,Integer idWorkspace,Integer idProject);
+    void updateProject(ProjectRequest projectRequest,Integer idAccount,Integer idProject);
     List<ProjectDTO> search(String name,Integer idWorkspace,PageSizeRequest pageSizeRequest);
-    void Activate(ActivateRequest activateRequest,Integer idWorkspace,Integer idProject);
+    void deleteProject(Integer idProject);
 
 
 }
