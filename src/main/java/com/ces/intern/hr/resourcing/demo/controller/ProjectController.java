@@ -16,12 +16,22 @@ import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Role;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.prefs.CsvPreference;
 
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "api/v1/workspaces")
@@ -29,20 +39,49 @@ public class ProjectController {
     private final ProjectService projectService;
     private final ProjectRepository projectRepository;
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public ProjectController(ProjectService projectService,
                              ProjectRepository projectRepository,
-                             AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository) {
+                             AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
+                             ModelMapper modelMapper) {
         this.projectService = projectService;
         this.projectRepository = projectRepository;
         this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
+        this.modelMapper=modelMapper;
     }
 
     @GetMapping(value = "/{idWorkspace}/project")
     private List<ProjectDTO> getAll(@PathVariable Integer idWorkspace,
-                                       @RequestBody PageSizeRequest pageRequest) {
+                                    @RequestBody PageSizeRequest pageRequest) {
         return projectService.getAllProjects(idWorkspace, pageRequest);
+    }
+
+    @GetMapping(value = "/{idWorkspace}/project/export")
+    public void exportToCSV(HttpServletResponse response,
+                            @PathVariable Integer idWorkspace) throws IOException {
+        response.setContentType("text/csv");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        String currentDateTime = dateFormat.format(new Date());
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=project_" + currentDateTime + ".csv";
+        response.setHeader(headerKey, headerValue);
+        List<ProjectEntity> projectEntityList=projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
+        List<ProjectDTO> projectDTOList=projectEntityList.stream().map(s->modelMapper.map(s,ProjectDTO.class)).collect(Collectors.toList());
+
+        ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
+        String[] csvHeader = {"Project ID", "Name", "Client Name", "Color", "Text Color","Color Pattern","Activate"};
+        String[] nameMapping = {"id", "name", "clientName", "color", "textColor","colorPattern","isActivate"};
+
+        csvWriter.writeHeader(csvHeader);
+
+        for (ProjectDTO projectDTO : projectDTOList) {
+            csvWriter.write(projectDTO, nameMapping);
+        }
+
+        csvWriter.close();
     }
 
     @PostMapping(value = "/{idWorkspace}/project")
@@ -57,7 +96,9 @@ public class ProjectController {
 
                 return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
             } else {
-                if (projectRequest.getName().isEmpty() || projectRequest.getColor().isEmpty()) {
+                if (projectRequest.getName().isEmpty() || projectRequest.getColor().isEmpty()
+                        || projectRequest.getClientName().isEmpty() || projectRequest.getTextColor().isEmpty()
+                        || projectRequest.getColorPattern().isEmpty()) {
                     return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
                 }
                 projectService.createProject(projectRequest, idAccount, idWorkspace);
@@ -71,47 +112,35 @@ public class ProjectController {
 
     @PutMapping(value = "/{idWorkspace}/project/{idProject}")
     private MessageResponse updateProject(@RequestHeader("AccountId") Integer idAccount,
-                                          @PathVariable Integer idWorkspace,
                                           @PathVariable Integer idProject,
                                           @RequestBody ProjectRequest projectRequest) {
-            if (projectRequest.getName().isEmpty() || projectRequest.getColor().isEmpty()) {
-                return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
-            } else {
-                projectService.updateProject(projectRequest, idAccount, idWorkspace, idProject);
-            }
-            if (projectRepository.findByName(projectRequest.getName()).isPresent()) {
-                return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
-            } else return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
-
-    }
-
-    @PutMapping(value = "/activate/{idWorkspace}/project/{idProject}")
-    private MessageResponse activateProject(@PathVariable Integer idWorkspace,
-                                            @PathVariable Integer idProject,
-                                            @RequestBody ActivateRequest activateRequest) {
-
-        projectService.Activate(activateRequest, idWorkspace, idProject);
-        if (projectRepository.findByIdAndIsActivate(activateRequest.isActivate(), idProject).isPresent()) {
+        if (projectRequest.getName().isEmpty() || projectRequest.getColor().isEmpty() || projectRequest.getClientName().isEmpty()
+                || projectRequest.getTextColor().isEmpty() || projectRequest.getColorPattern().isEmpty()) {
+            return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
+        } else {
+            projectService.updateProject(projectRequest, idAccount, idProject);
+        }
+        if (projectRepository.findByName(projectRequest.getName()).isPresent()) {
             return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
         } else return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
 
     }
 
-    @GetMapping(value = "/{idWorkspace}/pm/project")
-    private List<ResourceResponse> getAllProjectManager(@PathVariable Integer idWorkspace) {
-        return projectService.getListPM(idWorkspace);
-    }
-
-    @GetMapping(value = "/{idWorkspace}/am/project")
-    private List<ResourceResponse> getAllAccountManager(@PathVariable Integer idWorkspace) {
-        return projectService.getListAM(idWorkspace);
+    @DeleteMapping(value = "/project/{idProject}")
+    private MessageResponse deleteProject(@PathVariable Integer idProject) {
+        projectService.deleteProject(idProject);
+        if (projectRepository.findById(idProject).isPresent()) {
+            return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
+        } else {
+            return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
+        }
     }
 
     @GetMapping(value = "{idWorkspace}/project/search/{name}")
     private List<ProjectDTO> search(@PathVariable String name,
                                     @PathVariable Integer idWorkspace,
                                     @RequestBody PageSizeRequest pageSizeRequest) {
-        return projectService.search(name,idWorkspace,pageSizeRequest);
+        return projectService.search(name, idWorkspace, pageSizeRequest);
 
     }
 }

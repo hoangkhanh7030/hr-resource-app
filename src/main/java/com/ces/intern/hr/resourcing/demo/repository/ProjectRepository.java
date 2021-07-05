@@ -24,5 +24,5 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> 
 
     Page<ProjectEntity> findAllByNameContainingIgnoreCaseAndWorkspaceEntityProject_Id(String name,Integer id,Pageable pageable);
 
-
+    List<ProjectEntity> findAllByWorkspaceEntityProject_Id(Integer idWorkspace);
 }

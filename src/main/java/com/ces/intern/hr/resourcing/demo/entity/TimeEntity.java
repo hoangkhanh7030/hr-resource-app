@@ -13,12 +13,13 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "time")
+@Table(name = "booking")
 public class TimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
+    @Column(name = "task")
+    private String task;
     @Column(name = "start_time")
     private Date startTime;
     @Column(name = "end_time")
