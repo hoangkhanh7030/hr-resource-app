@@ -6,16 +6,13 @@ import com.ces.intern.hr.resourcing.demo.http.exception.BadRequestException;
 import com.ces.intern.hr.resourcing.demo.http.exception.LoginException;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.AccountLoginRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.AccountResponse;
+import com.ces.intern.hr.resourcing.demo.http.request.GoogleRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.ErrorResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.LoginResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
-import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import com.ces.intern.hr.resourcing.demo.security.jwt.JwtTokenProvider;
-
-import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2Account;
-import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2AccountService;
 import com.ces.intern.hr.resourcing.demo.sevice.AccountService;
+import com.ces.intern.hr.resourcing.demo.utils.AuthenticationProvider;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.modelmapper.ModelMapper;
@@ -29,9 +26,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.security.Principal;
 import java.util.Date;
-import java.util.List;
 
 @RestController
 
@@ -39,24 +34,23 @@ public class LoginController {
 
 
     private final JwtTokenProvider tokenProvider;
-    private final ModelMapper mapper;
     private final AccountService accountService;
-    private final CustomOAuth2AccountService customOAuth2AccountService;
     private final AccoutRepository accoutRepository;
     private final ModelMapper modelMapper;
 
+
+
     @Autowired
-    public LoginController(JwtTokenProvider tokenProvider, ModelMapper mapper,
+    public LoginController(JwtTokenProvider tokenProvider,
                            AccountService accountService,
-                           CustomOAuth2AccountService customOAuth2AccountService,
                            AccoutRepository accoutRepository,
-                           ModelMapper modelMapper) {
+                           ModelMapper modelMapper
+                          ) {
         this.tokenProvider = tokenProvider;
-        this.mapper = mapper;
         this.accountService = accountService;
-        this.customOAuth2AccountService =customOAuth2AccountService;
         this.accoutRepository=accoutRepository;
         this.modelMapper=modelMapper;
+
     }
 
     @PostMapping(value = "/login")
@@ -72,14 +66,33 @@ public class LoginController {
             return new LoginResponse(jwt, accountDTO, Status.SUCCESS.getCode());
 
     }
-    @RequestMapping(value = "/user")
-    public LoginResponse user(Principal principal){
-        String name = principal.getName();
-        AccountEntity accountEntity = accoutRepository.findByFullname(name).orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        AccountDTO accountDTO = modelMapper.map(accountEntity, AccountDTO.class);
-        String jwt = tokenProvider.generateToken(accountDTO);
-        return new LoginResponse(jwt,accountDTO,Status.SUCCESS.getCode());
+
+    @PostMapping(value = "api/v1/auth/google")
+    public LoginResponse authGoogle(@RequestBody GoogleRequest googleRequest){
+        if (accoutRepository.findByEmail(googleRequest.getEmail()).isPresent()){
+            AccountEntity accountEntity = accoutRepository.findByEmail(googleRequest.getEmail())
+                    .orElseThrow(()-> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            AccountDTO accountDTO = modelMapper.map(accountEntity,AccountDTO.class);
+            String jwt =tokenProvider.generateToken(accountDTO);
+            return new LoginResponse(jwt,accountDTO,Status.SUCCESS.getCode());
+
+        }else {
+            AccountEntity accountEntity = new AccountEntity();
+            accountEntity.setEmail(googleRequest.getEmail());
+            accountEntity.setFullname(googleRequest.getFullName());
+            accountEntity.setAvatar(googleRequest.getAvatar());
+            accountEntity.setAuthenticationProvider(AuthenticationProvider.GOOGLE);
+            accountEntity.setCreatedDate(new Date());
+            accoutRepository.save(accountEntity);
+            AccountEntity account = accoutRepository.findByEmail(googleRequest.getEmail())
+                    .orElseThrow(()-> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            AccountDTO  accountDTO =modelMapper.map(account,AccountDTO.class);
+            String jwt = tokenProvider.generateToken(accountDTO);
+            return new LoginResponse(jwt,accountDTO,Status.SUCCESS.getCode());
+        }
     }
+
+
 
 
 

@@ -5,6 +5,7 @@ import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ActivateRequest;
+import com.ces.intern.hr.resourcing.demo.http.request.PageSizeRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
 
 import com.ces.intern.hr.resourcing.demo.http.response.ProjectResponse;
@@ -14,6 +15,8 @@ import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;
 import com.ces.intern.hr.resourcing.demo.utils.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.support.PagedListHolder;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 
@@ -48,32 +51,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDTO> getAllProjects( Integer idWorkspace) {
-
-        List<ProjectEntity> projectEntities = projectRepository.findAllById(idWorkspace);
-        List<ProjectDTO> projectDTOS = new ArrayList<>();
-        for (int i=0;i<projectEntities.size();i++){
-
-            ProjectDTO projectDTO = modelMapper.map(projectEntities.get(i),ProjectDTO.class);
-            TimeEntity timeEntityPM = timeRepository.findByIdProjectAndnamePosition(projectDTO.getId(),Position.PROJECTMANAGER.getName());
-            ResourceEntity resourceEntity = resourceRepository.findById(timeEntityPM.getResourceEntity().getId())
-                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-            ResourceResponse resourceResponsePM =modelMapper.map(resourceEntity,ResourceResponse.class);
-            resourceResponsePM.setPosition(resourceEntity.getPositionEntity().getName());
-            resourceResponsePM.setTeam(resourceEntity.getTeamEntity().getName());
-            projectDTO.setProjectManager(resourceResponsePM);
-
-            TimeEntity timeEntityAM = timeRepository.findByIdProjectAndnamePosition(projectDTO.getId(),Position.ACCOUNTMANAGER.getName());
-            ResourceEntity resourceAM = resourceRepository.findById(timeEntityAM.getResourceEntity().getId())
-                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-            ResourceResponse resourceResponseAM =modelMapper.map(resourceAM,ResourceResponse.class);
-            resourceResponseAM.setPosition(resourceAM.getPositionEntity().getName());
-            resourceResponseAM.setTeam(resourceAM.getTeamEntity().getName());
-            projectDTO.setAccountManager(resourceResponseAM);
-            projectDTOS.add(projectDTO);
-        }
-
-       return projectDTOS;
+    public List<ProjectDTO> getAllProjects(Integer idWorkspace, PageSizeRequest pageSizeRequest) {
+        Pageable pageable = PageRequest.of(pageSizeRequest.getPage(),pageSizeRequest.getSize());
+        Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace,pageable);
+        List<ProjectEntity> projectEntityList =projectEntityPage.getContent();
+       return projectEntityList.stream().map(s->modelMapper.map(s,ProjectDTO.class)).collect(Collectors.toList());
     }
 
 
@@ -111,23 +93,22 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ResourceResponse> getListPM(Integer idAccount, Integer idWorkspace) {
-        if (accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,idAccount).isPresent()){
+    public List<ResourceResponse> getListPM( Integer idWorkspace) {
+
             List<ResourceEntity> list = resourceRepository.findAllByIdWorkspaceAndNamePosition(idWorkspace,Position.PROJECTMANAGER.getName());
 
             return list.stream().map(s->modelMapper.map(s,ResourceResponse.class)).collect(Collectors.toList());
-        }return null;
+
 
 
     }
 
     @Override
-    public List<ResourceResponse> getListAM(Integer idAccount, Integer idWorkspace) {
-        if (accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,idAccount).isPresent()){
+    public List<ResourceResponse> getListAM(Integer idWorkspace) {
+
             List<ResourceEntity> list = resourceRepository.findAllByIdWorkspaceAndNamePosition(idWorkspace,Position.ACCOUNTMANAGER.getName());
 
             return list.stream().map(s->modelMapper.map(s,ResourceResponse.class)).collect(Collectors.toList());
-        }return null;
     }
 
     @Override
@@ -155,31 +136,12 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Override
-    public List<ProjectDTO> search(String name) {
-        List<ProjectEntity> projectEntities = projectRepository.findAllByNameContainingIgnoreCase(name);
-        List<ProjectDTO> projectDTOList = new ArrayList<>();
-        for (int i=0;i<projectEntities.size();i++){
+    public List<ProjectDTO> search(String name,Integer idWorkspace,PageSizeRequest pageSizeRequest) {
+        Pageable pageable = PageRequest.of(pageSizeRequest.getPage(),pageSizeRequest.getSize());
+        Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameContainingIgnoreCaseAndWorkspaceEntityProject_Id(name,idWorkspace,pageable);
+        List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
 
-            ProjectDTO projectDTO = modelMapper.map(projectEntities.get(i),ProjectDTO.class);
-            TimeEntity timeEntityPM = timeRepository.findByIdProjectAndnamePosition(projectDTO.getId(),Position.PROJECTMANAGER.getName());
-            ResourceEntity resourceEntity = resourceRepository.findById(timeEntityPM.getResourceEntity().getId())
-                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-            ResourceResponse resourceResponsePM =modelMapper.map(resourceEntity,ResourceResponse.class);
-            resourceResponsePM.setPosition(resourceEntity.getPositionEntity().getName());
-            resourceResponsePM.setTeam(resourceEntity.getTeamEntity().getName());
-            projectDTO.setProjectManager(resourceResponsePM);
-
-            TimeEntity timeEntityAM = timeRepository.findByIdProjectAndnamePosition(projectDTO.getId(),Position.ACCOUNTMANAGER.getName());
-            ResourceEntity resourceAM = resourceRepository.findById(timeEntityAM.getResourceEntity().getId())
-                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-            ResourceResponse resourceResponseAM =modelMapper.map(resourceAM,ResourceResponse.class);
-            resourceResponseAM.setPosition(resourceAM.getPositionEntity().getName());
-            resourceResponseAM.setTeam(resourceAM.getTeamEntity().getName());
-            projectDTO.setAccountManager(resourceResponseAM);
-            projectDTOList.add(projectDTO);
-        }
-
-        return projectDTOList;
+        return projectEntityList.stream().map(s->modelMapper.map(s,ProjectDTO.class)).collect(Collectors.toList());
     }
 
     @Override
