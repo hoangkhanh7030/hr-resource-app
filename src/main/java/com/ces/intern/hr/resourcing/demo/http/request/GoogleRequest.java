@@ -11,6 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GoogleRequest {
     private String email;
-    private String fullName;
-    private String avatar;
+    private String name;
+    private String imageUrl;
 }

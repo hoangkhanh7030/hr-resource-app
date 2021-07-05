@@ -79,8 +79,8 @@ public class LoginController {
         }else {
             AccountEntity accountEntity = new AccountEntity();
             accountEntity.setEmail(googleRequest.getEmail());
-            accountEntity.setFullname(googleRequest.getFullName());
-            accountEntity.setAvatar(googleRequest.getAvatar());
+            accountEntity.setFullname(googleRequest.getName());
+            accountEntity.setAvatar(googleRequest.getImageUrl());
             accountEntity.setAuthenticationProvider(AuthenticationProvider.GOOGLE);
             accountEntity.setCreatedDate(new Date());
             accoutRepository.save(accountEntity);
