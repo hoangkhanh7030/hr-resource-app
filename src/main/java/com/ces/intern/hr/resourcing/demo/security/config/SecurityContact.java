@@ -6,6 +6,7 @@ public class SecurityContact {
     public static final String HEADER_STRING = "Authorization";
     public static final String SIGN_IN_URL = "/login";
     public static final String SIGN_UP_URL = "/account";
+    public static final String GOOGLE_URL ="/api/v1/auth/google";
     public static final String TOKEN_SECRET = "hoangkhanhadsfasdfadsfadsfaasdfasdfadsfasdfasdfa";
     public static final String HEADER_USERID = "accountId";
 }
