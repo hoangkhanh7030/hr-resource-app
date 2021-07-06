@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 @RestController
-@RequestMapping(value = "api/v1")
+@RequestMapping(value = "/api/v1")
 public class LoginController {
 
 

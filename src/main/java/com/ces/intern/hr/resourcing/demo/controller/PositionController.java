@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "api/v1/workspaces")
+@RequestMapping(value = "/api/v1/workspaces")
 public class PositionController {
     private final PositionRepository positionRepository;
     private final PositionService positionService;

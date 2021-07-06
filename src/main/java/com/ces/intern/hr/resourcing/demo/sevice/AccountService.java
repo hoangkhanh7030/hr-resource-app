@@ -12,7 +12,7 @@ public interface AccountService {
 
     AccountDTO validateAccount(String email, String password);
 
-    AccountResponse update(AccountRequest accountRequest, Integer modifiedBy);
+    void update(AccountRequest accountRequest, Integer modifiedBy);
 
     AccountResponse getAccount(Integer idAccount);
 
