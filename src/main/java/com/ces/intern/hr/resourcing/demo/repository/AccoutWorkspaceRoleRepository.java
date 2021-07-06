@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface AccoutWorkspaceRoleRepository extends JpaRepository<AccountWorkspaceRoleEntity, Integer> {
@@ -19,4 +20,6 @@ public interface AccoutWorkspaceRoleRepository extends JpaRepository<AccountWork
     Optional<AccountWorkspaceRoleEntity> findByNameWorkspace(@Param("nameWorkspace") String nameWorkspace);
     @Query(value = "select ac from AccountWorkspaceRoleEntity ac WHERE ac.workspaceEntity.name=:nameWorkspace and ac.accountEntity.id=:idAccount")
     Optional<AccountWorkspaceRoleEntity> findByNameWorkspaceAndIdAccount(@Param("nameWorkspace") String nameWorkspace,@Param("idAccount") Integer idAccount);
+
+    List<AccountWorkspaceRoleEntity> findAllByAccountEntity_Id(Integer idAccount);
 }
