@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> {
-    Optional<ProjectEntity> findByName(String name);
+
+    Optional<ProjectEntity> findByNameAndWorkspaceEntityProject_Id(String name,Integer id);
     @Query("select p from ProjectEntity p where p.workspaceEntityProject.id =:idworkspace")
     Page<ProjectEntity> findAllById(@Param("idworkspace") Integer idworkspace,Pageable pageable);
 
@@ -22,7 +23,18 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> 
     @Query("select p from ProjectEntity p where p.isActivate=:activate and p.id=:idProject")
     Optional<ProjectEntity> findByIdAndIsActivate(@Param("activate") boolean activate,@Param("idProject") Integer idProject);
 
-    Page<ProjectEntity> findAllByNameContainingIgnoreCaseAndWorkspaceEntityProject_Id(String name,Integer id,Pageable pageable);
 
     List<ProjectEntity> findAllByWorkspaceEntityProject_Id(Integer idWorkspace);
+
+    @Query(value = "select p from ProjectEntity p where p.workspaceEntityProject.id=:idWorkspace and lower(p.name) like lower(concat('%',:name,'%')) and lower(p.clientName) like lower(concat('%',:clientName,'%')) " +
+            "and p.isActivate=:isActivate")
+    Page<ProjectEntity> findAllByNameAndClientNameAndIsActivate(@Param("idWorkspace") Integer idWorkspace,
+                                                                @Param("name") String name,
+                                                                @Param("clientName") String clientName,
+                                                                @Param("isActivate") Boolean isActivate,
+                                                                Pageable pageable);
+
+
+
+
 }
