@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "api/v1/workspaces")
+@RequestMapping(value = "/api/v1/workspaces")
 public class ProjectController {
     private final ProjectService projectService;
     private final ProjectRepository projectRepository;
