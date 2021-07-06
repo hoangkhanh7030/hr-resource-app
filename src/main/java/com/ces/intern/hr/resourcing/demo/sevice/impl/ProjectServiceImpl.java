@@ -4,7 +4,6 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
-import com.ces.intern.hr.resourcing.demo.http.request.ActivateRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.PageSizeRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
 
@@ -75,19 +74,20 @@ public class ProjectServiceImpl implements ProjectService {
 
     }
 
-    @Override
-    public List<ProjectDTO> search(String name, Integer idWorkspace, PageSizeRequest pageSizeRequest) {
-        Pageable pageable = PageRequest.of(pageSizeRequest.getPage(), pageSizeRequest.getSize());
-        Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameContainingIgnoreCaseAndWorkspaceEntityProject_Id(name, idWorkspace, pageable);
-        List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
 
+    @Override
+    public List<ProjectDTO> searchParameter(String name, String clientName, Boolean isActivate, Integer idWorkspace, PageSizeRequest pageSizeRequest) {
+        Pageable pageable = PageRequest.of(pageSizeRequest.getPage(), pageSizeRequest.getSize());
+        Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientNameAndIsActivate(idWorkspace, name, clientName, isActivate, pageable);
+        List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
         return projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
     }
+
 
     @Override
     public void deleteProject(Integer idProject) {
         ProjectEntity projectEntity = projectRepository.findById(idProject)
-                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         projectRepository.delete(projectEntity);
     }
 

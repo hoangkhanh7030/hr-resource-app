@@ -15,8 +15,9 @@ public interface ProjectService {
 
     void createProject(ProjectRequest projectRequest,Integer idAccount, Integer idWorkspace);
     void updateProject(ProjectRequest projectRequest,Integer idAccount,Integer idProject);
-    List<ProjectDTO> search(String name,Integer idWorkspace,PageSizeRequest pageSizeRequest);
     void deleteProject(Integer idProject);
+    List<ProjectDTO> searchParameter(String name,String clientName,Boolean isActivate,Integer idWorkspace,PageSizeRequest pageSizeRequest);
+
 
 
 

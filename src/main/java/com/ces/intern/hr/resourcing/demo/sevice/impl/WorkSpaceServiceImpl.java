@@ -4,19 +4,14 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.ProjectResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.ResourceResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.WorkspaceResponse;
 import com.ces.intern.hr.resourcing.demo.repository.*;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
-import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Role;
 import com.ces.intern.hr.resourcing.demo.converter.WorkspaceConverter;
 import com.ces.intern.hr.resourcing.demo.dto.WorkspaceDTO;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.sevice.WorkspaceService;
-import com.ces.intern.hr.resourcing.demo.utils.Utils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -37,8 +31,6 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
     private final AccoutRepository accoutRepository;
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
     private final ModelMapper modelMapper;
-    private final ResourceRepository resourceRepository;
-    private final TimeRepository timeRepository;
 
 
 
@@ -47,17 +39,15 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
                                 WorkspaceConverter workspaceConverter,
                                 AccoutRepository accoutRepository,
                                 AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
-                                ModelMapper modelMapper,
-                                ResourceRepository resourceRepository,
-                                TimeRepository timeRepository
+                                ModelMapper modelMapper
+
     ) {
         this.workspaceRepository = workspaceRepository;
         this.workspaceConverter = workspaceConverter;
         this.accoutRepository = accoutRepository;
         this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
         this.modelMapper = modelMapper;
-        this.resourceRepository=resourceRepository;
-        this.timeRepository=timeRepository;
+
 
     }
 
@@ -119,15 +109,15 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
                 () -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + "with" + id));
         WorkspaceEntity workspaceEntity = workspaceConverter.toEntity(workspaceDTO);
-            Date date = new Date();
-            workspaceEntity.setCreatedDate(date);
-            workspaceEntity.setCreatedBy(id);
-            AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = new AccountWorkspaceRoleEntity();
-            accountWorkspaceRoleEntity.setAccountEntity(accountEntity);
-            accountWorkspaceRoleEntity.setWorkspaceEntity(workspaceEntity);
-            accountWorkspaceRoleEntity.setCodeRole(Role.EDIT.getCode());
-            workspaceRepository.save(workspaceEntity);
-            accoutWorkspaceRoleRepository.save(accountWorkspaceRoleEntity);
+        Date date = new Date();
+        workspaceEntity.setCreatedDate(date);
+        workspaceEntity.setCreatedBy(id);
+        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = new AccountWorkspaceRoleEntity();
+        accountWorkspaceRoleEntity.setAccountEntity(accountEntity);
+        accountWorkspaceRoleEntity.setWorkspaceEntity(workspaceEntity);
+        accountWorkspaceRoleEntity.setCodeRole(Role.EDIT.getCode());
+        workspaceRepository.save(workspaceEntity);
+        accoutWorkspaceRoleRepository.save(accountWorkspaceRoleEntity);
 
 
     }
@@ -137,12 +127,12 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + " with " + idWorkspace));
-            workspaceEntity.setName(workspaceDTO.getName());
-            Date date = new Date();
-            workspaceEntity.setModifiedDate(date);
-            workspaceEntity.setModifiedBy(idAccount);
-            workspaceRepository.save(workspaceEntity);
-            workspaceConverter.toDTO(workspaceEntity);
+        workspaceEntity.setName(workspaceDTO.getName());
+        Date date = new Date();
+        workspaceEntity.setModifiedDate(date);
+        workspaceEntity.setModifiedBy(idAccount);
+        workspaceRepository.save(workspaceEntity);
+        workspaceConverter.toDTO(workspaceEntity);
 
     }
 
@@ -152,7 +142,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + " with " + idWorkspace));
 
-            workspaceRepository.delete(workspaceEntity);
+        workspaceRepository.delete(workspaceEntity);
 
     }
 
