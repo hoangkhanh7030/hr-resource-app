@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping(value = "/account")
+@RequestMapping(value = "api/v1")
 public class AccountController {
     private final AccountService accountService;
     private final AccoutRepository accoutRepository;
@@ -27,7 +27,7 @@ public class AccountController {
         this.accoutRepository = accoutRepository;
     }
 
-    @PostMapping(value = "")
+    @PostMapping(value = "/signup")
     public MessageResponse create(@RequestBody AccountRequest accountRequest) {
         String emailRegex = "^(.+)@(codeengine.com)$";
         String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
@@ -50,7 +50,7 @@ public class AccountController {
         return new MessageResponse(ResponseMessage.INCRECT_EMAIL, Status.FAIL.getCode());
     }
 
-    @PutMapping(value = "")
+    @PutMapping(value = "/account")
     public AccountResponse updateAccount(@RequestBody AccountRequest accountRequest,
                                          @RequestHeader(value = "AccountId") Integer accountId) {
         return accountService.update(accountRequest, accountId);

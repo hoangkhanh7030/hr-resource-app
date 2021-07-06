@@ -76,7 +76,7 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("oauth2/login/**", "/login/google").permitAll()
+                .antMatchers("oauth2/login/**").permitAll()
                 .antMatchers(HttpMethod.POST, SecurityContact.SIGN_UP_URL).permitAll()
                 .antMatchers(HttpMethod.POST, SecurityContact.SIGN_IN_URL).permitAll()
                 .antMatchers(HttpMethod.POST, SecurityContact.GOOGLE_URL).permitAll()

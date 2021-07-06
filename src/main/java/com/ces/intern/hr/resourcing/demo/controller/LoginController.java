@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 @RestController
-
+@RequestMapping(value = "api/v1")
 public class LoginController {
 
 
@@ -66,7 +66,7 @@ public class LoginController {
             return new LoginResponse(jwt, accountDTO, Status.SUCCESS.getCode());
 
     }
-    @PostMapping(value = "api/v1/auth/google")
+    @PostMapping(value = "/auth/google")
     public LoginResponse authGoogle(@RequestBody GoogleRequest googleRequest){
         if (accoutRepository.findByEmail(googleRequest.getEmail()).isPresent()){
             AccountEntity accountEntity = accoutRepository.findByEmail(googleRequest.getEmail())
