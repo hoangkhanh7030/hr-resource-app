@@ -54,26 +54,21 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
 
     @Override
     public List<WorkspaceResponse> getAllWorkspaceByIdAccount(Integer idAccount) {
-        AccountEntity accountEntity = accoutRepository.findById(idAccount)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
-                        + " with " + idAccount));
+        List<AccountWorkspaceRoleEntity> accountWorkspaceRoleEntityList = accoutWorkspaceRoleRepository.findAllByAccountEntity_Id(idAccount);
 
         List<WorkspaceResponse> list = new ArrayList<>();
-        if (accountEntity.getEntityAccoutWorkspaceRoleList().size() > 0) {
-            for (int i = 0; i < accountEntity.getEntityAccoutWorkspaceRoleList().size(); i++) {
 
-
-                WorkspaceResponse workspaceResponse = modelMapper.map(accountEntity.getEntityAccoutWorkspaceRoleList().get(i).getWorkspaceEntity(), WorkspaceResponse.class);
-                List<ProjectDTO> projectDTOS = workspaceConverter.projectDTOList(workspaceRepository.findByName(workspaceResponse.getName())
+            for (int i = 0; i < accountWorkspaceRoleEntityList.size(); i++) {
+                WorkspaceEntity workspaceEntity = workspaceRepository.findById(accountWorkspaceRoleEntityList.get(i).getWorkspaceEntity().getId())
+                        .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+                WorkspaceResponse workspaceResponse = modelMapper.map(workspaceEntity,WorkspaceResponse.class);
+                List<ProjectDTO> projectDTOS = workspaceConverter.projectDTOList(workspaceRepository.findById(workspaceEntity.getId())
                         .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                                 + " with " + workspaceResponse.getName())));
-                List<ResourceDTO> resourceDTOS = workspaceConverter.resourceDTOList(workspaceRepository.findByName(workspaceResponse.getName())
+                List<ResourceDTO> resourceDTOS = workspaceConverter.resourceDTOList(workspaceRepository.findById(workspaceEntity.getId())
                         .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                                 + " with " + workspaceResponse.getName())));
-                AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository
-                        .findByNameWorkspace(workspaceResponse.getName())
-                        .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-                if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
+                if (accountWorkspaceRoleEntityList.get(i).getCodeRole().equals(Role.EDIT.getCode())) {
                     workspaceResponse.setRole(Role.EDIT.getName());
                 } else {
                     workspaceResponse.setRole(Role.VIEW.getName());
@@ -82,7 +77,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
                 workspaceResponse.setResourceListLength(resourceDTOS.size());
                 list.add(workspaceResponse);
             }
-        }
+
         return list;
     }
 
