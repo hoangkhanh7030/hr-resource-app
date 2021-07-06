@@ -17,4 +17,6 @@ public interface AccoutWorkspaceRoleRepository extends JpaRepository<AccountWork
 
     @Query(value = "select ac from AccountWorkspaceRoleEntity ac WHERE ac.workspaceEntity.name=:nameWorkspace")
     Optional<AccountWorkspaceRoleEntity> findByNameWorkspace(@Param("nameWorkspace") String nameWorkspace);
+    @Query(value = "select ac from AccountWorkspaceRoleEntity ac WHERE ac.workspaceEntity.name=:nameWorkspace and ac.accountEntity.id=:idAccount")
+    Optional<AccountWorkspaceRoleEntity> findByNameWorkspaceAndIdAccount(@Param("nameWorkspace") String nameWorkspace,@Param("idAccount") Integer idAccount);
 }

@@ -8,6 +8,6 @@ import java.util.List;
 public interface PositionService {
     List<PositionDTO> getAll();
     void createPosition(PositionRequest positionRequest);
-    void updatePosition(PositionRequest positionRequest);
+    void updatePosition(PositionRequest positionRequest,Integer idPosition);
     void deletePosition(Integer idPosition);
 }
