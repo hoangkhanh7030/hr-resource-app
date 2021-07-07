@@ -52,7 +52,7 @@ public class ProjectController {
         this.projectRepository = projectRepository;
         this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
         this.modelMapper = modelMapper;
-        this.csvFileSerivce=csvFileSerivce;
+        this.csvFileSerivce = csvFileSerivce;
     }
 
     @GetMapping(value = "/{idWorkspace}/project")
@@ -86,10 +86,11 @@ public class ProjectController {
 
         csvWriter.close();
     }
+
     @PostMapping(value = "/{idWorkspace}/project/import")
-    public Response importCsvFile(@RequestHeader("AccountId")Integer idAccount,
+    public Response importCsvFile(@RequestHeader("AccountId") Integer idAccount,
                                   @PathVariable Integer idWorkspace,
-                                  @RequestParam("csvfile") MultipartFile csvfile){
+                                  @RequestParam("csvfile") MultipartFile csvfile) {
         Response response = new Response();
         if (Objects.requireNonNull(csvfile.getOriginalFilename()).isEmpty()) {
             response.addMessage(new Message(csvfile.getOriginalFilename(),
@@ -97,7 +98,7 @@ public class ProjectController {
 
             return response;
         }
-        if(!ApacheCommonsCsvUtil.isCSVFile(csvfile)) {
+        if (!ApacheCommonsCsvUtil.isCSVFile(csvfile)) {
             response.addMessage(new Message(csvfile.getOriginalFilename(), "Error: this is not a CSV file!", Status.FAIL.getCode()));
             return response;
         }
@@ -105,7 +106,7 @@ public class ProjectController {
 
         try {
 
-            csvFileSerivce.store(csvfile.getInputStream(),idWorkspace,idAccount);
+            csvFileSerivce.store(csvfile.getInputStream(), idWorkspace, idAccount);
             response.addMessage(new Message(csvfile.getOriginalFilename(), "Upload File Successfully!", Status.SUCCESS.getCode()));
         } catch (Exception e) {
             response.addMessage(new Message(csvfile.getOriginalFilename(), e.getMessage(), Status.FAIL.getCode()));
@@ -118,26 +119,23 @@ public class ProjectController {
     private MessageResponse createdProject(@RequestHeader("AccountId") Integer idAccount,
                                            @PathVariable Integer idWorkspace,
                                            @RequestBody ProjectRequest projectRequest) {
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
 
-            if (projectRepository.findByNameAndWorkspaceEntityProject_Id(projectRequest.getName(), idWorkspace).isPresent()) {
+        if (projectRepository.findByNameAndWorkspaceEntityProject_Id(projectRequest.getName(), idWorkspace).isPresent()) {
 
-                return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
-            } else {
-                if (projectRequest.getName().isEmpty() || projectRequest.getColor().isEmpty()
-                        || projectRequest.getClientName().isEmpty() || projectRequest.getTextColor().isEmpty()
-                        || projectRequest.getColorPattern().isEmpty()) {
-                    return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
-                }
-                projectService.createProject(projectRequest, idAccount, idWorkspace);
-                if (projectRepository.findByNameAndWorkspaceEntityProject_Id(projectRequest.getName(), idWorkspace).isPresent()) {
-                    return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
-                }
-                return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
+            return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
+        } else {
+            if (projectRequest.getName().isEmpty() || projectRequest.getColor().isEmpty()
+                    || projectRequest.getClientName().isEmpty() || projectRequest.getTextColor().isEmpty()
+                    || projectRequest.getColorPattern().isEmpty()) {
+                return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
             }
-        } else return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
+            projectService.createProject(projectRequest, idAccount, idWorkspace);
+            if (projectRepository.findByNameAndWorkspaceEntityProject_Id(projectRequest.getName(), idWorkspace).isPresent()) {
+                return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
+            }
+            return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
+        }
+
     }
 
     @PutMapping(value = "/{idWorkspace}/project/{idProject}")

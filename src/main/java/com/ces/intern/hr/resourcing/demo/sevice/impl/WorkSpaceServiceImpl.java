@@ -57,25 +57,25 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
 
         List<WorkspaceResponse> list = new ArrayList<>();
 
-            for (int i = 0; i < accountWorkspaceRoleEntityList.size(); i++) {
-                WorkspaceEntity workspaceEntity = workspaceRepository.findById(accountWorkspaceRoleEntityList.get(i).getWorkspaceEntity().getId())
-                        .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-                WorkspaceResponse workspaceResponse = modelMapper.map(workspaceEntity,WorkspaceResponse.class);
-                List<ProjectDTO> projectDTOS = workspaceConverter.projectDTOList(workspaceRepository.findById(workspaceEntity.getId())
-                        .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
-                                + " with " + workspaceResponse.getName())));
-                List<ResourceDTO> resourceDTOS = workspaceConverter.resourceDTOList(workspaceRepository.findById(workspaceEntity.getId())
-                        .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
-                                + " with " + workspaceResponse.getName())));
-                if (accountWorkspaceRoleEntityList.get(i).getCodeRole().equals(Role.EDIT.getCode())) {
-                    workspaceResponse.setRole(Role.EDIT.getName());
-                } else {
-                    workspaceResponse.setRole(Role.VIEW.getName());
-                }
-                workspaceResponse.setProjectListLength(projectDTOS.size());
-                workspaceResponse.setResourceListLength(resourceDTOS.size());
-                list.add(workspaceResponse);
+            for (AccountWorkspaceRoleEntity accountWorkspaceRoleEntity : accountWorkspaceRoleEntityList) {
+            WorkspaceEntity workspaceEntity = workspaceRepository.findById(accountWorkspaceRoleEntity.getWorkspaceEntity().getId())
+                    .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            WorkspaceResponse workspaceResponse = modelMapper.map(workspaceEntity, WorkspaceResponse.class);
+            List<ProjectDTO> projectDTOS = workspaceConverter.projectDTOList(workspaceRepository.findById(workspaceEntity.getId())
+                    .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
+                            + " with " + workspaceResponse.getName())));
+            List<ResourceDTO> resourceDTOS = workspaceConverter.resourceDTOList(workspaceRepository.findById(workspaceEntity.getId())
+                    .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
+                            + " with " + workspaceResponse.getName())));
+            if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
+                workspaceResponse.setRole(Role.EDIT.getName());
+            } else {
+                workspaceResponse.setRole(Role.VIEW.getName());
             }
+            workspaceResponse.setProjectListLength(projectDTOS.size());
+            workspaceResponse.setResourceListLength(resourceDTOS.size());
+            list.add(workspaceResponse);
+        }
 
         return list;
     }
@@ -126,7 +126,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         workspaceEntity.setModifiedDate(date);
         workspaceEntity.setModifiedBy(idAccount);
         workspaceRepository.save(workspaceEntity);
-        workspaceConverter.toDTO(workspaceEntity);
+
 
     }
 

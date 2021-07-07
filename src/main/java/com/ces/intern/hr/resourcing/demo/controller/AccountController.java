@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
-
 @RestController
 @RequestMapping(value = "/api/v1")
 public class AccountController {
@@ -29,7 +28,7 @@ public class AccountController {
 
     @PostMapping(value = "/signup")
     public MessageResponse create(@RequestBody AccountRequest accountRequest) {
-        String emailRegex = "^(.+)@(codeengine.com)$";
+        String emailRegex = "^(.+)@(codeenginestudio.com)$";
         String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
         if (accountRequest.getEmail().matches(emailRegex)) {
             if (accountRequest.getPassword().matches(passwordRegex)) {
@@ -51,9 +50,31 @@ public class AccountController {
     }
 
     @PutMapping(value = "/account")
-    public AccountResponse updateAccount(@RequestBody AccountRequest accountRequest,
+    public MessageResponse updateAccount(@RequestBody AccountRequest accountRequest,
                                          @RequestHeader(value = "AccountId") Integer accountId) {
-        return accountService.update(accountRequest, accountId);
+        String emailRegex = "^(.+)@(codeenginestudio.com)$";
+        String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
+        if (accountRequest.getEmail().matches(emailRegex)) {
+            if (accountRequest.getPassword().matches(passwordRegex)) {
+                if (accoutRepository.findByEmail(accountRequest.getEmail()).isPresent()) {
+                    return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
+                } else {
+                    if (accountRequest.getEmail().isEmpty() || accountRequest.getPassword().isEmpty() ||
+                            accountRequest.getAvatar().isEmpty() || accountRequest.getFullname().isEmpty()) {
+                        return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
+                    } else {
+                        accountService.update(accountRequest, accountId);
+                    }
+                    if (accoutRepository.findByEmail(accountRequest.getFullname()).isPresent()) {
+                        return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+                    } else {
+                        return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+                    }
+                }
+            }
+            return new MessageResponse(ResponseMessage.INCRECT_PASSWORD, Status.FAIL.getCode());
+        }
+        return new MessageResponse(ResponseMessage.INCRECT_EMAIL, Status.FAIL.getCode());
     }
 
     @GetMapping(value = "")
