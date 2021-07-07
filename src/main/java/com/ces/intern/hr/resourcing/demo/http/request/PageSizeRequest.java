@@ -5,17 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TimeRequest {
-    private Date date;
-    private String taskName;
-    private Integer resourceId;
-    private Integer projectId;
-    private Integer startHour;
-    private Integer endHour;
+public class PageSizeRequest {
+    private Integer page;
+    private Integer size;
 }
+

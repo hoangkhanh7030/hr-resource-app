@@ -6,6 +6,7 @@ import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.dto.TimeDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
+import com.ces.intern.hr.resourcing.demo.http.request.PageSizeRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.TimeRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
@@ -20,11 +21,13 @@ import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
-@RequestMapping("api/v1/bookings")
+@RequestMapping("api/v1/workspaces")
 public class TimeController {
     private final ProjectService projectService;
     private final ResourceService resourceService;
@@ -44,8 +47,9 @@ public class TimeController {
     }
 
     @GetMapping("/{workspaceId}")
-    public List<ResourceDTO> sendListResource(@PathVariable Integer workspaceId){
-        return resourceService.getResourcesOfWorkSpace(workspaceId);
+    public List<ResourceDTO> sendListResource(@PathVariable Integer workspaceId,
+                                              @RequestBody PageSizeRequest pageSizeRequest){
+        return resourceService.getResourcesOfWorkSpace(workspaceId, pageSizeRequest);
     }
 //
 //    @GetMapping("/{workspaceId}/add")
@@ -53,7 +57,14 @@ public class TimeController {
 //        return projectService.getAllProjects(idAccount, workspaceId);
 //    }
 
-    @PostMapping("/{workspaceId}/{resourceId}")
+    @GetMapping("/{workspaceId}/bookings")
+    public Map<Date, List<TimeDTO>> showBookingForRangeOfDays(@PathVariable Integer workspaceId,
+                                               @RequestParam Integer month,
+                                               @RequestParam Integer year){
+        return timeService.getBookingByMonth(month, year, workspaceId);
+    }
+
+    @PostMapping("/{workspaceId}/bookings/{resourceId}")
     public MessageResponse addNewBooking(@RequestBody TimeRequest timeRequest,
                               @PathVariable Integer resourceId,
                               @PathVariable Integer workspaceId,
@@ -67,7 +78,7 @@ public class TimeController {
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
-    @PutMapping("/{workspaceId}/{timeId}")
+    @PutMapping("/{workspaceId}/bookings/{timeId}")
     public MessageResponse editBooking(@RequestBody TimeRequest timeRequest,
                             @PathVariable Integer timeId,
                             @PathVariable Integer workspaceId,
@@ -80,7 +91,7 @@ public class TimeController {
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
-    @DeleteMapping("/{workspaceId}/{timeId}")
+    @DeleteMapping("/{workspaceId}/bookings/{timeId}")
     public MessageResponse deleteBooking(@PathVariable Integer timeId,
                               @PathVariable Integer workspaceId,
                               @RequestHeader Integer accountId){

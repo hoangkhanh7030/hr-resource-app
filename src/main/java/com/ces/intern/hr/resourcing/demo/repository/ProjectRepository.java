@@ -7,15 +7,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> {
 
     Optional<ProjectEntity> findByNameAndWorkspaceEntityProject_Id(String name,Integer id);
     @Query("select p from ProjectEntity p where p.workspaceEntityProject.id =:idworkspace")
-    Page<ProjectEntity> findAllById(@Param("idworkspace") Integer idworkspace,Pageable pageable);
+    Page<ProjectEntity> findAllById(@Param("idworkspace") Integer idworkspace, Pageable pageable);
 
     @Query("select p from ProjectEntity p where p.id=:idProject and p.workspaceEntityProject.id=:idWorkspace")
     Optional<ProjectEntity> findByIdWorkspaceAndIdProject(@Param("idWorkspace") Integer idWorkspace,@Param("idProject") Integer idProject);
