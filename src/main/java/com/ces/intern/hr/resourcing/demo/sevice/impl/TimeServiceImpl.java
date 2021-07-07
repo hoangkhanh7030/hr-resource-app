@@ -114,7 +114,7 @@ public class TimeServiceImpl implements TimeService {
 
     private boolean TimeCheck(TimeRequest timeRequest, TimeEntity timeEntity, int start, int end, Calendar calendar) {
         List<TimeEntity> listTime = timeRepository.findShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId()).get();
+                calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId()).orElse(new ArrayList<>());
         boolean check = true;
         Calendar shiftStart = Calendar.getInstance();
         Calendar shiftEnd = Calendar.getInstance();
@@ -218,16 +218,13 @@ public class TimeServiceImpl implements TimeService {
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         //int maxDaysOfMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
         Map<Date, List<TimeDTO>> bookingMonth = new LinkedHashMap<>();
-        while (calendar.get(Calendar.MONTH) + 1 == month){
+        while (calendar.get(Calendar.MONTH) + 1 == month) {
             List<TimeDTO> list = new ArrayList<>();
             Date date = calendar.getTime();
-            if (timeRepository.findAllShiftOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                    calendar.get(Calendar.DAY_OF_MONTH), workspaceId).isPresent()) {
-                List<TimeEntity> timeEntities = timeRepository.findAllShiftOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                        calendar.get(Calendar.DAY_OF_MONTH), workspaceId).get();
-                for (TimeEntity t : timeEntities) {
-                    list.add(timeConverter.convertToDto(t));
-                }
+            List<TimeEntity> timeEntities = timeRepository.findAllShiftOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
+                    calendar.get(Calendar.DAY_OF_MONTH), workspaceId).orElse(new ArrayList<>());
+            for (TimeEntity t : timeEntities) {
+                list.add(timeConverter.convertToDto(t));
             }
             bookingMonth.put(date, list);
             calendar.add(Calendar.DATE, 1);
