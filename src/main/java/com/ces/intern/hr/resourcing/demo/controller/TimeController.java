@@ -6,6 +6,7 @@ import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.dto.TimeDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
+import com.ces.intern.hr.resourcing.demo.http.request.PageSizeRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.TimeRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
@@ -45,8 +46,9 @@ public class TimeController {
     }
 
     @GetMapping("/{workspaceId}")
-    public List<ResourceDTO> sendListResource(@PathVariable Integer workspaceId){
-        return resourceService.getResourcesOfWorkSpace(workspaceId);
+    public List<ResourceDTO> sendListResource(@PathVariable Integer workspaceId,
+                                              @RequestBody PageSizeRequest pageSizeRequest){
+        return resourceService.getResourcesOfWorkSpace(workspaceId, pageSizeRequest);
     }
 //
 //    @GetMapping("/{workspaceId}/add")
