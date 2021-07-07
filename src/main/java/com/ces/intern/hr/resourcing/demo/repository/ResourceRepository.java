@@ -25,15 +25,15 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
     Page<ResourceEntity> findByNameContainingIgnoreCaseAndWorkspaceEntityResource_Id(String name, Integer id, Pageable pageable);
 
     @Query(value = "SELECT res FROM ResourceEntity res WHERE res.workspaceEntityResource.id = :id")
-    Page<ResourceEntity> findResourcesOfWorkSpace(@Param("id") int id, Pageable pageable);
+    Page<ResourceEntity> findResourcesOfWorkSpace(@Param("id") Integer id, Pageable pageable);
 
     //Optional<ResourceEntity> findByIdAndWorkspaceEntityResource_Id(int id, int workspaceId);
 
     @Query(value = "SELECT res from ResourceEntity res where res.positionEntity.id = 1 and res.workspaceEntityResource.id = :id")
-    List<ResourceEntity> findAllProductManagersOfWorkspace(@Param("id") int id);
+    List<ResourceEntity> findAllProductManagersOfWorkspace(@Param("id") Integer id);
 
     @Query(value = "SELECT res from ResourceEntity res where res.positionEntity.id = 2 and res.workspaceEntityResource.id = :id")
-    List<ResourceEntity> findAllAccountManagersOfWorkspace(@Param("id") int id);
+    List<ResourceEntity> findAllAccountManagersOfWorkspace(@Param("id") Integer id);
 
     Optional<ResourceEntity> findByIdAndWorkspaceEntityResource_Id(Integer resourceId, Integer workspaceId);
 }

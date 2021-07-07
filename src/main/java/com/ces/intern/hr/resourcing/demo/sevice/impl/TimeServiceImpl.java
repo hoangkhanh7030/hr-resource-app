@@ -94,8 +94,8 @@ public class TimeServiceImpl implements TimeService {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(timeRequest.getDate());
         if(start >= START_HOUR && end <= END_HOUR && start < end){
-            if (timeRepository.findShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                    calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId()).isPresent()){
+            if (timeRepository.findAllDifferentShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
+                    calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId(), timeId).isPresent()){
                 if(TimeCheck(timeRequest, timeEntity, start, end, calendar)){
                     setShift(timeEntity, start, end, calendar);
                     timeRepository.save(timeEntity);
