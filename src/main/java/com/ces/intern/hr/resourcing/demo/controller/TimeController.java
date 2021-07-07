@@ -20,10 +20,12 @@ import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("api/v1/bookings")
+@RequestMapping("api/v1/workspaces")
 public class TimeController {
     private final ProjectService projectService;
     private final ResourceService resourceService;
@@ -51,6 +53,13 @@ public class TimeController {
 //    public List<ProjectDTO> sendListProject(@PathVariable Integer workspaceId, @RequestHeader Integer idAccount){
 //        return projectService.getAllProjects(idAccount, workspaceId);
 //    }
+
+    @GetMapping("/{workspaceId}/bookings")
+    public Map<Date, List<TimeDTO>> showBookingForRangeOfDays(@PathVariable Integer workspaceId,
+                                               @RequestParam Integer month,
+                                               @RequestParam Integer year){
+        return timeService.getBookingByMonth(month, year, workspaceId);
+    }
 
     @PostMapping("/{workspaceId}/{resourceId}")
     public MessageResponse addNewBooking(@RequestBody TimeRequest timeRequest,

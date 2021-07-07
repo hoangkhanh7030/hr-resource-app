@@ -7,6 +7,7 @@ import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
+import com.ces.intern.hr.resourcing.demo.http.request.PageSizeRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/resources")
+@RequestMapping("api/v1/workspaces")
 public class ResourceController {
     private final ResourceService resourceService;
     private final ResourceConverter resourceConverter;
@@ -45,14 +46,15 @@ public class ResourceController {
     }
 
 
-    @GetMapping("/{workspaceId}")
-    public List<ResourceDTO> showResourceList(@PathVariable Integer workspaceId){
-        return resourceService.getResourcesOfWorkSpace(workspaceId);
+    @GetMapping("/{workspaceId}/resources")
+    public List<ResourceDTO> showResourceList(@PathVariable Integer workspaceId,
+                                              @RequestBody PageSizeRequest pageSizeRequest){
+        return resourceService.getResourcesOfWorkSpace(workspaceId, pageSizeRequest);
     }
 
 
 
-    @PostMapping("/{workspaceId}")
+    @PostMapping("/{workspaceId}/resources")
     public MessageResponse createResource(@RequestBody ResourceRequest resourceRequest,
                                           @PathVariable Integer workspaceId,
                                           @RequestHeader Integer accountId){
@@ -65,18 +67,20 @@ public class ResourceController {
         return new MessageResponse(ResponseMessage.ROLE,Status.FAIL.getCode());
     }
 
-    @GetMapping("/{workspaceId}/search")
-    public List<ResourceDTO> searchResource(@RequestParam String name, @PathVariable Integer workspaceId){
-        return resourceService.searchByName(name, workspaceId);
+    @GetMapping("/{workspaceId}/resources/search")
+    public List<ResourceDTO> searchResource(@RequestParam String name,
+                                            @PathVariable Integer workspaceId,
+                                            @RequestBody PageSizeRequest pageSizeRequest){
+        return resourceService.searchByName(name, workspaceId, pageSizeRequest);
     }
 
-    @GetMapping("/{workspaceId}/{resourceId}")
+    @GetMapping("/{workspaceId}/resources/{resourceId}")
     public ResourceDTO getOneResourceInfo(@PathVariable Integer resourceId,
                                           @PathVariable Integer workspaceId){
         return resourceService.getResourceInfo(resourceId, workspaceId);
     }
 
-    @PutMapping("/{workspaceId}/{resourceId}")
+    @PutMapping("/{workspaceId}/resources/{resourceId}")
     public MessageResponse updateResource(@RequestBody ResourceRequest resourceRequest,
                                           @PathVariable Integer workspaceId,
                                           @PathVariable Integer resourceId,
@@ -89,7 +93,7 @@ public class ResourceController {
         return new MessageResponse(ResponseMessage.ROLE,Status.FAIL.getCode());
     }
 
-    @DeleteMapping("/{workspaceId}/{resourceId}")
+    @DeleteMapping("/{workspaceId}/resources/{resourceId}")
     public MessageResponse deleteResource(@PathVariable Integer resourceId,
                                           @PathVariable Integer workspaceId,
                                           @RequestHeader Integer accountId){

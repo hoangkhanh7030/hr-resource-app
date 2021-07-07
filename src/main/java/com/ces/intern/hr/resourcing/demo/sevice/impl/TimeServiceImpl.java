@@ -14,13 +14,11 @@ import com.ces.intern.hr.resourcing.demo.sevice.TimeService;
 import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.datetime.joda.DateTimeFormatterFactoryBean;
 import org.springframework.stereotype.Service;
 
 import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class TimeServiceImpl implements TimeService {
@@ -51,6 +49,7 @@ public class TimeServiceImpl implements TimeService {
         TimeEntity timeEntity = new TimeEntity();
         int start = timeRequest.getStartHour();
         int end = timeRequest.getEndHour();
+        timeEntity.setTask(timeRequest.getTaskName());
         timeEntity.setProjectEntity(projectRepository.findById(timeRequest.getProjectId()).orElse(null));
         timeEntity.setResourceEntity(resourceRepository.findById(timeRequest.getResourceId()).orElse(null));
         Calendar calendar = Calendar.getInstance();
@@ -72,6 +71,7 @@ public class TimeServiceImpl implements TimeService {
                 }
             }
         }
+
         return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
     }
 
@@ -81,6 +81,7 @@ public class TimeServiceImpl implements TimeService {
         if(timeRepository.findById(timeId).isPresent()
         && projectRepository.findById(timeRequest.getProjectId()).isPresent()
         && resourceRepository.findById(timeRequest.getResourceId()).isPresent()){
+            timeEntity.setTask(timeRequest.getTaskName());
             timeEntity.setResourceEntity(resourceRepository.findById(timeRequest.getResourceId()).get());
             timeEntity.setProjectEntity(projectRepository.findById(timeRequest.getProjectId()).get());
             timeEntity.setId(timeId);
@@ -150,63 +151,88 @@ public class TimeServiceImpl implements TimeService {
         return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
     }
 
+//    @Override
+//    public List<TimeDTO> showBookingByWeek(Date date, Integer workspaceId){
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTime(date);
+//        List<Date> dateList = new ArrayList<>();
+//        dateList.add(date);
+//        List<TimeDTO> list = new ArrayList<>();
+//        if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY){
+//            while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY){
+//                calendar.add(Calendar.DATE, 1);
+//                Date newDate = calendar.getTime();
+//                dateList.add(newDate);
+//            }
+//        }
+//        else if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY){
+//            while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+//                calendar.add(Calendar.DATE, -1);
+//                Date newDate = calendar.getTime();
+//                dateList.add(newDate);
+//            }
+//        }
+//        else {
+//            while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY){
+//                calendar.add(Calendar.DATE, 1);
+//                Date newDate = calendar.getTime();
+//                dateList.add(newDate);
+//            }
+//            calendar.setTime(date);
+//            while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
+//                calendar.add(Calendar.DATE, -1);
+//                Date newDate = calendar.getTime();
+//                dateList.add(newDate);
+//            }
+//        }
+//        if (!resourceRepository.findResourcesOfWorkSpace(workspaceId).isEmpty()) {
+//            List<ResourceEntity> resourceEntityList = resourceRepository.findResourcesOfWorkSpace(workspaceId);
+//            List<List<TimeEntity>> resourceTimeList = new ArrayList<>();
+//            for(Date d : dateList){
+//                Calendar calendarOfDateList = Calendar.getInstance();
+//                calendarOfDateList.setTime(d);
+//                for (ResourceEntity res : resourceEntityList){
+//                    if (timeRepository.findShiftOfResource(calendarOfDateList.get(Calendar.YEAR),
+//                            calendarOfDateList.get(Calendar.MONTH) + 1,
+//                            calendarOfDateList.get(Calendar.DAY_OF_MONTH), res.getId()).isPresent()){
+//                        resourceTimeList.add(timeRepository.findShiftOfResource(calendarOfDateList.get(Calendar.YEAR),
+//                                calendarOfDateList.get(Calendar.MONTH) + 1,
+//                                calendarOfDateList.get(Calendar.DAY_OF_MONTH), res.getId()).get());
+//                    }
+//                }
+//            }
+//            for (List<TimeEntity> l : resourceTimeList){
+//                for (TimeEntity t : l){
+//                    list.add(timeConverter.convertToDto(t));
+//                }
+//            }
+//        }
+//        return list;
+//    }
+
     @Override
-    public List<TimeDTO> showBookingByWeek(Date date, Integer workspaceId){
+    public Map<Date, List<TimeDTO>> getBookingByMonth(Integer month, Integer year, Integer workspaceId){
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        List<Date> dateList = new ArrayList<>();
-        dateList.add(date);
-        List<TimeDTO> list = new ArrayList<>();
-        if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY){
-            while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY){
-                calendar.add(Calendar.DATE, 1);
-                Date newDate = calendar.getTime();
-                dateList.add(newDate);
-            }
-        }
-        else if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY){
-            while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
-                calendar.add(Calendar.DATE, -1);
-                Date newDate = calendar.getTime();
-                dateList.add(newDate);
-            }
-        }
-        else {
-            while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY){
-                calendar.add(Calendar.DATE, 1);
-                Date newDate = calendar.getTime();
-                dateList.add(newDate);
-            }
-            calendar.setTime(date);
-            while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
-                calendar.add(Calendar.DATE, -1);
-                Date newDate = calendar.getTime();
-                dateList.add(newDate);
-            }
-        }
-        if (!resourceRepository.findResourcesOfWorkSpace(workspaceId).isEmpty()) {
-            List<ResourceEntity> resourceEntityList = resourceRepository.findResourcesOfWorkSpace(workspaceId);
-            List<List<TimeEntity>> resourceTimeList = new ArrayList<>();
-            for(Date d : dateList){
-                Calendar calendarOfDateList = Calendar.getInstance();
-                calendarOfDateList.setTime(d);
-                for (ResourceEntity res : resourceEntityList){
-                    if (timeRepository.findShiftOfResource(calendarOfDateList.get(Calendar.YEAR),
-                            calendarOfDateList.get(Calendar.MONTH) + 1,
-                            calendarOfDateList.get(Calendar.DAY_OF_MONTH), res.getId()).isPresent()){
-                        resourceTimeList.add(timeRepository.findShiftOfResource(calendarOfDateList.get(Calendar.YEAR),
-                                calendarOfDateList.get(Calendar.MONTH) + 1,
-                                calendarOfDateList.get(Calendar.DAY_OF_MONTH), res.getId()).get());
-                    }
-                }
-            }
-            for (List<TimeEntity> l : resourceTimeList){
-                for (TimeEntity t : l){
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month - 1);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        //int maxDaysOfMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        Map<Date, List<TimeDTO>> bookingMonth = new LinkedHashMap<>();
+        while (calendar.get(Calendar.MONTH) + 1 == month){
+            List<TimeDTO> list = new ArrayList<>();
+            Date date = calendar.getTime();
+            if (timeRepository.findAllShiftOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
+                    calendar.get(Calendar.DAY_OF_MONTH), workspaceId).isPresent()) {
+                List<TimeEntity> timeEntities = timeRepository.findAllShiftOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
+                        calendar.get(Calendar.DAY_OF_MONTH), workspaceId).get();
+                for (TimeEntity t : timeEntities) {
                     list.add(timeConverter.convertToDto(t));
                 }
             }
+            bookingMonth.put(date, list);
+            calendar.add(Calendar.DATE, 1);
         }
-        return list;
+        return bookingMonth;
     }
 
     private void setShift(TimeEntity timeEntity, Integer start, Integer end, Calendar calendar) {

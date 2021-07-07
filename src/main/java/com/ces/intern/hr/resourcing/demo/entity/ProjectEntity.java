@@ -20,8 +20,15 @@ public class ProjectEntity extends BaseEnity {
     private String name;
     @Column(name = "color")
     private String color;
+    @Column(name = "text_color")
+    private String textColor;
+    @Column(name = "color_pattern")
+    private String colorPattern;
+    @Column(name = "client_name")
+    private String clientName;
     @Column(name = "is_activate")
     private Boolean isActivate;
+
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "projectEntity")
     private List<TimeEntity> timeEntities = new ArrayList<>();

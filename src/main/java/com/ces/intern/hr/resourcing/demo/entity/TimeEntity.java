@@ -13,7 +13,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "time")
+@Table(name = "booking")
 public class TimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,6 +23,9 @@ public class TimeEntity {
     private Date startTime;
     @Column(name = "end_time")
     private Date endTime;
+
+    @Column(name = "task")
+    private String task;
 
     @ManyToOne
     @JoinColumn(name = "resource_id")
