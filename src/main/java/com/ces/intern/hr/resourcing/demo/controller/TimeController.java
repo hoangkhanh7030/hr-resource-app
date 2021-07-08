@@ -63,7 +63,7 @@ public class TimeController {
         return timeService.getBookingByMonth(month, year, workspaceId);
     }
 
-    @PostMapping("/{workspaceId}/{resourceId}")
+    @PostMapping("/{workspaceId}/bookings/{resourceId}")
     public MessageResponse addNewBooking(@RequestBody TimeRequest timeRequest,
                               @PathVariable Integer resourceId,
                               @PathVariable Integer workspaceId,
@@ -77,7 +77,7 @@ public class TimeController {
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
-    @PutMapping("/{workspaceId}/{timeId}")
+    @PutMapping("/{workspaceId}/bookings/{timeId}")
     public MessageResponse editBooking(@RequestBody TimeRequest timeRequest,
                             @PathVariable Integer timeId,
                             @PathVariable Integer workspaceId,
@@ -90,7 +90,7 @@ public class TimeController {
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
-    @DeleteMapping("/{workspaceId}/{timeId}")
+    @DeleteMapping("/{workspaceId}/bookings/{timeId}")
     public MessageResponse deleteBooking(@PathVariable Integer timeId,
                               @PathVariable Integer workspaceId,
                               @RequestHeader Integer accountId){
