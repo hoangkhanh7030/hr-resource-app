@@ -10,11 +10,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ApacheCommonsCsvUtil {
-    private static String csvExtension = "csv";
+    private static final String csvExtension = "csv";
 
     public static List<ProjectDTO> parseCsvFile(InputStream is) {
         BufferedReader fileReader = null;
@@ -23,7 +25,7 @@ public class ApacheCommonsCsvUtil {
         List<ProjectDTO> projectDTOList = new ArrayList<>();
 
         try {
-            fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            fileReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
             csvParser = new CSVParser(fileReader,
                     CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
 
@@ -42,8 +44,9 @@ public class ApacheCommonsCsvUtil {
             e.printStackTrace();
         } finally {
             try {
+                assert fileReader != null;
                 fileReader.close();
-                csvParser.close();
+                Objects.requireNonNull(csvParser).close();
             } catch (IOException e) {
                 System.out.println("Closing fileReader/csvParser Error!");
                 e.printStackTrace();
@@ -54,12 +57,8 @@ public class ApacheCommonsCsvUtil {
     }
 
     public static boolean isCSVFile(MultipartFile file) {
-        String extension = file.getOriginalFilename().split("\\.")[1];
+        String extension = Objects.requireNonNull(file.getOriginalFilename()).split("\\.")[1];
 
-        if(!extension.equals(csvExtension)) {
-            return false;
-        }
-
-        return true;
+        return extension.equals(csvExtension);
     }
 }

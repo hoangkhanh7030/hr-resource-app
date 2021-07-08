@@ -81,7 +81,7 @@ public class TeamController {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
-            if (name.isEmpty() || name == null) {
+            if (name.isEmpty()) {
                 return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
             } else {
                 teamService.renameTeam(idTeam, name);
