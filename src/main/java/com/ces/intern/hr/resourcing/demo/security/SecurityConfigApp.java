@@ -1,13 +1,8 @@
 package com.ces.intern.hr.resourcing.demo.security;
 
-import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import com.ces.intern.hr.resourcing.demo.security.filter.AuthorizationFilter;
-import com.ces.intern.hr.resourcing.demo.security.jwt.JwtTokenProvider;
 import com.ces.intern.hr.resourcing.demo.security.jwtAccount.CustomAccountService;
-import com.ces.intern.hr.resourcing.demo.security.oauth.AccoutService;
-import com.ces.intern.hr.resourcing.demo.security.oauth.CustomOAuth2AccountService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,26 +24,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
 
-    private final CustomOAuth2AccountService customOAuth2AccountService;
-    private final AccoutService accoutService;
+
+
     private final CustomAccountService accService;
-    private final AccoutRepository accoutRepository;
-    private final ModelMapper modelMapper;
-    private final JwtTokenProvider tokenProvider;
+
 
     @Autowired
-    public SecurityConfigApp(CustomOAuth2AccountService customOAuth2AccountService,
-                             AccoutService accoutService,
-                             CustomAccountService accService,
-                             AccoutRepository accoutRepository,
-                             ModelMapper modelMapper,
-                             JwtTokenProvider tokenProvider) {
-        this.customOAuth2AccountService = customOAuth2AccountService;
-        this.accoutService = accoutService;
+    public SecurityConfigApp(CustomAccountService accService) {
         this.accService = accService;
-        this.accoutRepository = accoutRepository;
-        this.modelMapper = modelMapper;
-        this.tokenProvider = tokenProvider;
+
     }
 
 
