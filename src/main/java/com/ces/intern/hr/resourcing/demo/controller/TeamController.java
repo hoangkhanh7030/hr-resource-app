@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/api/v1/team")
+@RequestMapping(value = "/api/v1/workspaces")
 public class TeamController {
     private final TeamService teamService;
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
@@ -36,12 +36,12 @@ public class TeamController {
         this.teamRepository = teamRepository;
     }
 
-    @GetMapping(value = "")
+    @GetMapping(value = "/team")
     private List<TeamDTO> getAll() {
         return teamService.getAll();
     }
 
-    @PutMapping("/{idWorkspace}/{idTeam}/{idResource}")
+    @PutMapping("/{idWorkspace}/team/{idTeam}/{idResource}")
     private MessageResponse addTeamToMember(@RequestHeader("AccountId") Integer idAccount,
                                             @PathVariable Integer idWorkspace,
                                             @PathVariable Integer idTeam,
@@ -56,7 +56,7 @@ public class TeamController {
         } else return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
-    @DeleteMapping("/{idWorkspace}/{idTeam}")
+    @DeleteMapping("/{idWorkspace}/team/{idTeam}")
     private MessageResponse deleteTeam(@RequestHeader("AccountId") Integer idAccount,
                                        @PathVariable Integer idWorkspace,
                                        @PathVariable Integer idTeam) {
@@ -71,24 +71,27 @@ public class TeamController {
         }
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
-    @PutMapping("/{idWorkspace}/{idTeam}")
+
+    @PutMapping("/{idWorkspace}/team/{idTeam}")
     private MessageResponse renameTeam(@RequestHeader("AccountId") Integer idAccount,
                                        @PathVariable Integer idWorkspace,
                                        @PathVariable Integer idTeam,
-                                       @RequestBody String name){
+                                       @RequestBody String name) {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
-            if (name.isEmpty()||name ==null){
-                return new MessageResponse(ResponseMessage.IS_EMPTY,Status.FAIL.getCode());
-            }else {
-                teamService.renameTeam(idTeam,name);
-                if (teamRepository.findByName(name).isPresent()){
-                    return new MessageResponse(ResponseMessage.UPDATE_SUCCESS,Status.SUCCESS.getCode());
-                }return new MessageResponse(ResponseMessage.UPDATE_FAIL,Status.FAIL.getCode());
+            if (name.isEmpty()) {
+                return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
+            } else {
+                teamService.renameTeam(idTeam, name);
+                if (teamRepository.findByName(name).isPresent()) {
+                    return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+                }
+                return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
             }
 
 
-        }return new MessageResponse(ResponseMessage.ROLE,Status.FAIL.getCode());
+        }
+        return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 }

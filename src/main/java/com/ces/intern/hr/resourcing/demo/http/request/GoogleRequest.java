@@ -7,14 +7,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class ProjectRequest {
+@AllArgsConstructor
+public class GoogleRequest {
+    private String email;
     private String name;
-    private String clientName;
-    private String color;
-    private String textColor;
-    private String colorPattern;
-    private Boolean isActivate;
-
+    private String imageUrl;
 }

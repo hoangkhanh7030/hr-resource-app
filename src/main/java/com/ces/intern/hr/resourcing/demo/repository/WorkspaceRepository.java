@@ -1,6 +1,8 @@
 package com.ces.intern.hr.resourcing.demo.repository;
 
 import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -9,12 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectRequest {
-    private String name;
-    private String clientName;
-    private String color;
-    private String textColor;
-    private String colorPattern;
-    private Boolean isActivate;
-
+public class PageSizeRequest {
+    private Integer page;
+    private Integer size;
 }

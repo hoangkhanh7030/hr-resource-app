@@ -12,11 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.*;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @RestController
-@RequestMapping(value = "/account")
+@RequestMapping(value = "/api/v1")
 public class AccountController {
     private final AccountService accountService;
     private final AccoutRepository accoutRepository;
@@ -28,32 +26,55 @@ public class AccountController {
         this.accoutRepository = accoutRepository;
     }
 
-    @PostMapping(value = "")
+    @PostMapping(value = "/signup")
     public MessageResponse create(@RequestBody AccountRequest accountRequest) {
-        String emailRegex ="^(.+)@(.+)$";
-
-
-        String passwordRegex="^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
+        String emailRegex = "^(.+)@(codeenginestudio.com)$";
+        String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
         if (accountRequest.getEmail().matches(emailRegex)) {
             if (accountRequest.getPassword().matches(passwordRegex)) {
-                accountRequest.setEmail(accountRequest.getEmail().toLowerCase());
-                if (accoutRepository.countByEmail(accountRequest.getEmail()) == 1 && accoutRepository.countByFullname(accountRequest.getFullname()) == 1) {
-                    return new MessageResponse(accountRequest.getEmail() + " " + ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
+
+                if (accoutRepository.findByEmail(accountRequest.getEmail()).isPresent()) {
+                    return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
+                } else {
+                    accountService.createdAccount(accountRequest);
                 }
-                accountService.createdAccount(accountRequest);
+
                 if (accoutRepository.findByEmail(accountRequest.getEmail()).isPresent()) {
                     return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
                 }
                 return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
             }
             return new MessageResponse(ResponseMessage.INCRECT_PASSWORD, Status.FAIL.getCode());
-        }return new MessageResponse(ResponseMessage.INCRECT_EMAIL,Status.FAIL.getCode());
+        }
+        return new MessageResponse(ResponseMessage.INCRECT_EMAIL, Status.FAIL.getCode());
     }
 
-    @PutMapping(value = "")
-    public AccountResponse updateAccount(@RequestBody AccountRequest accountRequest,
+    @PutMapping(value = "/account")
+    public MessageResponse updateAccount(@RequestBody AccountRequest accountRequest,
                                          @RequestHeader(value = "AccountId") Integer accountId) {
-        return accountService.update(accountRequest, accountId);
+        String emailRegex = "^(.+)@(codeenginestudio.com)$";
+        String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
+        if (accountRequest.getEmail().matches(emailRegex)) {
+            if (accountRequest.getPassword().matches(passwordRegex)) {
+                if (accoutRepository.findByEmail(accountRequest.getEmail()).isPresent()) {
+                    return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
+                } else {
+                    if (accountRequest.getEmail().isEmpty() || accountRequest.getPassword().isEmpty() ||
+                            accountRequest.getAvatar().isEmpty() || accountRequest.getFullname().isEmpty()) {
+                        return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
+                    } else {
+                        accountService.update(accountRequest, accountId);
+                    }
+                    if (accoutRepository.findByEmail(accountRequest.getFullname()).isPresent()) {
+                        return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+                    } else {
+                        return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+                    }
+                }
+            }
+            return new MessageResponse(ResponseMessage.INCRECT_PASSWORD, Status.FAIL.getCode());
+        }
+        return new MessageResponse(ResponseMessage.INCRECT_EMAIL, Status.FAIL.getCode());
     }
 
     @GetMapping(value = "")

@@ -39,18 +39,17 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void createdAccount(AccountRequest accountRequest) {
 
-            String encodePassword = passwordEncoder.encode(accountRequest.getPassword());
-            AccountEntity accountEntity = modelMapper.map(accountRequest, AccountEntity.class);
-            accountEntity.setPassword(encodePassword);
-            accountEntity.setAuthenticationProvider(AuthenticationProvider.LOCAL);
-            Date date = new Date();
-            accountEntity.setCreatedDate(date);
-            accountEntity.setModifiedDate(date);
-            accountEntity = accoutRepository.save(accountEntity);
-            accountEntity.setCreatedBy(accountEntity.getId());
-            accountEntity.setModifiedBy(accountEntity.getId());
-            accoutRepository.save(accountEntity);
-
+        String encodePassword = passwordEncoder.encode(accountRequest.getPassword());
+        AccountEntity accountEntity = modelMapper.map(accountRequest, AccountEntity.class);
+        accountEntity.setPassword(encodePassword);
+        accountEntity.setAuthenticationProvider(AuthenticationProvider.LOCAL);
+        Date date = new Date();
+        accountEntity.setCreatedDate(date);
+        accountEntity.setModifiedDate(date);
+        accountEntity = accoutRepository.save(accountEntity);
+        accountEntity.setCreatedBy(accountEntity.getId());
+        accountEntity.setModifiedBy(accountEntity.getId());
+        accoutRepository.save(accountEntity);
 
 
     }
@@ -65,7 +64,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountResponse update(AccountRequest accountRequest, Integer modifiedBy) {
+    public void update(AccountRequest accountRequest, Integer modifiedBy) {
         AccountDTO accountDTO = modelMapper.map(accountRequest, AccountDTO.class);
         accountDTO.setId(modifiedBy);
         accountDTO.setModifiedDate(new Date());
@@ -80,7 +79,6 @@ public class AccountServiceImpl implements AccountService {
         accountEntity = modelMapper.map(accountDTO, AccountEntity.class);
         accoutRepository.save(accountEntity);
 
-        return modelMapper.map(accountDTO, AccountResponse.class);
     }
 
     @Override

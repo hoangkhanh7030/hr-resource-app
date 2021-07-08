@@ -15,14 +15,13 @@ import com.ces.intern.hr.resourcing.demo.utils.Role;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 
 @RestController
-@RequestMapping(value = "api/v1/workspaces")
+@RequestMapping(value = "/api/v1/workspaces")
 public class WorkspaceController {
 
 
@@ -51,27 +50,20 @@ public class WorkspaceController {
 
         return workspaceService.getAllWorkspaceByIdAccount(idAccount);
     }
-//    @GetMapping(value = "/today/{idWorkspace}")
-//    private WorkspaceDTO getWorkspaceWithToday(@RequestHeader("AccountId") Integer idAccount,
-//                                               @PathVariable Integer idWorkspace){
-//        return workspaceService.getWorkspaceWithToDay(idWorkspace,idAccount);
-//    }
-
 
     @PostMapping(value = "")
     private MessageResponse createWorkspaceByIdAccount(@RequestHeader("AccountId") Integer idAccount, @RequestBody WorkspaceDTO workspaceDTO) {
 
-        if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()) {
+        if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()) {
 
             return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
-
         } else {
             if (workspaceDTO.getName().isEmpty() || workspaceDTO.getName() == null) {
                 return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
             } else {
                 workspaceService.createdWorkspaceByIdAccount(workspaceDTO, idAccount);
             }
-            if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()) {
+            if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()) {
                 return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
 
             }
@@ -88,18 +80,23 @@ public class WorkspaceController {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
 
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
-            if (workspaceDTO.getName().isEmpty() || workspaceDTO.getName() == null) {
-                return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
+            if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()) {
+                return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
             } else {
-                workspaceService.updateWorkspaceByIdWorkspace(workspaceDTO, idWorkspace, idAccount);
+                if (workspaceDTO.getName().isEmpty() || workspaceDTO.getName() == null) {
+                    return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
+                } else {
+
+                    workspaceService.updateWorkspaceByIdWorkspace(workspaceDTO, idWorkspace, idAccount);
+                }
+
+                if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()) {
+                    return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+
+                }
+                return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
             }
 
-
-            if (workspaceRepository.findByName(workspaceDTO.getName()).isPresent()) {
-                return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
-
-            }
-            return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
         } else return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
