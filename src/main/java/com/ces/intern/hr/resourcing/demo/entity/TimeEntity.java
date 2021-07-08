@@ -18,7 +18,8 @@ public class TimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
+    @Column(name = "task")
+    private String task;
     @Column(name = "start_time")
     private Date startTime;
     @Column(name = "end_time")

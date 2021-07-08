@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PageSizeRequest {
-    private Integer page;
-    private Integer size;
+public class ActivateRequest {
+    private boolean isActivate;
 }
