@@ -1,9 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.controller;
 
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
-import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
-import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.PageSizeRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
@@ -11,7 +9,6 @@ import com.ces.intern.hr.resourcing.demo.importCSV.ApacheCommonsCsvUtil;
 import com.ces.intern.hr.resourcing.demo.importCSV.CsvFileSerivce;
 import com.ces.intern.hr.resourcing.demo.importCSV.Message.Message;
 import com.ces.intern.hr.resourcing.demo.importCSV.Message.Response;
-import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
 import com.ces.intern.hr.resourcing.demo.repository.ProjectRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;
 import com.ces.intern.hr.resourcing.demo.utils.*;
@@ -38,19 +35,16 @@ import java.util.stream.Collectors;
 public class ProjectController {
     private final ProjectService projectService;
     private final ProjectRepository projectRepository;
-    private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
     private final ModelMapper modelMapper;
     private final CsvFileSerivce csvFileSerivce;
 
     @Autowired
     public ProjectController(ProjectService projectService,
                              ProjectRepository projectRepository,
-                             AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
                              ModelMapper modelMapper,
                              CsvFileSerivce csvFileSerivce) {
         this.projectService = projectService;
         this.projectRepository = projectRepository;
-        this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
         this.modelMapper = modelMapper;
         this.csvFileSerivce = csvFileSerivce;
     }
