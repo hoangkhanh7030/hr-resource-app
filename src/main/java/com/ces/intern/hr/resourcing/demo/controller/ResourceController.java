@@ -1,26 +1,17 @@
 package com.ces.intern.hr.resourcing.demo.controller;
 
-import com.ces.intern.hr.resourcing.demo.converter.ResourceConverter;
-import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
-import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
-import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
-import com.ces.intern.hr.resourcing.demo.http.request.PageSizeRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
-import com.ces.intern.hr.resourcing.demo.repository.ProjectRepository;
-import com.ces.intern.hr.resourcing.demo.sevice.AccountService;
-import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;
 import com.ces.intern.hr.resourcing.demo.sevice.ResourceService;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Role;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,27 +20,22 @@ import java.util.List;
 @RequestMapping("api/v1/workspaces")
 public class ResourceController {
     private final ResourceService resourceService;
-    private final ResourceConverter resourceConverter;
-    private final AccountService accountService;
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
 
 
     @Autowired
     private ResourceController(ResourceService resourceService,
-                                                  AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
-                                                  ResourceConverter resourceConverter,
-                                                  AccountService accountService){
+                               AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository
+    ) {
         this.resourceService = resourceService;
         this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
-        this.resourceConverter = resourceConverter;
-        this.accountService = accountService;
     }
 
 
     @GetMapping("/{workspaceId}/resources")
     public List<ResourceDTO> showResourceList(@PathVariable Integer workspaceId,
                                               @RequestParam Integer page,
-                                              @RequestParam Integer size){
+                                              @RequestParam Integer size) {
         return resourceService.getResourcesOfWorkSpace(workspaceId, page, size);
     }
 
@@ -57,38 +43,38 @@ public class ResourceController {
     public List<ResourceDTO> showResourceByTeam(@PathVariable Integer workspaceId,
                                                 @RequestParam String teamName,
                                                 @RequestParam Integer page,
-                                                @RequestParam Integer size){
+                                                @RequestParam Integer size) {
         return resourceService.filterByTeam(workspaceId, teamName, page, size);
     }
 
     @GetMapping("/{workspaceId}/resources/filterByPosition")
     public List<ResourceDTO> showResourceByPosition(@PathVariable Integer workspaceId,
-                                                @RequestParam String posName,
+                                                    @RequestParam String posName,
                                                     @RequestParam Integer page,
-                                                    @RequestParam Integer size){
+                                                    @RequestParam Integer size) {
         return resourceService.filterByPosition(workspaceId, posName, page, size);
     }
 
     @GetMapping("/{workspaceId}/resources/filterByTeamAndPosition")
     public List<ResourceDTO> showResourceByTeamAndPosition(@PathVariable Integer workspaceId,
-                                                @RequestParam String teamName,
-                                                @RequestParam String posName,
+                                                           @RequestParam String teamName,
+                                                           @RequestParam String posName,
                                                            @RequestParam Integer page,
-                                                           @RequestParam Integer size){
+                                                           @RequestParam Integer size) {
         return resourceService.filterByTeamAndPosition(workspaceId, teamName, posName, page, size);
     }
 
     @PostMapping("/{workspaceId}/resources")
     public MessageResponse createResource(@RequestBody ResourceRequest resourceRequest,
                                           @PathVariable Integer workspaceId,
-                                          @RequestHeader Integer accountId){
+                                          @RequestHeader Integer accountId) {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId
                 (workspaceId, accountId).orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        if(accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())){
+        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             //resourceService.addNewResource(resourceRequest, workspaceId, accountId);
             return resourceService.addNewResource(resourceRequest, workspaceId, accountId);
         }
-        return new MessageResponse(ResponseMessage.ROLE,Status.FAIL.getCode());
+        return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
     @GetMapping("/{workspaceId}/resources/search")
@@ -97,13 +83,13 @@ public class ResourceController {
                                             @RequestParam String teamName,
                                             @PathVariable Integer workspaceId,
                                             @RequestParam Integer page,
-                                            @RequestParam Integer size){
+                                            @RequestParam Integer size) {
         return resourceService.searchByName(name, posName, teamName, workspaceId, page, size);
     }
 
     @GetMapping("/{workspaceId}/resources/{resourceId}")
     public ResourceDTO getOneResourceInfo(@PathVariable Integer resourceId,
-                                          @PathVariable Integer workspaceId){
+                                          @PathVariable Integer workspaceId) {
         return resourceService.getResourceInfo(resourceId, workspaceId);
     }
 
@@ -111,31 +97,30 @@ public class ResourceController {
     public MessageResponse updateResource(@RequestBody ResourceRequest resourceRequest,
                                           @PathVariable Integer workspaceId,
                                           @PathVariable Integer resourceId,
-                                          @RequestHeader Integer accountId){
+                                          @RequestHeader Integer accountId) {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId
                 (workspaceId, accountId).orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        if(accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())){
+        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             return resourceService.updateResource(resourceRequest, resourceId, workspaceId, accountId);
         }
-        return new MessageResponse(ResponseMessage.ROLE,Status.FAIL.getCode());
+        return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
     @DeleteMapping("/{workspaceId}/resources/{resourceId}")
     public MessageResponse deleteResource(@PathVariable Integer resourceId,
                                           @PathVariable Integer workspaceId,
-                                          @RequestHeader Integer accountId){
+                                          @RequestHeader Integer accountId) {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId
                 (workspaceId, accountId).orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        if(accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())){
+        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             return resourceService.deleteResource(resourceId, workspaceId);
         }
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
 
-
     @GetMapping("/changeTeam")
-    public void changeTeamForm(){
+    public void changeTeamForm() {
 
     }
 }

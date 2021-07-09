@@ -13,8 +13,6 @@ public interface TimeService {
 
     MessageResponse updateBooking(TimeRequest timeRequest, Integer timeId);
 
-    //List<TimeDTO> showBookingByWeek(Date date, Integer workspaceId);
-
     MessageResponse deleteBooking(Integer id);
 
     Map<Date, List<TimeDTO>> getBookingByMonth(Integer month, Integer year, Integer workspaceId);
