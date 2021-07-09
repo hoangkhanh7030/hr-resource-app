@@ -29,6 +29,7 @@ public class ProjectEntity extends BaseEnity {
     @Column(name = "is_activate")
     private Boolean isActivate;
 
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "projectEntity")
     private List<TimeEntity> timeEntities = new ArrayList<>();
     @ManyToOne
