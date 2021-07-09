@@ -47,11 +47,11 @@ public class TimeController {
         this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
     }
 
-    @GetMapping("/{workspaceId}")
-    public List<ResourceDTO> sendListResource(@PathVariable Integer workspaceId,
-                                              @RequestBody PageSizeRequest pageSizeRequest){
-        return resourceService.getResourcesOfWorkSpace(workspaceId, pageSizeRequest);
-    }
+//    @GetMapping("/{workspaceId}")
+//    public List<ResourceDTO> sendListResource(@PathVariable Integer workspaceId,
+//                                              @RequestBody PageSizeRequest pageSizeRequest){
+//        return resourceService.getResourcesOfWorkSpace(workspaceId, pageSizeRequest);
+//    }
 //
 //    @GetMapping("/{workspaceId}/add")
 //    public List<ProjectDTO> sendListProject(@PathVariable Integer workspaceId, @RequestHeader Integer idAccount){
