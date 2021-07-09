@@ -12,7 +12,7 @@ public interface ProjectService {
     void updateProject(ProjectRequest projectRequest,Integer idAccount,Integer idProject);
     void deleteProject(Integer idProject);
     List<ProjectDTO> searchParameter(String name,String clientName,Boolean isActivate,Integer idWorkspace,int page,int size);
-    List<ProjectDTO> sortProject(int page,int size,Integer idWorkspace,String name,String sort);
+    List<ProjectDTO> sortProject(int page,int size,Integer idWorkspace,String name,String type);
 
 
 
