@@ -48,11 +48,35 @@ public class ResourceController {
 
     @GetMapping("/{workspaceId}/resources")
     public List<ResourceDTO> showResourceList(@PathVariable Integer workspaceId,
-                                              @RequestBody PageSizeRequest pageSizeRequest){
-        return resourceService.getResourcesOfWorkSpace(workspaceId, pageSizeRequest);
+                                              @RequestParam Integer page,
+                                              @RequestParam Integer size){
+        return resourceService.getResourcesOfWorkSpace(workspaceId, page, size);
     }
 
+    @GetMapping("/{workspaceId}/resources/filterByTeam")
+    public List<ResourceDTO> showResourceByTeam(@PathVariable Integer workspaceId,
+                                                @RequestParam String teamName,
+                                                @RequestParam Integer page,
+                                                @RequestParam Integer size){
+        return resourceService.filterByTeam(workspaceId, teamName, page, size);
+    }
 
+    @GetMapping("/{workspaceId}/resources/filterByPosition")
+    public List<ResourceDTO> showResourceByPosition(@PathVariable Integer workspaceId,
+                                                @RequestParam String posName,
+                                                    @RequestParam Integer page,
+                                                    @RequestParam Integer size){
+        return resourceService.filterByPosition(workspaceId, posName, page, size);
+    }
+
+    @GetMapping("/{workspaceId}/resources/filterByTeamAndPosition")
+    public List<ResourceDTO> showResourceByTeamAndPosition(@PathVariable Integer workspaceId,
+                                                @RequestParam String teamName,
+                                                @RequestParam String posName,
+                                                           @RequestParam Integer page,
+                                                           @RequestParam Integer size){
+        return resourceService.filterByTeamAndPosition(workspaceId, teamName, posName, page, size);
+    }
 
     @PostMapping("/{workspaceId}/resources")
     public MessageResponse createResource(@RequestBody ResourceRequest resourceRequest,
@@ -69,9 +93,12 @@ public class ResourceController {
 
     @GetMapping("/{workspaceId}/resources/search")
     public List<ResourceDTO> searchResource(@RequestParam String name,
+                                            @RequestParam String posName,
+                                            @RequestParam String teamName,
                                             @PathVariable Integer workspaceId,
-                                            @RequestBody PageSizeRequest pageSizeRequest){
-        return resourceService.searchByName(name, workspaceId, pageSizeRequest);
+                                            @RequestParam Integer page,
+                                            @RequestParam Integer size){
+        return resourceService.searchByName(name, posName, teamName, workspaceId, page, size);
     }
 
     @GetMapping("/{workspaceId}/resources/{resourceId}")
