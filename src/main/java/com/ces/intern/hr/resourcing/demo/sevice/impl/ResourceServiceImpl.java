@@ -41,11 +41,11 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Autowired
     public ResourceServiceImpl(ResourceRepository resourceRepository,
-                                                   WorkspaceConverter workSpaceConverter,
-                                                   ResourceConverter resourceConverter,
-                                                   WorkspaceRepository workspaceRepository,
-                                                   TeamRepository teamRepository,
-                                                   PositionRepository positionRepository){
+                               WorkspaceConverter workSpaceConverter,
+                               ResourceConverter resourceConverter,
+                               WorkspaceRepository workspaceRepository,
+                               TeamRepository teamRepository,
+                               PositionRepository positionRepository) {
         this.resourceRepository = resourceRepository;
         this.workSpaceConverter = workSpaceConverter;
         this.resourceConverter = resourceConverter;
@@ -67,13 +67,13 @@ public class ResourceServiceImpl implements ResourceService {
         resourceDTO.setCreatedDate(date);
         resourceDTO.setCreatedBy(accountId);
         resourceDTO.setWorkspaceName(workSpaceConverter.toDTO(workspaceRepository.findById(id).orElseThrow(()
-                ->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()))));
+                -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()))));
         resourceRepository.save(resourceConverter.convertToEntity(resourceDTO));
         return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
     }
 
     @Override
-    public ResourceDTO findById(Integer id){
+    public ResourceDTO findById(Integer id) {
         ResourceEntity resourceEntity = new ResourceEntity();
         if (resourceRepository.findById(id).isPresent()) {
             resourceEntity = resourceRepository.findById(id).get();
@@ -82,12 +82,11 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public MessageResponse updateResource(ResourceRequest resourceRequest, Integer resourceId, Integer workspaceId, Integer accountId){
-        if(resourceRepository.findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).isPresent()) {
-            if(resourceRequest.getName().equals("") || resourceRequest.getName() == null) {
+    public MessageResponse updateResource(ResourceRequest resourceRequest, Integer resourceId, Integer workspaceId, Integer accountId) {
+        if (resourceRepository.findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).isPresent()) {
+            if (resourceRequest.getName().equals("") || resourceRequest.getName() == null) {
                 return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
-            }
-            else {
+            } else {
                 ResourceEntity resourceEntityTarget = resourceRepository.findByIdAndWorkspaceEntityResource_Id
                         (resourceId, workspaceId).get();
                 //ResourceEntity resourceEntityUpdated = resourceConverter.convertToEntity(resourceDTO);
@@ -108,36 +107,37 @@ public class ResourceServiceImpl implements ResourceService {
                 return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
             }
         }
-        return new MessageResponse(ResponseMessage.UPDATE_FAIL,Status.FAIL.getCode());
+        return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
     }
 
     @Override
-    public MessageResponse deleteResource(Integer id, Integer workspaceId){
-        if(resourceRepository.findByIdAndWorkspaceEntityResource_Id(id, workspaceId).isPresent()){
+    public MessageResponse deleteResource(Integer id, Integer workspaceId) {
+        if (resourceRepository.findByIdAndWorkspaceEntityResource_Id(id, workspaceId).isPresent()) {
             resourceRepository.deleteById(id);
-            return new MessageResponse(ResponseMessage.DELETE_SUCCESS,Status.SUCCESS.getCode());
+            return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
         }
-        return new MessageResponse(ResponseMessage.DELETE_FAIL,Status.FAIL.getCode());
+        return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
     }
 
     @Override
-    public List<ResourceDTO> getResourcesOfWorkSpace(Integer id, PageSizeRequest pageSizeRequest){
-        Pageable pageable = PageRequest.of(pageSizeRequest.getPage(), pageSizeRequest.getSize());
+    public List<ResourceDTO> getResourcesOfWorkSpace(Integer id, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
         List<ResourceDTO> list = new ArrayList<>();
         Page<ResourceEntity> resourceEntityPage = resourceRepository.findResourcesOfWorkSpace(id, pageable);
         List<ResourceEntity> resourceEntityList = resourceEntityPage.getContent();
-        for(ResourceEntity r : resourceEntityList){
+        for (ResourceEntity r : resourceEntityList) {
             list.add(resourceConverter.convertToDto(r));
         }
         return list;
     }
 
     @Override
-    public List<ResourceDTO> searchByName(String name, Integer id, PageSizeRequest pageSizeRequest){
-        Pageable pageable = PageRequest.of(pageSizeRequest.getPage(), pageSizeRequest.getSize());
+    public List<ResourceDTO> searchByName(String name, String posName, String teamName,
+                                          Integer workspaceId, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
         List<ResourceDTO> result = new ArrayList<>();
         Page<ResourceEntity> found = resourceRepository.
-                findByNameContainingIgnoreCaseAndWorkspaceEntityResource_Id(name, id, pageable);
+                filterResultByParameter(name, posName, teamName, workspaceId, pageable);
         List<ResourceEntity> resourceEntityList = found.getContent();
         for (ResourceEntity resourceEntity : resourceEntityList) {
             result.add(resourceConverter.convertToDto(resourceEntity));
@@ -146,31 +146,71 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public List<ResourceDTO> getProductManagers(Integer id){
+    public List<ResourceDTO> getProductManagers(Integer id) {
         ArrayList<ResourceDTO> list = new ArrayList<>();
-        for(ResourceEntity r : resourceRepository.findAllProductManagersOfWorkspace(id)){
+        for (ResourceEntity r : resourceRepository.findAllProductManagersOfWorkspace(id)) {
             list.add(resourceConverter.convertToDto(r));
         }
         return list;
     }
 
     @Override
-    public List<ResourceDTO> getAccountManagers(Integer id){
+    public List<ResourceDTO> getAccountManagers(Integer id) {
         ArrayList<ResourceDTO> list = new ArrayList<>();
-        for(ResourceEntity r : resourceRepository.findAllAccountManagersOfWorkspace(id)){
+        for (ResourceEntity r : resourceRepository.findAllAccountManagersOfWorkspace(id)) {
             list.add(resourceConverter.convertToDto(r));
         }
         return list;
     }
 
     @Override
-    public ResourceDTO getResourceInfo(Integer resourceId, Integer workspaceId){
-        if (resourceRepository.findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).isPresent()){
+    public ResourceDTO getResourceInfo(Integer resourceId, Integer workspaceId) {
+        if (resourceRepository.findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).isPresent()) {
             return resourceConverter.convertToDto(resourceRepository
                     .findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).get());
-        }
-        else {
+        } else {
             return null;
         }
     }
+
+    @Override
+    public List<ResourceDTO> filterByTeam(Integer id, String teamName, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<ResourceDTO> result = new ArrayList<>();
+        Page<ResourceEntity> found = resourceRepository.
+                filterByTeam(id, teamName, pageable);
+        List<ResourceEntity> resourceEntityList = found.getContent();
+        for (ResourceEntity resourceEntity : resourceEntityList) {
+            result.add(resourceConverter.convertToDto(resourceEntity));
+        }
+        return result;
+    }
+
+    @Override
+    public List<ResourceDTO> filterByPosition(Integer id, String posName, Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<ResourceDTO> result = new ArrayList<>();
+        Page<ResourceEntity> found = resourceRepository.
+                filterByPosition(id, posName, pageable);
+        List<ResourceEntity> resourceEntityList = found.getContent();
+        for (ResourceEntity resourceEntity : resourceEntityList) {
+            result.add(resourceConverter.convertToDto(resourceEntity));
+        }
+        return result;
+    }
+
+    @Override
+    public List<ResourceDTO> filterByTeamAndPosition(Integer id, String teamName, String posName,
+                                                     Integer page, Integer size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<ResourceDTO> result = new ArrayList<>();
+        Page<ResourceEntity> found = resourceRepository.
+                filterByTeamAndPosition(id,teamName, posName, pageable);
+        List<ResourceEntity> resourceEntityList = found.getContent();
+        for (ResourceEntity resourceEntity : resourceEntityList) {
+            result.add(resourceConverter.convertToDto(resourceEntity));
+        }
+        return result;
+    }
 }
+
