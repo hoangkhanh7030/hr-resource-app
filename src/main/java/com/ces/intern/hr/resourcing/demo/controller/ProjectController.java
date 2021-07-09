@@ -48,7 +48,7 @@ public class ProjectController {
         this.csvFileSerivce = csvFileSerivce;
     }
 
-    @GetMapping(value = "/{idWorkspace}/project")
+    @GetMapping(value = "/{idWorkspace}/projects")
     private List<ProjectDTO> getAll(@PathVariable Integer idWorkspace,
                                     @RequestParam int page,
                                     @RequestParam int size) {
