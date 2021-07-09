@@ -6,8 +6,6 @@ import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 
 import java.util.List;
 
-
-
 public interface ResourceService {
     List<ResourceDTO> searchByName(String name, String posName, String teamName,
                                    Integer workspaceId, Integer page, Integer size);
