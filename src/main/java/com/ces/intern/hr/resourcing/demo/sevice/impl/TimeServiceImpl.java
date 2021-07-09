@@ -1,6 +1,5 @@
 package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
-import com.ces.intern.hr.resourcing.demo.converter.ProjectConverter;
 import com.ces.intern.hr.resourcing.demo.converter.TimeConverter;
 import com.ces.intern.hr.resourcing.demo.dto.TimeDTO;
 import com.ces.intern.hr.resourcing.demo.entity.TimeEntity;
@@ -15,7 +14,6 @@ import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
 import java.util.*;
 
 @Service
@@ -23,19 +21,16 @@ public class TimeServiceImpl implements TimeService {
     private static final int START_HOUR = 9;
     private static final int END_HOUR = 17;
     private final TimeConverter timeConverter;
-    private final ProjectConverter projectConverter;
     private final TimeRepository timeRepository;
     private final ProjectRepository projectRepository;
     private final ResourceRepository resourceRepository;
 
     @Autowired
     private TimeServiceImpl(TimeConverter timeConverter,
-                            ProjectConverter projectConverter,
                             TimeRepository timeRepository,
                             ProjectRepository projectRepository,
                             ResourceRepository resourceRepository){
         this.timeConverter = timeConverter;
-        this.projectConverter = projectConverter;
         this.timeRepository = timeRepository;
         this.projectRepository = projectRepository;
         this.resourceRepository = resourceRepository;
@@ -144,6 +139,7 @@ public class TimeServiceImpl implements TimeService {
         }
         return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
     }
+
 
     @Override
     public Map<Date, List<TimeDTO>> getBookingByMonth(Integer month, Integer year, Integer workspaceId){

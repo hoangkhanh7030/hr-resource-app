@@ -4,7 +4,7 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
-import com.ces.intern.hr.resourcing.demo.http.request.PageSizeRequest;
+
 import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
 
 import com.ces.intern.hr.resourcing.demo.repository.*;
@@ -37,8 +37,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDTO> getAllProjects(Integer idWorkspace, PageSizeRequest pageSizeRequest) {
-        Pageable pageable = PageRequest.of(pageSizeRequest.getPage(), pageSizeRequest.getSize());
+    public List<ProjectDTO> getAllProjects(Integer idWorkspace, int page,int size) {
+        Pageable pageable = PageRequest.of(page, size);
         Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, pageable);
         List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
         return projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
@@ -76,11 +76,27 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Override
-    public List<ProjectDTO> searchParameter(String name, String clientName, Boolean isActivate, Integer idWorkspace, PageSizeRequest pageSizeRequest) {
-        Pageable pageable = PageRequest.of(pageSizeRequest.getPage(), pageSizeRequest.getSize());
+    public List<ProjectDTO> searchParameter(String name, String clientName, Boolean isActivate, Integer idWorkspace,int page,int size) {
+        Pageable pageable = PageRequest.of(page,size);
         Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientNameAndIsActivate(idWorkspace, name, clientName, isActivate, pageable);
         List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
         return projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProjectDTO> sortProject(int page, int size,Integer idWorkspace, String name, String type) {
+        if (type.equals(SortPara.ASC.getName())) {
+            Pageable pageable = PageRequest.of(page, size, Sort.by(name));
+            Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, pageable);
+            List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
+            return projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+        }else {
+            Pageable pageable = PageRequest.of(page, size, Sort.by(name).descending());
+            Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, pageable);
+            List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
+            return projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+        }
+
     }
 
 
@@ -90,6 +106,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         projectRepository.delete(projectEntity);
     }
+
 
 
 }

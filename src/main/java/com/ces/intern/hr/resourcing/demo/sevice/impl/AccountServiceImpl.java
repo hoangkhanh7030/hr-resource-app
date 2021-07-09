@@ -1,11 +1,9 @@
 package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
-import com.ces.intern.hr.resourcing.demo.converter.AccountConverter;
+
 import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.utils.AuthenticationProvider;
-import com.ces.intern.hr.resourcing.demo.http.exception.AlreadyExistException;
 import com.ces.intern.hr.resourcing.demo.http.exception.LoginException;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.AccountRequest;
@@ -13,7 +11,6 @@ import com.ces.intern.hr.resourcing.demo.http.response.AccountResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.AccountService;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
-import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +23,19 @@ import java.util.Date;
 
 @Service
 public class AccountServiceImpl implements AccountService {
-    @Autowired
-    private AccoutRepository accoutRepository;
-    @Autowired
-    private AccountConverter accountConverter;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private ModelMapper modelMapper;
 
+    private final AccoutRepository accoutRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
+
+    @Autowired
+    public AccountServiceImpl(AccoutRepository accoutRepository,
+                              PasswordEncoder passwordEncoder,
+                              ModelMapper modelMapper) {
+        this.accoutRepository = accoutRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public void createdAccount(AccountRequest accountRequest) {

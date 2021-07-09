@@ -20,27 +20,28 @@ public class TeamServiceImpl implements TeamService {
     private final TeamRepository teamRepository;
     private final ModelMapper modelMapper;
     private final ResourceRepository resourceRepository;
+
     @Autowired
     public TeamServiceImpl(TeamRepository teamRepository,
                            ModelMapper modelMapper,
                            ResourceRepository resourceRepository) {
         this.teamRepository = teamRepository;
-        this.modelMapper=modelMapper;
-        this.resourceRepository=resourceRepository;
+        this.modelMapper = modelMapper;
+        this.resourceRepository = resourceRepository;
     }
 
     @Override
     public List<TeamDTO> getAll() {
         List<TeamEntity> teamEntityList = teamRepository.findAll();
-        return teamEntityList.stream().map(s->modelMapper.map(s,TeamDTO.class)).collect(Collectors.toList());
+        return teamEntityList.stream().map(s -> modelMapper.map(s, TeamDTO.class)).collect(Collectors.toList());
     }
 
     @Override
     public void addResourceToTeam(Integer idTeam, Integer idResource) {
-        ResourceEntity resourceEntity=resourceRepository.findById(idResource)
-                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        ResourceEntity resourceEntity = resourceRepository.findById(idResource)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         TeamEntity teamEntity = teamRepository.findById(idTeam)
-                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         resourceEntity.setTeamEntity(teamEntity);
         resourceRepository.save(resourceEntity);
 
@@ -49,14 +50,14 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public void deleteTeam(Integer idTeam) {
         TeamEntity teamEntity = teamRepository.findById(idTeam)
-                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         teamRepository.delete(teamEntity);
     }
 
     @Override
     public void renameTeam(Integer idTeam, String name) {
         TeamEntity teamEntity = teamRepository.findById(idTeam)
-                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         teamEntity.setName(name);
         teamRepository.save(teamEntity);
 

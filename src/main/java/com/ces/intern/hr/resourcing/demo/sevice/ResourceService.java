@@ -5,6 +5,10 @@ import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 
 import java.util.List;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5c73417917891f9cb644177ad1d9c0b8d84f0b29
 
 public interface ResourceService {
     List<ResourceDTO> searchByName(String name, String posName, String teamName,

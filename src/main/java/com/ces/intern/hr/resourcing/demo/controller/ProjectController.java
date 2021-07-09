@@ -2,7 +2,6 @@ package com.ces.intern.hr.resourcing.demo.controller;
 
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
-import com.ces.intern.hr.resourcing.demo.http.request.PageSizeRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.importCSV.ApacheCommonsCsvUtil;
@@ -51,11 +50,12 @@ public class ProjectController {
 
     @GetMapping(value = "/{idWorkspace}/project")
     private List<ProjectDTO> getAll(@PathVariable Integer idWorkspace,
-                                    @RequestBody PageSizeRequest pageRequest) {
-        return projectService.getAllProjects(idWorkspace, pageRequest);
+                                    @RequestParam int page,
+                                    @RequestParam int size) {
+        return projectService.getAllProjects(idWorkspace,page,size);
     }
 
-    @GetMapping(value = "/{idWorkspace}/project/export")
+    @GetMapping(value = "/{idWorkspace}/projects/export")
     public void exportToCSV(HttpServletResponse response,
                             @PathVariable Integer idWorkspace) throws IOException {
         response.setContentType("text/csv");
@@ -81,7 +81,7 @@ public class ProjectController {
         csvWriter.close();
     }
 
-    @PostMapping(value = "/{idWorkspace}/project/import")
+    @PostMapping(value = "/{idWorkspace}/projects/import")
     public Response importCsvFile(@RequestHeader("AccountId") Integer idAccount,
                                   @PathVariable Integer idWorkspace,
                                   @RequestParam("csvfile") MultipartFile csvfile) {
@@ -109,7 +109,7 @@ public class ProjectController {
         return response;
     }
 
-    @PostMapping(value = "/{idWorkspace}/project")
+    @PostMapping(value = "/{idWorkspace}/projects")
     private MessageResponse createdProject(@RequestHeader("AccountId") Integer idAccount,
                                            @PathVariable Integer idWorkspace,
                                            @RequestBody ProjectRequest projectRequest) {
@@ -132,7 +132,7 @@ public class ProjectController {
 
     }
 
-    @PutMapping(value = "/{idWorkspace}/project/{idProject}")
+    @PutMapping(value = "/{idWorkspace}/projects/{idProject}")
     private MessageResponse updateProject(@RequestHeader("AccountId") Integer idAccount,
                                           @PathVariable Integer idWorkspace,
                                           @PathVariable Integer idProject,
@@ -149,7 +149,7 @@ public class ProjectController {
 
     }
 
-    @DeleteMapping(value = "/project/{idProject}")
+    @DeleteMapping(value = "/projects/{idProject}")
     private MessageResponse deleteProject(@PathVariable Integer idProject) {
         projectService.deleteProject(idProject);
         if (projectRepository.findById(idProject).isPresent()) {
@@ -160,17 +160,26 @@ public class ProjectController {
     }
 
 
-    @GetMapping(value = "/{idWorkspace}/project/searchParam")
+    @GetMapping(value = "/{idWorkspace}/projects/searchParam")
     private List<ProjectDTO> searchPara(@PathVariable Integer idWorkspace,
                                         @RequestParam String name,
                                         @RequestParam String param,
                                         @RequestParam Boolean isActivate,
-                                        @RequestBody PageSizeRequest pageSizeRequest
+                                        @RequestParam int page,
+                                        @RequestParam int size
     ) {
         if (param.equals(SearchMessage.PROJECT_NAME.getName())) {
-            return projectService.searchParameter(name, "", isActivate, idWorkspace, pageSizeRequest);
+            return projectService.searchParameter(name, "", isActivate, idWorkspace,page,size);
         } else {
-            return projectService.searchParameter("", name, isActivate, idWorkspace, pageSizeRequest);
+            return projectService.searchParameter("", name, isActivate, idWorkspace,page,size);
         }
+    }
+    @GetMapping(value = "/{idWorkspace}/projects/sort")
+    private List<ProjectDTO> sortProject(@PathVariable Integer idWorkspace,
+                                         @RequestParam int page,
+                                         @RequestParam int size,
+                                         @RequestParam String name,
+                                         @RequestParam String type){
+        return projectService.sortProject(page,size,idWorkspace,name,type);
     }
 }

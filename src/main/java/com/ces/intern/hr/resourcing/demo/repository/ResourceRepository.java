@@ -64,4 +64,5 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
                                                  @Param("teamName") String teamName,
                                                  @Param("posName") String posName,
                                                  Pageable pageable);
+    Optional<ResourceEntity> findByTeamEntity_IdAndId(Integer idTeam,Integer idResource);
 }

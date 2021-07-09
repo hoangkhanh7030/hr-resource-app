@@ -196,7 +196,7 @@ public class ResourceServiceImpl implements ResourceService {
         Pageable pageable = PageRequest.of(page, size);
         List<ResourceDTO> result = new ArrayList<>();
         Page<ResourceEntity> found = resourceRepository.
-                filterByTeamAndPosition(id,teamName, posName, pageable);
+                filterByTeamAndPosition(id, teamName, posName, pageable);
         List<ResourceEntity> resourceEntityList = found.getContent();
         for (ResourceEntity resourceEntity : resourceEntityList) {
             result.add(resourceConverter.convertToDto(resourceEntity));
