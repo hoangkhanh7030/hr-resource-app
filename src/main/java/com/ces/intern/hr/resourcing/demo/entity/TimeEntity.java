@@ -25,8 +25,6 @@ public class TimeEntity {
     @Column(name = "end_time")
     private Date endTime;
 
-    @Column(name = "task")
-    private String task;
 
     @ManyToOne
     @JoinColumn(name = "resource_id")

@@ -1,9 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
-import com.ces.intern.hr.resourcing.demo.converter.ProjectConverter;
 import com.ces.intern.hr.resourcing.demo.converter.TimeConverter;
 import com.ces.intern.hr.resourcing.demo.dto.TimeDTO;
-import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.entity.TimeEntity;
 import com.ces.intern.hr.resourcing.demo.http.request.TimeRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
@@ -14,10 +12,8 @@ import com.ces.intern.hr.resourcing.demo.sevice.TimeService;
 import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.datetime.joda.DateTimeFormatterFactoryBean;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
 import java.util.*;
 
 @Service
@@ -25,19 +21,16 @@ public class TimeServiceImpl implements TimeService {
     private static final int START_HOUR = 9;
     private static final int END_HOUR = 17;
     private final TimeConverter timeConverter;
-    private final ProjectConverter projectConverter;
     private final TimeRepository timeRepository;
     private final ProjectRepository projectRepository;
     private final ResourceRepository resourceRepository;
 
     @Autowired
     private TimeServiceImpl(TimeConverter timeConverter,
-                            ProjectConverter projectConverter,
                             TimeRepository timeRepository,
                             ProjectRepository projectRepository,
                             ResourceRepository resourceRepository){
         this.timeConverter = timeConverter;
-        this.projectConverter = projectConverter;
         this.timeRepository = timeRepository;
         this.projectRepository = projectRepository;
         this.resourceRepository = resourceRepository;
@@ -61,7 +54,7 @@ public class TimeServiceImpl implements TimeService {
                 timeRepository.save(timeEntity);
                 return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
             } else {
-                if(TimeCheck(timeRequest, timeEntity, start, end, calendar)){
+                if(TimeCheck(timeRequest, start, end, calendar)){
                     setShift(timeEntity, start, end, calendar);
                     timeRepository.save(timeEntity);
                     return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
@@ -96,7 +89,7 @@ public class TimeServiceImpl implements TimeService {
         if(start >= START_HOUR && end <= END_HOUR && start < end){
             if (timeRepository.findAllDifferentShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
                     calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId(), timeId).isPresent()){
-                if(TimeCheck(timeRequest, timeEntity, start, end, calendar)){
+                if(TimeCheck(timeRequest, start, end, calendar)){
                     setShift(timeEntity, start, end, calendar);
                     timeRepository.save(timeEntity);
                     return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
@@ -112,7 +105,7 @@ public class TimeServiceImpl implements TimeService {
         return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
     }
 
-    private boolean TimeCheck(TimeRequest timeRequest, TimeEntity timeEntity, int start, int end, Calendar calendar) {
+    private boolean TimeCheck(TimeRequest timeRequest, int start, int end, Calendar calendar) {
         List<TimeEntity> listTime = timeRepository.findShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
                 calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId()).orElse(new ArrayList<>());
         boolean check = true;
@@ -135,10 +128,7 @@ public class TimeServiceImpl implements TimeService {
                 break;
             }
         }
-//        if(check){
-//            setShift(timeEntity, start, end, calendar);
-//            timeRepository.save(timeEntity);
-//        }
+
         return check;
     }
 
@@ -151,64 +141,6 @@ public class TimeServiceImpl implements TimeService {
         return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
     }
 
-//    @Override
-//    public List<TimeDTO> showBookingByWeek(Date date, Integer workspaceId){
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTime(date);
-//        List<Date> dateList = new ArrayList<>();
-//        dateList.add(date);
-//        List<TimeDTO> list = new ArrayList<>();
-//        if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY){
-//            while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY){
-//                calendar.add(Calendar.DATE, 1);
-//                Date newDate = calendar.getTime();
-//                dateList.add(newDate);
-//            }
-//        }
-//        else if(calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY){
-//            while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
-//                calendar.add(Calendar.DATE, -1);
-//                Date newDate = calendar.getTime();
-//                dateList.add(newDate);
-//            }
-//        }
-//        else {
-//            while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY){
-//                calendar.add(Calendar.DATE, 1);
-//                Date newDate = calendar.getTime();
-//                dateList.add(newDate);
-//            }
-//            calendar.setTime(date);
-//            while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY){
-//                calendar.add(Calendar.DATE, -1);
-//                Date newDate = calendar.getTime();
-//                dateList.add(newDate);
-//            }
-//        }
-//        if (!resourceRepository.findResourcesOfWorkSpace(workspaceId).isEmpty()) {
-//            List<ResourceEntity> resourceEntityList = resourceRepository.findResourcesOfWorkSpace(workspaceId);
-//            List<List<TimeEntity>> resourceTimeList = new ArrayList<>();
-//            for(Date d : dateList){
-//                Calendar calendarOfDateList = Calendar.getInstance();
-//                calendarOfDateList.setTime(d);
-//                for (ResourceEntity res : resourceEntityList){
-//                    if (timeRepository.findShiftOfResource(calendarOfDateList.get(Calendar.YEAR),
-//                            calendarOfDateList.get(Calendar.MONTH) + 1,
-//                            calendarOfDateList.get(Calendar.DAY_OF_MONTH), res.getId()).isPresent()){
-//                        resourceTimeList.add(timeRepository.findShiftOfResource(calendarOfDateList.get(Calendar.YEAR),
-//                                calendarOfDateList.get(Calendar.MONTH) + 1,
-//                                calendarOfDateList.get(Calendar.DAY_OF_MONTH), res.getId()).get());
-//                    }
-//                }
-//            }
-//            for (List<TimeEntity> l : resourceTimeList){
-//                for (TimeEntity t : l){
-//                    list.add(timeConverter.convertToDto(t));
-//                }
-//            }
-//        }
-//        return list;
-//    }
 
     @Override
     public Map<Date, List<TimeDTO>> getBookingByMonth(Integer month, Integer year, Integer workspaceId){

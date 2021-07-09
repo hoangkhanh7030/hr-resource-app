@@ -51,7 +51,7 @@ public class TeamController {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             teamService.addResourceToTeam(idTeam, idResource);
-            if (resourceRepository.findByIdTeamandIdResource(idTeam, idResource).isPresent()) {
+            if (resourceRepository.findByTeamEntity_IdAndId(idTeam, idResource).isPresent()) {
                 return new MessageResponse(ResponseMessage.ADD_SUCCESS, Status.SUCCESS.getCode());
             } else return new MessageResponse(ResponseMessage.ADD_FAIL, Status.FAIL.getCode());
         } else return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
