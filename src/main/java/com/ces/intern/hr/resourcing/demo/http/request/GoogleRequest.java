@@ -7,9 +7,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class PageSizeRequest {
-    private Integer page;
-    private Integer size;
+@AllArgsConstructor
+public class GoogleRequest {
+    private String email;
+    private String name;
+    private String imageUrl;
 }

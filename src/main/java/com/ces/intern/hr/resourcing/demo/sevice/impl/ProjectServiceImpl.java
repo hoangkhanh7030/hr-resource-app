@@ -4,21 +4,17 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
+import com.ces.intern.hr.resourcing.demo.http.request.PageSizeRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.ResourceResponse;
+
 import com.ces.intern.hr.resourcing.demo.repository.*;
 import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;
-import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
-import com.ces.intern.hr.resourcing.demo.utils.Position;
-import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
-import com.ces.intern.hr.resourcing.demo.utils.Role;
+import com.ces.intern.hr.resourcing.demo.utils.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,114 +24,72 @@ import java.util.stream.Collectors;
 public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ModelMapper modelMapper;
-    private final TimeRepository timeRepository;
-    private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
-    private final ResourceRepository resourceRepository;
+
     private final WorkspaceRepository workspaceRepository;
 
     @Autowired
     public ProjectServiceImpl(ProjectRepository projectRepository,
                               ModelMapper modelMapper,
-                              TimeRepository timeRepository,
-                              AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
-                              ResourceRepository resourceRepository,
                               WorkspaceRepository workspaceRepository) {
         this.projectRepository = projectRepository;
         this.modelMapper = modelMapper;
-        this.timeRepository=timeRepository;
-        this.accoutWorkspaceRoleRepository=accoutWorkspaceRoleRepository;
-        this.resourceRepository= resourceRepository;
-        this.workspaceRepository=workspaceRepository;
+        this.workspaceRepository = workspaceRepository;
     }
 
     @Override
-    public List<ProjectDTO> getAllProjects(Integer idAccount, Integer idWorkspace) {
-        List<ProjectEntity> projectEntities = projectRepository.findAll();
-        List<ProjectDTO> projectDTOS = new ArrayList<>();
-        for (ProjectEntity projectEntity : projectEntities) {
-            ProjectDTO projectDTO = modelMapper.map(projectEntity, ProjectDTO.class);
-            List<TimeEntity> timeEntityList = timeRepository.findAllByIdProject(projectDTO.getId());
-            for (TimeEntity timeEntity : timeEntityList) {
-                if (timeEntity.getResourceEntity().getPositionEntity().getName().equals(Position.PROJECTMANAGER.getName())) {
-                    projectDTO.setProjectManager(timeEntity.getResourceEntity().getName());
-                } else if (timeEntity.getResourceEntity().getPositionEntity().getName().equals(Position.ACCOUNTMANAGER.getName())) {
-                    projectDTO.setAccountManager(timeEntity.getResourceEntity().getName());
-                }
-            }
-            projectDTOS.add(projectDTO);
-        }
-        return projectDTOS;
-
-
+    public List<ProjectDTO> getAllProjects(Integer idWorkspace, PageSizeRequest pageSizeRequest) {
+        Pageable pageable = PageRequest.of(pageSizeRequest.getPage(), pageSizeRequest.getSize());
+        Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, pageable);
+        List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
+        return projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
     }
+
 
     @Override
     public void createProject(ProjectRequest projectRequest, Integer idAccount, Integer idWorkspace) {
-
-                WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
-                        .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-                ProjectEntity projectEntity = new ProjectEntity();
-                projectEntity.setName(projectRequest.getName());
-                projectEntity.setColor(projectRequest.getColor());
-                projectEntity.setIsActivate(true);
-                projectEntity.setCreatedDate(new Date());
-                projectEntity.setCreatedBy(idAccount);
-                projectEntity.setWorkspaceEntityProject(workspaceEntity);
-                projectRepository.save(projectEntity);
-
-
-                projectEntity=projectRepository.findByName(projectRequest.getName()).orElse(null);
-                TimeEntity timeEntity = new TimeEntity();
-                timeEntity.setProjectEntity(projectEntity);
-                ResourceEntity resourceEntity = resourceRepository.findById(projectRequest.getIdProjectManager()).orElse(null);
-                timeEntity.setResourceEntity(resourceEntity);
-                timeRepository.save(timeEntity);
-
-                TimeEntity time = new TimeEntity();
-                time.setProjectEntity(projectEntity);
-                resourceEntity=resourceRepository.findById(projectRequest.getIdAccountManager()).orElse(null);
-                time.setResourceEntity(resourceEntity);
-                timeRepository.save(time);
-
-
+        WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        ProjectEntity projectEntity = modelMapper.map(projectRequest, ProjectEntity.class);
+        projectEntity.setWorkspaceEntityProject(workspaceEntity);
+        projectEntity.setIsActivate(true);
+        projectEntity.setCreatedBy(idAccount);
+        projectEntity.setCreatedDate(new Date());
+        projectRepository.save(projectEntity);
     }
+
 
     @Override
-    public List<ResourceResponse> getListPM(Integer idAccount, Integer idWorkspace) {
-        if (accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,idAccount).isPresent()){
-            List<ResourceEntity> list = resourceRepository.findAllByIdWorkspaceAndNamePosition(idWorkspace,Position.PROJECTMANAGER.getName());
-
-            return list.stream().map(s->modelMapper.map(s,ResourceResponse.class)).collect(Collectors.toList());
-        }return null;
-
+    public void updateProject(ProjectRequest projectRequest, Integer idAccount, Integer idProject) {
+        ProjectEntity projectEntity = projectRepository.findById(idProject)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        projectEntity.setName(projectRequest.getName());
+        projectEntity.setClientName(projectRequest.getClientName());
+        projectEntity.setColor(projectRequest.getColor());
+        projectEntity.setIsActivate(projectRequest.getIsActivate());
+        projectEntity.setTextColor(projectRequest.getTextColor());
+        projectEntity.setColorPattern(projectRequest.getColorPattern());
+        projectEntity.setModifiedBy(idAccount);
+        projectEntity.setModifiedDate(new Date());
+        projectRepository.save(projectEntity);
 
     }
+
 
     @Override
-    public List<ResourceResponse> getListAM(Integer idAccount, Integer idWorkspace) {
-        if (accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,idAccount).isPresent()){
-            List<ResourceEntity> list = resourceRepository.findAllByIdWorkspaceAndNamePosition(idWorkspace,Position.ACCOUNTMANAGER.getName());
-
-            return list.stream().map(s->modelMapper.map(s,ResourceResponse.class)).collect(Collectors.toList());
-        }return null;
+    public List<ProjectDTO> searchParameter(String name, String clientName, Boolean isActivate, Integer idWorkspace, PageSizeRequest pageSizeRequest) {
+        Pageable pageable = PageRequest.of(pageSizeRequest.getPage(), pageSizeRequest.getSize());
+        Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientNameAndIsActivate(idWorkspace, name, clientName, isActivate, pageable);
+        List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
+        return projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
     }
+
 
     @Override
-    public void updateProject(ProjectRequest projectRequest, Integer idAccount, Integer idWorkspace,Integer idProject) {
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,idAccount)
-                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        if(accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())){
-            ProjectEntity projectEntity = projectRepository.findById(idProject)
-                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-            projectEntity.setName(projectRequest.getName());
-            projectEntity.setColor(projectRequest.getColor());
-            ResourceEntity resourceEntity = resourceRepository.findById(projectRequest.getIdProjectManager()).orElse(null);
-
-        }
+    public void deleteProject(Integer idProject) {
+        ProjectEntity projectEntity = projectRepository.findById(idProject)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        projectRepository.delete(projectEntity);
     }
 
-    @Override
-    public List<ProjectDTO> search(String name) {
-        return null;
-    }
+
 }

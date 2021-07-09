@@ -18,14 +18,14 @@ import java.util.List;
 public class ProjectEntity extends BaseEnity {
     @Column(name = "name")
     private String name;
+    @Column(name = "client_name")
+    private String clientName;
     @Column(name = "color")
     private String color;
     @Column(name = "text_color")
     private String textColor;
     @Column(name = "color_pattern")
     private String colorPattern;
-    @Column(name = "client_name")
-    private String clientName;
     @Column(name = "is_activate")
     private Boolean isActivate;
 
