@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> {
 
     Optional<ProjectEntity> findByNameAndWorkspaceEntityProject_Id(String name,Integer id);

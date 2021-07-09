@@ -27,7 +27,7 @@ public class ResourceConverter {
         if(resourceEntity.getPositionEntity() != null){
             resourceDTO.setPositionDTO(ObjectMapperUtils.map(resourceEntity.getPositionEntity(), PositionDTO.class));
         }
-        if (resourceEntity.getTimeEntities() != null && resourceEntity.getTimeEntities().size() != 0){
+        if (resourceEntity.getTimeEntities() != null){
             resourceDTO.setListTime(ObjectMapperUtils.mapAll(resourceEntity.getTimeEntities(), TimeDTO.class));
         }
         if (resourceEntity.getWorkspaceEntityResource() != null){
@@ -51,7 +51,7 @@ public class ResourceConverter {
         if(resourceDTO.getPositionDTO() != null){
             resourceEntity.setPositionEntity(ObjectMapperUtils.map(resourceDTO.getPositionDTO(), PositionEntity.class));
         }
-        if (resourceDTO.getListTime() != null && resourceDTO.getListTime().size() != 0){
+        if (resourceDTO.getListTime() != null){
             resourceEntity.setTimeEntities(ObjectMapperUtils.mapAll(resourceDTO.getListTime(), TimeEntity.class));
         }
         if (resourceDTO.getWorkspaceName() != null){

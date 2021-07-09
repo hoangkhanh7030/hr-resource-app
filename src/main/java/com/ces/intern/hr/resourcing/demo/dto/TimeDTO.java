@@ -12,6 +12,13 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TimeDTO {
+    private Integer id;
+
     private Date startTime;
+
     private Date endTime;
+
+    private ResourceDTO resourceDTO;
+
+    private ProjectDTO projectDTO;
 }
