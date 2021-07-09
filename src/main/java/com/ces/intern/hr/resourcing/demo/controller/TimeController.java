@@ -1,16 +1,11 @@
 package com.ces.intern.hr.resourcing.demo.controller;
 
-import com.ces.intern.hr.resourcing.demo.converter.ResourceConverter;
-import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
-import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.dto.TimeDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
-import com.ces.intern.hr.resourcing.demo.http.request.PageSizeRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.TimeRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
-import com.ces.intern.hr.resourcing.demo.sevice.AccountService;
 import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;
 import com.ces.intern.hr.resourcing.demo.sevice.ResourceService;
 import com.ces.intern.hr.resourcing.demo.sevice.TimeService;
@@ -47,16 +42,6 @@ public class TimeController {
         this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
     }
 
-//    @GetMapping("/{workspaceId}")
-//    public List<ResourceDTO> sendListResource(@PathVariable Integer workspaceId,
-//                                              @RequestBody PageSizeRequest pageSizeRequest){
-//        return resourceService.getResourcesOfWorkSpace(workspaceId, pageSizeRequest);
-//    }
-//
-//    @GetMapping("/{workspaceId}/add")
-//    public List<ProjectDTO> sendListProject(@PathVariable Integer workspaceId, @RequestHeader Integer idAccount){
-//        return projectService.getAllProjects(idAccount, workspaceId);
-//    }
 
     @GetMapping("/{workspaceId}/bookings")
     public Map<Date, List<TimeDTO>> showBookingForRangeOfDays(@PathVariable Integer workspaceId,

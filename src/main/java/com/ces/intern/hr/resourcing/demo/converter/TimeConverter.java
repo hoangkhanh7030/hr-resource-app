@@ -21,8 +21,6 @@ public class TimeConverter {
         timeDTO.setId(timeEntity.getId());
         timeDTO.setStartTime(timeEntity.getStartTime());
         timeDTO.setEndTime(timeEntity.getEndTime());
-//        timeDTO.setProjectDTO(projectConverter.convertToDto(timeEntity.getProjectEntity()));
-//        timeDTO.setResourceDTO(resourceConverter.convertToDto(timeEntity.getResourceEntity()));
         if (timeEntity.getResourceEntity() != null){
             timeDTO.setProjectDTO(ObjectMapperUtils.map(timeEntity.getProjectEntity(), ProjectDTO.class));
         }
@@ -37,8 +35,6 @@ public class TimeConverter {
         timeEntity.setId(timeDTO.getId());
         timeEntity.setStartTime(timeDTO.getStartTime());
         timeEntity.setEndTime(timeDTO.getEndTime());
-//        timeEntity.setProjectEntity(projectConverter.convertToEntity(timeDTO.getProjectDTO()));
-//        timeEntity.setResourceEntity(resourceConverter.convertToEntity(timeDTO.getResourceDTO()));
         if(timeDTO.getProjectDTO() != null){
             timeEntity.setProjectEntity(ObjectMapperUtils.map(timeDTO.getProjectDTO(), ProjectEntity.class));
         }

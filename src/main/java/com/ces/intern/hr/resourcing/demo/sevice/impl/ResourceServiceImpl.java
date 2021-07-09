@@ -8,9 +8,7 @@ import com.ces.intern.hr.resourcing.demo.dto.TeamDTO;
 import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
-import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
-import com.ces.intern.hr.resourcing.demo.http.request.PageSizeRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.PositionRepository;
@@ -18,7 +16,6 @@ import com.ces.intern.hr.resourcing.demo.repository.ResourceRepository;
 import com.ces.intern.hr.resourcing.demo.repository.TeamRepository;
 import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.ResourceService;
-import com.ces.intern.hr.resourcing.demo.sevice.WorkspaceService;
 import com.ces.intern.hr.resourcing.demo.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -89,10 +86,6 @@ public class ResourceServiceImpl implements ResourceService {
             } else {
                 ResourceEntity resourceEntityTarget = resourceRepository.findByIdAndWorkspaceEntityResource_Id
                         (resourceId, workspaceId).get();
-                //ResourceEntity resourceEntityUpdated = resourceConverter.convertToEntity(resourceDTO);
-                //resourceEntityTarget.setId(resourceEntityUpdated.getId());
-//            resourceEntityTarget.setCreatedBy(resourceEntityUpdated.getCreatedBy());
-//            resourceEntityTarget.setCreatedDate(resourceEntityUpdated.getCreatedDate());
                 resourceEntityTarget.setModifiedBy(accountId);
                 resourceEntityTarget.setModifiedDate(new Date());
                 resourceEntityTarget.setAvatar(resourceRequest.getAvatar());
@@ -101,8 +94,6 @@ public class ResourceServiceImpl implements ResourceService {
                         (resourceRequest.getTeamId()).orElse(null));
                 resourceEntityTarget.setPositionEntity(positionRepository.findById
                         (resourceRequest.getPositionId()).orElse(null));
-//            resourceEntityTarget.setTimeEntities(resourceEntityUpdated.getTimeEntities());
-//            resourceEntityTarget.setWorkspaceEntityResource(resourceEntityUpdated.getWorkspaceEntityResource());
                 resourceRepository.save(resourceEntityTarget);
                 return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
             }
