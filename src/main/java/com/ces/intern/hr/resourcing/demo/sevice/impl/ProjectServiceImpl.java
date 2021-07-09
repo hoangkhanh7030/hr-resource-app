@@ -84,8 +84,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDTO> sortProject(int page, int size,Integer idWorkspace, String name, String sort) {
-        if (sort.equals(SortPara.ASC.getName())) {
+    public List<ProjectDTO> sortProject(int page, int size,Integer idWorkspace, String name, String type) {
+        if (type.equals(SortPara.ASC.getName())) {
             Pageable pageable = PageRequest.of(page, size, Sort.by(name));
             Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, pageable);
             List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
