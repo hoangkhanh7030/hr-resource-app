@@ -18,7 +18,7 @@ public interface ResourceService {
 
     MessageResponse deleteResource(Integer id, Integer workspaceId);
 
-    List<ResourceDTO> getResourcesOfWorkSpace(Integer id, Integer page, Integer size);
+    List<ResourceDTO> getResourcesOfWorkSpace(Integer id);
 
     List<ResourceDTO> getProductManagers(Integer id);
     List<ResourceDTO> getAccountManagers(Integer id);
@@ -30,4 +30,7 @@ public interface ResourceService {
     List<ResourceDTO> filterByPosition(Integer id, String posName, Integer page, Integer size);
 
     List<ResourceDTO> filterByTeamAndPosition(Integer id, String teamName, String posName, Integer page, Integer size);
+
+    List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String teamName, String posName,
+                                    String name, String type, Integer page, Integer size);
 }
