@@ -30,8 +30,8 @@ public class WorkspaceConverter {
 
     public WorkspaceDTO toDTO(WorkspaceEntity workspaceEntity){
         WorkspaceDTO workspaceDTO = modelMapper.map(workspaceEntity,WorkspaceDTO.class);
-        workspaceDTO.setProjectList(projectResponseList(workspaceEntity));
-        workspaceDTO.setResourceList(resourceResponseList(workspaceEntity));
+        workspaceDTO.setProjects(projectResponseList(workspaceEntity));
+        workspaceDTO.setResources(resourceResponseList(workspaceEntity));
 
         return workspaceDTO;
     }
