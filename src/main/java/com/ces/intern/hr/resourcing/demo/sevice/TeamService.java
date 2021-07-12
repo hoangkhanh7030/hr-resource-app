@@ -10,4 +10,5 @@ public interface TeamService {
 
     void deleteTeam(Integer idTeam);
     void renameTeam(Integer idTeam,String name);
+    void updateTeam(List<TeamDTO> teamDTOS);
 }

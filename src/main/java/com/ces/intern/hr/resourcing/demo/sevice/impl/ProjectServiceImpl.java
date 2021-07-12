@@ -40,8 +40,8 @@ public class ProjectServiceImpl implements ProjectService {
     public List<ProjectDTO> getAllProjects(Integer idWorkspace, int page,int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, pageable);
-        List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
-        return projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+        List<ProjectEntity> projectEntities = projectEntityPage.getContent();
+        return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
     }
 
 
@@ -76,11 +76,11 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Override
-    public List<ProjectDTO> searchParameter(String name, String clientName, Boolean isActivate, Integer idWorkspace,int page,int size) {
+    public List<ProjectDTO> searchParameter(String name, Boolean isActivate, Integer idWorkspace,int page,int size) {
         Pageable pageable = PageRequest.of(page,size);
-        Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientNameAndIsActivate(idWorkspace, name, clientName, isActivate, pageable);
-        List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
-        return projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+        Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientNameAndIsActivate(idWorkspace, name, isActivate, pageable);
+        List<ProjectEntity> projectEntities = projectEntityPage.getContent();
+        return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
     }
 
     @Override
@@ -88,13 +88,13 @@ public class ProjectServiceImpl implements ProjectService {
         if (type.equals(SortPara.ASC.getName())) {
             Pageable pageable = PageRequest.of(page, size, Sort.by(name));
             Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, pageable);
-            List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
-            return projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+            List<ProjectEntity> projectEntities = projectEntityPage.getContent();
+            return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
         }else {
             Pageable pageable = PageRequest.of(page, size, Sort.by(name).descending());
             Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, pageable);
-            List<ProjectEntity> projectEntityList = projectEntityPage.getContent();
-            return projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+            List<ProjectEntity> projectEntities = projectEntityPage.getContent();
+            return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
         }
 
     }

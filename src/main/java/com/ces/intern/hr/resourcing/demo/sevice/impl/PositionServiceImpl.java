@@ -2,11 +2,9 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
 import com.ces.intern.hr.resourcing.demo.dto.PositionDTO;
 import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
-import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.PositionRequest;
 import com.ces.intern.hr.resourcing.demo.repository.PositionRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.PositionService;
-import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,31 +26,31 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     public List<PositionDTO> getAll() {
-        List<PositionEntity> positionEntityList = positionRepository.findAll();
-        return positionEntityList.stream().map(s -> modelMapper.map(s, PositionDTO.class)).collect(Collectors.toList());
+        List<PositionEntity> positionEntities = positionRepository.findAll();
+        return positionEntities.stream().map(s -> modelMapper.map(s, PositionDTO.class)).collect(Collectors.toList());
     }
 
     @Override
-    public void createPosition(PositionRequest positionRequest) {
-        PositionEntity positionEntity = new PositionEntity();
-        positionEntity.setName(positionRequest.getName());
-        positionRepository.save(positionEntity);
-
+    public void updatePosition(List<PositionRequest> positionRequests) {
+        List<PositionEntity> positionEntities = positionRepository.findAll();
+        deletePosition(positionRequests,positionEntities);
+        for (PositionRequest positionRequest : positionRequests){
+            if (!positionRepository.findByName(positionRequest.getName()).isPresent()){
+                PositionEntity positionEntity = new PositionEntity();
+                positionEntity.setName(positionRequest.getName());
+                positionRepository.save(positionEntity);
+            }
+        }
     }
 
-    @Override
-    public void updatePosition(PositionRequest positionRequest, Integer idPosition) {
-        PositionEntity positionEntity = positionRepository.findById(idPosition)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        positionEntity.setName(positionRequest.getName());
-        positionRepository.save(positionEntity);
+    private void deletePosition(List<PositionRequest> positionRequests,List<PositionEntity> positionEntities){
 
+        for (PositionEntity positionEntity: positionEntities){
+            if (positionRequests.stream().filter(s->positionEntity.getName().equals(s.getName())).findAny().orElse(null)==null){
+                positionRepository.delete(positionEntity);
+            }
+        }
     }
 
-    @Override
-    public void deletePosition(Integer idPosition) {
-        PositionEntity positionEntity = positionRepository.findById(idPosition)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        positionRepository.delete(positionEntity);
-    }
+
 }

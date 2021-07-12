@@ -20,6 +20,6 @@ public class AccountDTO extends BaseDTO{
     private String password;
     private String fullname;
     private String avatar;
-    private List<WorkspaceDTO> workspaceDto;
+    private List<WorkspaceDTO> workspaceDTOS;
 
 }

@@ -6,6 +6,7 @@ import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.repository.ProjectRepository;
 import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
+import com.ces.intern.hr.resourcing.demo.utils.CSVFile;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,7 @@ public class CsvFileSerivce {
 
             projectRepository.saveAll(projectEntityList);
         } catch (Exception e) {
-            throw new RuntimeException("FAIL! -> message = " + e.getMessage());
+            throw new RuntimeException(CSVFile.FAIL_MESSAGE + e.getMessage());
         }
     }
 }

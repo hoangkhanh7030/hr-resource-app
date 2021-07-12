@@ -56,7 +56,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
     public List<WorkspaceResponse> getAllWorkspaceByIdAccount(Integer idAccount) {
         List<AccountWorkspaceRoleEntity> accountWorkspaceRoleEntityList = accoutWorkspaceRoleRepository.findAllByAccountEntity_Id(idAccount);
 
-        List<WorkspaceResponse> list = new ArrayList<>();
+        List<WorkspaceResponse> workspaceResponses = new ArrayList<>();
 
             for (AccountWorkspaceRoleEntity accountWorkspaceRoleEntity : accountWorkspaceRoleEntityList) {
             WorkspaceEntity workspaceEntity = workspaceRepository.findById(accountWorkspaceRoleEntity.getWorkspaceEntity().getId())
@@ -75,10 +75,10 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
             }
             workspaceResponse.setProjectListLength(projectDTOS.size());
             workspaceResponse.setResourceListLength(resourceDTOS.size());
-            list.add(workspaceResponse);
+            workspaceResponses.add(workspaceResponse);
         }
 
-        return list;
+        return workspaceResponses;
     }
 
     @Override
@@ -143,8 +143,8 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
 
     @Override
     public List<WorkspaceDTO> searchWorkspaceByName(String name) {
-        List<WorkspaceEntity> workspaceEntityList = workspaceRepository.findAllByNameContainingIgnoreCase(name);
-        return workspaceEntityList.stream().map(workspaceConverter::toDTO).collect(Collectors.toList());
+        List<WorkspaceEntity> workspaceEntities = workspaceRepository.findAllByNameContainingIgnoreCase(name);
+        return workspaceEntities.stream().map(workspaceConverter::toDTO).collect(Collectors.toList());
     }
 
 

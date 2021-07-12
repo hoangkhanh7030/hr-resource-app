@@ -1,9 +1,11 @@
 package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
 import com.ces.intern.hr.resourcing.demo.dto.TeamDTO;
+import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
+import com.ces.intern.hr.resourcing.demo.http.request.PositionRequest;
 import com.ces.intern.hr.resourcing.demo.repository.ResourceRepository;
 import com.ces.intern.hr.resourcing.demo.repository.TeamRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.TeamService;
@@ -62,5 +64,28 @@ public class TeamServiceImpl implements TeamService {
         teamRepository.save(teamEntity);
 
     }
+
+    @Override
+    public void updateTeam(List<TeamDTO> teamDTOS) {
+        List<TeamEntity> teamEntities = teamRepository.findAll();
+        deleteTeam(teamDTOS,teamEntities);
+        for (TeamDTO teamDTO : teamDTOS){
+            if (!teamRepository.findByName(teamDTO.getName()).isPresent()){
+                TeamEntity teamEntity = new TeamEntity();
+                teamEntity.setName(teamDTO.getName());
+                teamRepository.save(teamEntity);
+            }
+        }
+
+    }
+    private void deleteTeam(List<TeamDTO> teamDTOS, List<TeamEntity> teamEntities){
+
+        for (TeamEntity teamEntity: teamEntities){
+            if (teamDTOS.stream().filter(s->teamEntity.getName().equals(s.getName())).findAny().orElse(null)==null){
+                teamRepository.delete(teamEntity);
+            }
+        }
+    }
+
 
 }
