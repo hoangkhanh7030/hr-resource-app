@@ -17,4 +17,14 @@ public class ProjectRequest {
     private String colorPattern;
     private Boolean isActivate;
 
+    public boolean validate() {
+        if (name == null||name.isEmpty()|| clientName == null || clientName.isEmpty() ||
+                color == null  || color.isEmpty() || textColor == null || textColor.isEmpty() ||
+                colorPattern == null  || colorPattern.isEmpty()  ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

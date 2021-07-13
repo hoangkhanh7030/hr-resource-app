@@ -56,12 +56,12 @@ public class ProjectController {
 
         int numberSize;
         int sizeListProject = list(idWorkspace).size();
-        if (sizeListProject%size==0){
-            numberSize = sizeListProject/size;
-        }else {
-            numberSize =(sizeListProject/size)+1;
+        if (sizeListProject % size == 0) {
+            numberSize = sizeListProject / size;
+        } else {
+            numberSize = (sizeListProject / size) + 1;
         }
-        return new NumberSizeResponse(projectService.getAllProjects(idWorkspace, page, size),numberSize);
+        return new NumberSizeResponse(projectService.getAllProjects(idWorkspace, page, size), numberSize);
     }
 
     @GetMapping(value = "/{idWorkspace}/projects/export")
@@ -127,9 +127,7 @@ public class ProjectController {
 
             return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
         } else {
-            if (projectRequest.getName().isEmpty() || projectRequest.getColor().isEmpty()
-                    || projectRequest.getClientName().isEmpty() || projectRequest.getTextColor().isEmpty()
-                    || projectRequest.getColorPattern().isEmpty()) {
+            if (projectRequest.validate()) {
                 return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
             }
             projectService.createProject(projectRequest, idAccount, idWorkspace);
@@ -146,8 +144,7 @@ public class ProjectController {
                                           @PathVariable Integer idWorkspace,
                                           @PathVariable Integer idProject,
                                           @RequestBody ProjectRequest projectRequest) {
-        if (projectRequest.getName().isEmpty() || projectRequest.getColor().isEmpty() || projectRequest.getClientName().isEmpty()
-                || projectRequest.getTextColor().isEmpty() || projectRequest.getColorPattern().isEmpty()) {
+        if (projectRequest.validate()) {
             return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
         } else {
             projectService.updateProject(projectRequest, idAccount, idProject);
@@ -171,37 +168,39 @@ public class ProjectController {
 
     @GetMapping(value = "/{idWorkspace}/projects/searchParam")
     private NumberSizeResponse searchPara(@PathVariable Integer idWorkspace,
-                                        @RequestParam String name,
-                                        @RequestParam Boolean isActivate,
-                                        @RequestParam int page,
-                                        @RequestParam int size
+                                          @RequestParam String name,
+                                          @RequestParam Boolean isActivate,
+                                          @RequestParam int page,
+                                          @RequestParam int size
     ) {
 
         int numberSize;
         int sizeListProject = list(idWorkspace).size();
-        if (sizeListProject%size==0){
-            numberSize = sizeListProject/size;
-        }else {
-            numberSize =(sizeListProject/size)+1;
+        if (sizeListProject % size == 0) {
+            numberSize = sizeListProject / size;
+        } else {
+            numberSize = (sizeListProject / size) + 1;
         }
-        return new NumberSizeResponse(projectService.searchParameter(name, isActivate, idWorkspace, page, size),numberSize);
+        return new NumberSizeResponse(projectService.searchParameter(name, isActivate, idWorkspace, page, size), numberSize);
     }
+
     @GetMapping(value = "/{idWorkspace}/projects/sort")
     private NumberSizeResponse sortProject(@PathVariable Integer idWorkspace,
-                                         @RequestParam int page,
-                                         @RequestParam int size,
-                                         @RequestParam String name,
-                                         @RequestParam String type){
+                                           @RequestParam int page,
+                                           @RequestParam int size,
+                                           @RequestParam String name,
+                                           @RequestParam String type) {
         int numberSize;
         int sizeListProject = list(idWorkspace).size();
-        if (sizeListProject%size==0){
-            numberSize = sizeListProject/size;
-        }else {
-            numberSize =(sizeListProject/size)+1;
+        if (sizeListProject % size == 0) {
+            numberSize = sizeListProject / size;
+        } else {
+            numberSize = (sizeListProject / size) + 1;
         }
-        return new NumberSizeResponse(projectService.sortProject(page,size,idWorkspace,name,type),numberSize);
+        return new NumberSizeResponse(projectService.sortProject(page, size, idWorkspace, name, type), numberSize);
     }
-    private List<ProjectEntity> list(Integer idWorkspace){
+
+    private List<ProjectEntity> list(Integer idWorkspace) {
         return projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
     }
 }

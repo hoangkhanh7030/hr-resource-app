@@ -1,7 +1,6 @@
 package com.ces.intern.hr.resourcing.demo.repository;
 
 import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
-import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,7 +36,7 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> 
                                                                 @Param("name") String name,
                                                                 @Param("isActivate") Boolean isActivate,
                                                                 Pageable pageable);
-
+    Optional<ProjectEntity> findByName(String name);
 
 
 

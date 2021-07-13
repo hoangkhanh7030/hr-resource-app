@@ -56,7 +56,7 @@ public class WorkspaceController {
 
             return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
         } else {
-            if (workspaceDTO.getName().isEmpty() || workspaceDTO.getName() == null) {
+            if (workspaceDTO.getName() == null || workspaceDTO.getName().isEmpty()) {
                 return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
             } else {
                 workspaceService.createdWorkspaceByIdAccount(workspaceDTO, idAccount);
@@ -80,7 +80,7 @@ public class WorkspaceController {
             if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()) {
                 return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
             } else {
-                if (workspaceDTO.getName().isEmpty() || workspaceDTO.getName() == null) {
+                if (workspaceDTO.getName() == null || workspaceDTO.getName().isEmpty()) {
                     return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
                 } else {
 
