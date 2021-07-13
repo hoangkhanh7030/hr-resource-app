@@ -2,7 +2,6 @@ package com.ces.intern.hr.resourcing.demo.dto;
 
 
 
-import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

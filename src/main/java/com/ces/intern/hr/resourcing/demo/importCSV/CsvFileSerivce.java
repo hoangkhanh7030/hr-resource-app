@@ -40,18 +40,21 @@ public class CsvFileSerivce {
             WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
                     .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
             List<ProjectDTO> projectDTOList = ApacheCommonsCsvUtil.parseCsvFile(file);
-            List<ProjectEntity> projectEntityList = new ArrayList<>();
-            for (ProjectDTO projectDTO : projectDTOList) {
-                ProjectEntity projectEntity = modelMapper.map(projectDTO, ProjectEntity.class);
-                projectEntity.setWorkspaceEntityProject(workspaceEntity);
-                projectEntity.setIsActivate(projectDTO.getIsActivate());
-                projectEntity.setCreatedDate(new Date());
-                projectEntity.setCreatedBy(idAccount);
-                projectEntityList.add(projectEntity);
 
+            for (ProjectDTO projectDTO : projectDTOList) {
+                if (projectRepository.findByName(projectDTO.getName()).isPresent()){
+                    continue;
+                }else {
+                    ProjectEntity projectEntity = modelMapper.map(projectDTO, ProjectEntity.class);
+                    projectEntity.setWorkspaceEntityProject(workspaceEntity);
+                    projectEntity.setIsActivate(projectDTO.getIsActivate());
+                    projectEntity.setCreatedDate(new Date());
+                    projectEntity.setCreatedBy(idAccount);
+                    projectRepository.save(projectEntity);
+                }
             }
 
-            projectRepository.saveAll(projectEntityList);
+
         } catch (Exception e) {
             throw new RuntimeException(CSVFile.FAIL_MESSAGE + e.getMessage());
         }

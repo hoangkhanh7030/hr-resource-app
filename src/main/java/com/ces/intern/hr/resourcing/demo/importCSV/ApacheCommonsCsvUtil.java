@@ -40,7 +40,6 @@ public class ApacheCommonsCsvUtil {
             }
 
         } catch (Exception e) {
-            System.out.println("Reading CSV Error!");
             e.printStackTrace();
         } finally {
             try {
@@ -48,7 +47,6 @@ public class ApacheCommonsCsvUtil {
                 fileReader.close();
                 Objects.requireNonNull(csvParser).close();
             } catch (IOException e) {
-                System.out.println("Closing fileReader/csvParser Error!");
                 e.printStackTrace();
             }
         }

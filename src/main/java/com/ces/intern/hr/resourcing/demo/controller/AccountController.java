@@ -6,6 +6,7 @@ import com.ces.intern.hr.resourcing.demo.http.response.AccountResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.AccountService;
+import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +35,13 @@ public class AccountController {
             if (accountRequest.getPassword().matches(passwordRegex)) {
 
                 if (accoutRepository.findByEmail(accountRequest.getEmail()).isPresent()) {
-                    return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
+                    return new MessageResponse(ExceptionMessage.EMAIL_ALREADY_EXIST.getMessage(), Status.FAIL.getCode());
                 } else {
-                    accountService.createdAccount(accountRequest);
+                    if (accountRequest.validate()) {
+                        return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
+                    } else {
+                        accountService.createdAccount(accountRequest);
+                    }
                 }
 
                 if (accoutRepository.findByEmail(accountRequest.getEmail()).isPresent()) {
@@ -57,15 +62,14 @@ public class AccountController {
         if (accountRequest.getEmail().matches(emailRegex)) {
             if (accountRequest.getPassword().matches(passwordRegex)) {
                 if (accoutRepository.findByEmail(accountRequest.getEmail()).isPresent()) {
-                    return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
+                    return new MessageResponse(ExceptionMessage.USERNAME_PASSWORD_INVALIDATE.getMessage(), Status.FAIL.getCode());
                 } else {
-                    if (accountRequest.getEmail().isEmpty() || accountRequest.getPassword().isEmpty() ||
-                            accountRequest.getAvatar().isEmpty() || accountRequest.getFullname().isEmpty()) {
+                    if (accountRequest.validate()) {
                         return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
                     } else {
                         accountService.update(accountRequest, accountId);
                     }
-                    if (accoutRepository.findByEmail(accountRequest.getFullname()).isPresent()) {
+                    if (accoutRepository.findByEmail(accountRequest.getFullName()).isPresent()) {
                         return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
                     } else {
                         return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
