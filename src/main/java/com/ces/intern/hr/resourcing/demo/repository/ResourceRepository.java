@@ -72,7 +72,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
             "AND lower(r.teamEntity.name) like lower(concat('%',:teamName,'%')) AND lower(r.positionEntity.name) " +
             "like lower(concat('%',:posName,'%'))")
     Page<ResourceEntity> filterList(@Param("workspaceId") Integer workspaceId,
-                                    @Param("name") String searchName,
+                                    @Param("searchName") String searchName,
                                     @Param("teamName") String teamName,
                                     @Param("posName") String posName,
                                     Pageable pageable);
