@@ -64,7 +64,7 @@ public class ResourceController {
         type = type == null ? SortPara.DESC.getName() : type;
         List<ResourceDTO> resourceDTOList = resourceService
                 .sortResources(workspaceId, keyword, teamName, posName, name, type, page, size);
-        int listSize = resourceDTOList.size();
+        int listSize = resourceService.getResourcesOfWorkSpace(workspaceId).size();
         int numberOfPages;
         if (listSize % size == 0){
             numberOfPages = listSize / size;
