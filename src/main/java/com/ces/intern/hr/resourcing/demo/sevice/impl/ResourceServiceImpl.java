@@ -3,9 +3,11 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.converter.ResourceConverter;
 import com.ces.intern.hr.resourcing.demo.converter.WorkspaceConverter;
 import com.ces.intern.hr.resourcing.demo.dto.PositionDTO;
+import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.dto.TeamDTO;
 import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
+import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
@@ -21,11 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ResourceServiceImpl implements ResourceService {
@@ -53,7 +57,7 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public MessageResponse addNewResource(ResourceRequest resourceRequest, Integer id, Integer accountId) {
-        Date date = new Date();
+        Date currentDate = new Date();
         ResourceDTO resourceDTO = new ResourceDTO();
         resourceDTO.setName(resourceRequest.getName());
         resourceDTO.setAvatar(resourceRequest.getAvatar());
@@ -61,7 +65,7 @@ public class ResourceServiceImpl implements ResourceService {
         resourceDTO.setTeamDTO(ObjectMapperUtils.map(teamEntity, TeamDTO.class));
         PositionEntity positionEntity = positionRepository.findById(resourceRequest.getTeamId()).orElse(null);
         resourceDTO.setPositionDTO(ObjectMapperUtils.map(positionEntity, PositionDTO.class));
-        resourceDTO.setCreatedDate(date);
+        resourceDTO.setCreatedDate(currentDate);
         resourceDTO.setCreatedBy(accountId);
         resourceDTO.setWorkspaceName(workSpaceConverter.toDTO(workspaceRepository.findById(id).orElseThrow(()
                 -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()))));
@@ -111,15 +115,13 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public List<ResourceDTO> getResourcesOfWorkSpace(Integer id, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
-        List<ResourceDTO> list = new ArrayList<>();
-        Page<ResourceEntity> resourceEntityPage = resourceRepository.findResourcesOfWorkSpace(id, pageable);
-        List<ResourceEntity> resourceEntityList = resourceEntityPage.getContent();
-        for (ResourceEntity r : resourceEntityList) {
-            list.add(resourceConverter.convertToDto(r));
+    public List<ResourceDTO> getResourcesOfWorkSpace(Integer id) {
+        List<ResourceDTO> resourceDTOS = new ArrayList<>();
+        List<ResourceEntity> resourceEntityList = resourceRepository.findAllByWorkspaceEntityResource_Id(id);
+        for (ResourceEntity resourceEntity : resourceEntityList) {
+            resourceDTOS.add(resourceConverter.convertToDto(resourceEntity));
         }
-        return list;
+        return resourceDTOS;
     }
 
     @Override
@@ -139,8 +141,8 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public List<ResourceDTO> getProductManagers(Integer id) {
         ArrayList<ResourceDTO> list = new ArrayList<>();
-        for (ResourceEntity r : resourceRepository.findAllProductManagersOfWorkspace(id)) {
-            list.add(resourceConverter.convertToDto(r));
+        for (ResourceEntity resourceEntity : resourceRepository.findAllProductManagersOfWorkspace(id)) {
+            list.add(resourceConverter.convertToDto(resourceEntity));
         }
         return list;
     }
@@ -148,8 +150,8 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public List<ResourceDTO> getAccountManagers(Integer id) {
         ArrayList<ResourceDTO> list = new ArrayList<>();
-        for (ResourceEntity r : resourceRepository.findAllAccountManagersOfWorkspace(id)) {
-            list.add(resourceConverter.convertToDto(r));
+        for (ResourceEntity resourceEntity : resourceRepository.findAllAccountManagersOfWorkspace(id)) {
+            list.add(resourceConverter.convertToDto(resourceEntity));
         }
         return list;
     }
@@ -194,10 +196,32 @@ public class ResourceServiceImpl implements ResourceService {
     public List<ResourceDTO> filterByTeamAndPosition(Integer id, String teamName, String posName,
                                                      Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
-        List<ResourceDTO> result = new ArrayList<>();
-        Page<ResourceEntity> found = resourceRepository.
+        List<ResourceDTO> searchResult = new ArrayList<>();
+        Page<ResourceEntity> queryResult = resourceRepository.
                 filterByTeamAndPosition(id, teamName, posName, pageable);
-        List<ResourceEntity> resourceEntityList = found.getContent();
+        List<ResourceEntity> resourceEntityList = queryResult.getContent();
+        for (ResourceEntity resourceEntity : resourceEntityList) {
+            searchResult.add(resourceConverter.convertToDto(resourceEntity));
+        }
+        return searchResult;
+    }
+
+    @Override
+    public List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String teamName, String posName,
+                                           String name, String type, Integer page, Integer size){
+        Pageable pageable;
+        if (name == null){
+            name = "createdDate";
+        }
+        if (type.equals(SortPara.ASC.getName())) {
+            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, name));
+        }else {
+            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, name));
+        }
+        Page<ResourceEntity> resourceEntityPage = resourceRepository
+                .filterList(idWorkspace, searchName, teamName, posName, pageable);
+        List<ResourceEntity> resourceEntityList = resourceEntityPage.getContent();
+        List<ResourceDTO> result = new ArrayList<>();
         for (ResourceEntity resourceEntity : resourceEntityList) {
             result.add(resourceConverter.convertToDto(resourceEntity));
         }
