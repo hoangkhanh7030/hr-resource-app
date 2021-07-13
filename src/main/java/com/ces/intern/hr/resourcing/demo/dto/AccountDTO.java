@@ -2,7 +2,6 @@ package com.ces.intern.hr.resourcing.demo.dto;
 
 
 
-import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +19,6 @@ public class AccountDTO extends BaseDTO{
     private String password;
     private String fullname;
     private String avatar;
-    private List<WorkspaceDTO> workspaceDto;
+    private List<WorkspaceDTO> workspaceDTOS;
 
 }

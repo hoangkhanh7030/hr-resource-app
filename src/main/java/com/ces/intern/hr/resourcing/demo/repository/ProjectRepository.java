@@ -1,7 +1,6 @@
 package com.ces.intern.hr.resourcing.demo.repository;
 
 import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
-import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +18,9 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> 
     @Query("select p from ProjectEntity p where p.workspaceEntityProject.id =:idworkspace")
     Page<ProjectEntity> findAllById(@Param("idworkspace") Integer idworkspace,Pageable pageable);
 
+    @Query("select p from ProjectEntity p where p.workspaceEntityProject.id =:idworkspace")
+    List<ProjectEntity> findAllByidWorkspace(@Param("idworkspace") Integer idworkspace);
+
     @Query("select p from ProjectEntity p where p.id=:idProject and p.workspaceEntityProject.id=:idWorkspace")
     Optional<ProjectEntity> findByIdWorkspaceAndIdProject(@Param("idWorkspace") Integer idWorkspace,@Param("idProject") Integer idProject);
 
@@ -28,14 +30,13 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> 
 
     List<ProjectEntity> findAllByWorkspaceEntityProject_Id(Integer idWorkspace);
 
-    @Query(value = "select p from ProjectEntity p where p.workspaceEntityProject.id=:idWorkspace and lower(p.name) like lower(concat('%',:name,'%')) and lower(p.clientName) like lower(concat('%',:clientName,'%')) " +
+    @Query(value = "select p from ProjectEntity p where p.workspaceEntityProject.id=:idWorkspace and lower(p.name) like lower(concat('%',:name,'%')) or lower(p.clientName) like lower(concat('%',:name,'%')) " +
             "and p.isActivate=:isActivate")
     Page<ProjectEntity> findAllByNameAndClientNameAndIsActivate(@Param("idWorkspace") Integer idWorkspace,
                                                                 @Param("name") String name,
-                                                                @Param("clientName") String clientName,
                                                                 @Param("isActivate") Boolean isActivate,
                                                                 Pageable pageable);
-
+    Optional<ProjectEntity> findByName(String name);
 
 
 

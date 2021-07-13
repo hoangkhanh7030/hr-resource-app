@@ -4,6 +4,7 @@ import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
 import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.NumberSizeResponse;
 import com.ces.intern.hr.resourcing.demo.importCSV.ApacheCommonsCsvUtil;
 import com.ces.intern.hr.resourcing.demo.importCSV.CsvFileSerivce;
 import com.ces.intern.hr.resourcing.demo.importCSV.Message.Message;
@@ -48,29 +49,37 @@ public class ProjectController {
         this.csvFileSerivce = csvFileSerivce;
     }
 
-    @GetMapping(value = "/{idWorkspace}/project")
-    private List<ProjectDTO> getAll(@PathVariable Integer idWorkspace,
-                                    @RequestParam int page,
-                                    @RequestParam int size) {
-        return projectService.getAllProjects(idWorkspace,page,size);
+    @GetMapping(value = "/{idWorkspace}/projects")
+    private NumberSizeResponse getAll(@PathVariable Integer idWorkspace,
+                                      @RequestParam int page,
+                                      @RequestParam int size) {
+
+        int numberSize;
+        int sizeListProject = list(idWorkspace).size();
+        if (sizeListProject % size == 0) {
+            numberSize = sizeListProject / size;
+        } else {
+            numberSize = (sizeListProject / size) + 1;
+        }
+        return new NumberSizeResponse(projectService.getAllProjects(idWorkspace, page, size), numberSize);
     }
 
     @GetMapping(value = "/{idWorkspace}/projects/export")
     public void exportToCSV(HttpServletResponse response,
                             @PathVariable Integer idWorkspace) throws IOException {
-        response.setContentType("text/csv");
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        response.setContentType(CSVFile.CONTENT_TYPE);
+        DateFormat dateFormat = new SimpleDateFormat(CSVFile.DATE);
         String currentDateTime = dateFormat.format(new Date());
 
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=project_" + currentDateTime + ".csv";
+        String headerKey = CSVFile.HEADER_KEY;
+        String headerValue = CSVFile.HEADER_VALUE + currentDateTime + CSVFile.FILE_TYPE;
         response.setHeader(headerKey, headerValue);
         List<ProjectEntity> projectEntityList = projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
         List<ProjectDTO> projectDTOList = projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
 
         ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
-        String[] csvHeader = {"Project ID", "Name", "Client Name", "Color", "Text Color", "Color Pattern", "Activate"};
-        String[] nameMapping = {"id", "name", "clientName", "color", "textColor", "colorPattern", "isActivate"};
+        String[] csvHeader = CSVFile.CSV_HEADER;
+        String[] nameMapping = CSVFile.NAME_MAPPING;
 
         csvWriter.writeHeader(csvHeader);
 
@@ -88,12 +97,12 @@ public class ProjectController {
         Response response = new Response();
         if (Objects.requireNonNull(csvfile.getOriginalFilename()).isEmpty()) {
             response.addMessage(new Message(csvfile.getOriginalFilename(),
-                    "No selected file to upload! Please do the checking", Status.FAIL.getCode()));
+                    CSVFile.NO_SELECTED_FILE, Status.FAIL.getCode()));
 
             return response;
         }
         if (!ApacheCommonsCsvUtil.isCSVFile(csvfile)) {
-            response.addMessage(new Message(csvfile.getOriginalFilename(), "Error: this is not a CSV file!", Status.FAIL.getCode()));
+            response.addMessage(new Message(csvfile.getOriginalFilename(), CSVFile.ERROR, Status.FAIL.getCode()));
             return response;
         }
 
@@ -101,7 +110,7 @@ public class ProjectController {
         try {
 
             csvFileSerivce.store(csvfile.getInputStream(), idWorkspace, idAccount);
-            response.addMessage(new Message(csvfile.getOriginalFilename(), "Upload File Successfully!", Status.SUCCESS.getCode()));
+            response.addMessage(new Message(csvfile.getOriginalFilename(), CSVFile.UPLOAD_FILE, Status.SUCCESS.getCode()));
         } catch (Exception e) {
             response.addMessage(new Message(csvfile.getOriginalFilename(), e.getMessage(), Status.FAIL.getCode()));
         }
@@ -118,9 +127,7 @@ public class ProjectController {
 
             return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
         } else {
-            if (projectRequest.getName().isEmpty() || projectRequest.getColor().isEmpty()
-                    || projectRequest.getClientName().isEmpty() || projectRequest.getTextColor().isEmpty()
-                    || projectRequest.getColorPattern().isEmpty()) {
+            if (projectRequest.validate()) {
                 return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
             }
             projectService.createProject(projectRequest, idAccount, idWorkspace);
@@ -137,8 +144,7 @@ public class ProjectController {
                                           @PathVariable Integer idWorkspace,
                                           @PathVariable Integer idProject,
                                           @RequestBody ProjectRequest projectRequest) {
-        if (projectRequest.getName().isEmpty() || projectRequest.getColor().isEmpty() || projectRequest.getClientName().isEmpty()
-                || projectRequest.getTextColor().isEmpty() || projectRequest.getColorPattern().isEmpty()) {
+        if (projectRequest.validate()) {
             return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
         } else {
             projectService.updateProject(projectRequest, idAccount, idProject);
@@ -161,25 +167,40 @@ public class ProjectController {
 
 
     @GetMapping(value = "/{idWorkspace}/projects/searchParam")
-    private List<ProjectDTO> searchPara(@PathVariable Integer idWorkspace,
-                                        @RequestParam String name,
-                                        @RequestParam String param,
-                                        @RequestParam Boolean isActivate,
-                                        @RequestParam int page,
-                                        @RequestParam int size
+    private NumberSizeResponse searchPara(@PathVariable Integer idWorkspace,
+                                          @RequestParam String name,
+                                          @RequestParam Boolean isActivate,
+                                          @RequestParam int page,
+                                          @RequestParam int size
     ) {
-        if (param.equals(SearchMessage.PROJECT_NAME.getName())) {
-            return projectService.searchParameter(name, "", isActivate, idWorkspace,page,size);
+
+        int numberSize;
+        int sizeListProject = list(idWorkspace).size();
+        if (sizeListProject % size == 0) {
+            numberSize = sizeListProject / size;
         } else {
-            return projectService.searchParameter("", name, isActivate, idWorkspace,page,size);
+            numberSize = (sizeListProject / size) + 1;
         }
+        return new NumberSizeResponse(projectService.searchParameter(name, isActivate, idWorkspace, page, size), numberSize);
     }
+
     @GetMapping(value = "/{idWorkspace}/projects/sort")
-    private List<ProjectDTO> sortProject(@PathVariable Integer idWorkspace,
-                                         @RequestParam int page,
-                                         @RequestParam int size,
-                                         @RequestParam String name,
-                                         @RequestParam String type){
-        return projectService.sortProject(page,size,idWorkspace,name,type);
+    private NumberSizeResponse sortProject(@PathVariable Integer idWorkspace,
+                                           @RequestParam int page,
+                                           @RequestParam int size,
+                                           @RequestParam String name,
+                                           @RequestParam String type) {
+        int numberSize;
+        int sizeListProject = list(idWorkspace).size();
+        if (sizeListProject % size == 0) {
+            numberSize = sizeListProject / size;
+        } else {
+            numberSize = (sizeListProject / size) + 1;
+        }
+        return new NumberSizeResponse(projectService.sortProject(page, size, idWorkspace, name, type), numberSize);
+    }
+
+    private List<ProjectEntity> list(Integer idWorkspace) {
+        return projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
     }
 }

@@ -16,8 +16,8 @@ import java.util.List;
 public class WorkspaceDTO extends BaseDTO{
     private String name;
     private String Role;
-    private List<ProjectResponse> projectList;
-    private List<ResourceResponse> resourceList;
+    private List<ProjectResponse> projects;
+    private List<ResourceResponse> resources;
 
 
 

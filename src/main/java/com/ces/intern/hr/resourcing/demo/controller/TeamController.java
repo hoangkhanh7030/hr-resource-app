@@ -2,7 +2,10 @@ package com.ces.intern.hr.resourcing.demo.controller;
 
 import com.ces.intern.hr.resourcing.demo.dto.TeamDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
+import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
+import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
+import com.ces.intern.hr.resourcing.demo.http.request.PositionRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
 import com.ces.intern.hr.resourcing.demo.repository.ResourceRepository;
@@ -12,10 +15,12 @@ import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Role;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/v1/workspaces")
@@ -24,16 +29,19 @@ public class TeamController {
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
     private final ResourceRepository resourceRepository;
     private final TeamRepository teamRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public TeamController(TeamService teamService,
                           AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
                           ResourceRepository resourceRepository,
-                          TeamRepository teamRepository) {
+                          TeamRepository teamRepository,
+                          ModelMapper modelMapper) {
         this.teamService = teamService;
         this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
         this.resourceRepository = resourceRepository;
         this.teamRepository = teamRepository;
+        this.modelMapper = modelMapper;
     }
 
     @GetMapping(value = "/team")
@@ -80,7 +88,7 @@ public class TeamController {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
-            if (name.isEmpty()) {
+            if (name.isEmpty() || name == null) {
                 return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
             } else {
                 teamService.renameTeam(idTeam, name);
@@ -94,4 +102,31 @@ public class TeamController {
         }
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
+
+    @PutMapping(value = "/team/update")
+    private MessageResponse updatePosition(@RequestBody List<TeamDTO> teamDTOS
+    ) {
+        teamService.updateTeam(teamDTOS);
+        List<TeamEntity> teamEntities = teamRepository.findAll();
+        List<TeamDTO> list = teamEntities.stream().map(s -> modelMapper.map(s, TeamDTO.class)).collect(Collectors.toList());
+        if (listEquals(list, teamDTOS)) {
+            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+        } else {
+            return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+        }
+
+    }
+
+
+    private static boolean listEquals(List<TeamDTO> list1, List<TeamDTO> list2) {
+        if (list1.size() != list2.size())
+            return true;
+
+        for (TeamDTO teamDTO : list1) {
+            if (!list2.contains(teamDTO))
+                return true;
+        }
+        return false;
+    }
+
 }

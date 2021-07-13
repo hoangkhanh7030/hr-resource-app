@@ -12,6 +12,15 @@ import lombok.Setter;
 public class AccountRequest {
     private String email;
     private String password;
-    private String fullname;
+    private String fullName;
     private String avatar;
+
+    public boolean validate() {
+        if (email == null || email.isEmpty() || password == null || password.isEmpty() ||
+                avatar == null || avatar.isEmpty() || fullName == null || fullName.isEmpty()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

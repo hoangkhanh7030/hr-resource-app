@@ -63,4 +63,27 @@ public class TeamServiceImpl implements TeamService {
 
     }
 
+    @Override
+    public void updateTeam(List<TeamDTO> teamDTOS) {
+        List<TeamEntity> teamEntities = teamRepository.findAll();
+        deleteTeam(teamDTOS,teamEntities);
+        for (TeamDTO teamDTO : teamDTOS){
+            if (!teamRepository.findByName(teamDTO.getName()).isPresent()){
+                TeamEntity teamEntity = new TeamEntity();
+                teamEntity.setName(teamDTO.getName());
+                teamRepository.save(teamEntity);
+            }
+        }
+
+    }
+    private void deleteTeam(List<TeamDTO> teamDTOS, List<TeamEntity> teamEntities){
+
+        for (TeamEntity teamEntity: teamEntities){
+            if (teamDTOS.stream().filter(s->teamEntity.getName().equals(s.getName())).findAny().orElse(null)==null){
+                teamRepository.delete(teamEntity);
+            }
+        }
+    }
+
+
 }
