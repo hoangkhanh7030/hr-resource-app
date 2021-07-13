@@ -128,7 +128,6 @@ public class TimeServiceImpl implements TimeService {
                 break;
             }
         }
-
         return check;
     }
 
@@ -148,7 +147,6 @@ public class TimeServiceImpl implements TimeService {
         calendar.set(Calendar.YEAR, year);
         calendar.set(Calendar.MONTH, month - 1);
         calendar.set(Calendar.DAY_OF_MONTH, 1);
-        //int maxDaysOfMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
         Map<Date, List<TimeDTO>> bookingMonth = new LinkedHashMap<>();
         while (calendar.get(Calendar.MONTH) + 1 == month) {
             List<TimeDTO> list = new ArrayList<>();

@@ -16,4 +16,6 @@ public interface TimeService {
     MessageResponse deleteBooking(Integer id);
 
     Map<Date, List<TimeDTO>> getBookingByMonth(Integer month, Integer year, Integer workspaceId);
+
+
 }
