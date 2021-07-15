@@ -94,31 +94,22 @@ public class ProjectController {
     }
 
     @PostMapping(value = "/{idWorkspace}/projects/import")
-    public Response importCsvFile(@RequestHeader("AccountId") Integer idAccount,
+    public Message importCsvFile(@RequestHeader("AccountId") Integer idAccount,
                                   @PathVariable Integer idWorkspace,
                                   @RequestParam("csvfile") MultipartFile csvfile) {
-        Response response = new Response();
         if (Objects.requireNonNull(csvfile.getOriginalFilename()).isEmpty()) {
-            response.addMessage(new Message(csvfile.getOriginalFilename(),
-                    CSVFile.NO_SELECTED_FILE, Status.FAIL.getCode()));
-
-            return response;
+           return new Message(csvfile.getOriginalFilename(),
+                    CSVFile.NO_SELECTED_FILE, Status.FAIL.getCode());
         }
         if (!ApacheCommonsCsvUtil.isCSVFile(csvfile)) {
-            response.addMessage(new Message(csvfile.getOriginalFilename(), CSVFile.ERROR, Status.FAIL.getCode()));
-            return response;
+            return new Message(csvfile.getOriginalFilename(), CSVFile.ERROR, Status.FAIL.getCode());
         }
-
-
         try {
-
             csvFileSerivce.store(csvfile.getInputStream(), idWorkspace, idAccount);
-            response.addMessage(new Message(csvfile.getOriginalFilename(), CSVFile.UPLOAD_FILE, Status.SUCCESS.getCode()));
+           return new Message(csvfile.getOriginalFilename(), CSVFile.UPLOAD_FILE, Status.SUCCESS.getCode());
         } catch (Exception e) {
-            response.addMessage(new Message(csvfile.getOriginalFilename(), e.getMessage(), Status.FAIL.getCode()));
+          return new Message(csvfile.getOriginalFilename(), e.getMessage(), Status.FAIL.getCode());
         }
-
-        return response;
     }
 
     @PostMapping(value = "/{idWorkspace}/projects")
