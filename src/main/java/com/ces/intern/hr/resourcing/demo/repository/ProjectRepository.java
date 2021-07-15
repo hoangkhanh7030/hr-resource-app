@@ -37,6 +37,7 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> 
                                                                 @Param("isActivate") Boolean isActivate,
                                                                 Pageable pageable);
     Optional<ProjectEntity> findByName(String name);
+    Optional<ProjectEntity> findByIdAndWorkspaceEntityProject_Id(Integer idProject,Integer idWorkspace);
 
 
 

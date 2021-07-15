@@ -2,6 +2,7 @@ package com.ces.intern.hr.resourcing.demo.controller;
 
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
+import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.NumberSizeResponse;
@@ -11,7 +12,10 @@ import com.ces.intern.hr.resourcing.demo.importCSV.Message.Message;
 import com.ces.intern.hr.resourcing.demo.importCSV.Message.Response;
 import com.ces.intern.hr.resourcing.demo.repository.ProjectRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;
-import com.ces.intern.hr.resourcing.demo.utils.*;
+import com.ces.intern.hr.resourcing.demo.utils.CSVFile;
+import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
+import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
+import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
-
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -155,14 +158,20 @@ public class ProjectController {
 
     }
 
-    @DeleteMapping(value = "/projects/{idProject}")
-    private MessageResponse deleteProject(@PathVariable Integer idProject) {
-        projectService.deleteProject(idProject);
-        if (projectRepository.findById(idProject).isPresent()) {
-            return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
-        } else {
-            return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
+    @DeleteMapping(value = "{idWorkspace}/projects/{idProject}")
+    private MessageResponse deleteProject(@PathVariable Integer idProject,
+                                          @PathVariable Integer idWorkspace) {
+        if (projectRepository.findByIdAndWorkspaceEntityProject_Id(idProject,idWorkspace).isPresent()){
+            projectService.deleteProject(idProject);
+            if (projectRepository.findById(idProject).isPresent()) {
+                return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
+            } else {
+                return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
+            }
+        }else {
+            return new MessageResponse(ResponseMessage.NOT_FOUND,Status.FAIL.getCode());
         }
+
     }
 
 
@@ -202,5 +211,25 @@ public class ProjectController {
 
     private List<ProjectEntity> list(Integer idWorkspace) {
         return projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
+    }
+
+    @PutMapping(value = "/{idWorkspace}/projects/{idProject}/isActivate")
+    private MessageResponse isActivate(@PathVariable Integer idWorkspace,
+                            @PathVariable Integer idProject){
+        if (projectRepository.findByIdAndWorkspaceEntityProject_Id(idProject,idWorkspace).isPresent()){
+            projectService.isActivate(idProject);
+            ProjectEntity projectEntity = projectRepository.findById(idProject)
+                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            if (projectEntity.getIsActivate()){
+                return new MessageResponse(ResponseMessage.IS_ACTIVATE,Status.SUCCESS.getCode());
+
+            }else {
+                return new MessageResponse(ResponseMessage.ARCHIEVED,Status.SUCCESS.getCode());
+            }
+        }else {
+            return new MessageResponse(ResponseMessage.NOT_FOUND,Status.FAIL.getCode());
+        }
+
+
     }
 }

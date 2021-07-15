@@ -13,6 +13,7 @@ public interface ProjectService {
     void deleteProject(Integer idProject);
     List<ProjectDTO> searchParameter(String name,Boolean isActivate,Integer idWorkspace,int page,int size);
     List<ProjectDTO> sortProject(int page,int size,Integer idWorkspace,String name,String type);
+    void isActivate(Integer idProject);
 
 
 

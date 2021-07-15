@@ -99,6 +99,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     }
 
+    @Override
+    public void isActivate(Integer idProject) {
+       ProjectEntity projectEntity = projectRepository.findById(idProject).
+                orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        projectEntity.setIsActivate(!projectEntity.getIsActivate());
+        projectRepository.save(projectEntity);
+    }
+
 
     @Override
     public void deleteProject(Integer idProject) {
@@ -106,6 +114,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         projectRepository.delete(projectEntity);
     }
+
 
 
 

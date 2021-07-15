@@ -20,7 +20,5 @@ public class ProjectDTO extends BaseDTO{
     private String textColor;
     private String colorPattern;
     private Boolean isActivate;
-    private String AccountManager;
-    private String ProjectManager;
-    private List<TimeDTO> timeDTOList;
+
 }
