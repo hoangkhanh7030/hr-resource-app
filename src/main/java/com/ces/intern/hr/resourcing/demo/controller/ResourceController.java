@@ -153,8 +153,8 @@ public class ResourceController {
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             //resourceService.addNewResource(resourceRequest, workspaceId, accountId);
             resourceRequest.setName(resourceRequest.getName() == null? "" : resourceRequest.getName());
-            resourceRequest.setTeamId(resourceRequest.getTeamId() == null? 0 : resourceRequest.getTeamId());
-            resourceRequest.setPositionId(resourceRequest.getPositionId() == null? 0 : resourceRequest.getPositionId());
+//            resourceRequest.setTeamId(resourceRequest.getTeamId() == null? 0 : resourceRequest.getTeamId());
+//            resourceRequest.setPositionId(resourceRequest.getPositionId() == null? 0 : resourceRequest.getPositionId());
             return resourceService.addNewResource(resourceRequest, workspaceId, accountId);
         }
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
