@@ -152,6 +152,9 @@ public class ResourceController {
                 (workspaceId, accountId).orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             //resourceService.addNewResource(resourceRequest, workspaceId, accountId);
+            resourceRequest.setName(resourceRequest.getName() == null? "" : resourceRequest.getName());
+            resourceRequest.setTeamId(resourceRequest.getTeamId() == null? 0 : resourceRequest.getTeamId());
+            resourceRequest.setPositionId(resourceRequest.getPositionId() == null? 0 : resourceRequest.getPositionId());
             return resourceService.addNewResource(resourceRequest, workspaceId, accountId);
         }
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
@@ -181,6 +184,9 @@ public class ResourceController {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId
                 (workspaceId, accountId).orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
+            resourceRequest.setName(resourceRequest.getName() == null? "" : resourceRequest.getName());
+            resourceRequest.setTeamId(resourceRequest.getTeamId() == null? 0 : resourceRequest.getTeamId());
+            resourceRequest.setPositionId(resourceRequest.getPositionId() == null? 0 : resourceRequest.getPositionId());
             return resourceService.updateResource(resourceRequest, resourceId, workspaceId, accountId);
         }
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
