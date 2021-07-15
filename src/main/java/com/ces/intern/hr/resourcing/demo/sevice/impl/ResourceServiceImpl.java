@@ -10,6 +10,7 @@ import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
+import com.ces.intern.hr.resourcing.demo.http.exception.BadRequestException;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
@@ -58,18 +59,21 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public MessageResponse addNewResource(ResourceRequest resourceRequest, Integer id, Integer accountId) {
         Date currentDate = new Date();
-        ResourceDTO resourceDTO = new ResourceDTO();
-        resourceDTO.setName(resourceRequest.getName());
-        resourceDTO.setAvatar(resourceRequest.getAvatar());
-        TeamEntity teamEntity = teamRepository.findById(resourceRequest.getTeamId()).orElse(null);
-        resourceDTO.setTeamDTO(ObjectMapperUtils.map(teamEntity, TeamDTO.class));
-        PositionEntity positionEntity = positionRepository.findById(resourceRequest.getTeamId()).orElse(null);
-        resourceDTO.setPositionDTO(ObjectMapperUtils.map(positionEntity, PositionDTO.class));
-        resourceDTO.setCreatedDate(currentDate);
-        resourceDTO.setCreatedBy(accountId);
-        resourceDTO.setWorkspaceName(workSpaceConverter.toDTO(workspaceRepository.findById(id).orElseThrow(()
-                -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()))));
-        resourceRepository.save(resourceConverter.convertToEntity(resourceDTO));
+        ResourceEntity resourceEntity = new ResourceEntity();
+        resourceEntity.setCreatedDate(currentDate);
+        resourceEntity.setCreatedBy(accountId);
+        if(resourceRequest.getName().equals("") || resourceRequest.getName() == null){
+            throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
+        }
+        resourceEntity.setName(resourceRequest.getName());
+        resourceEntity.setAvatar(resourceRequest.getAvatar());
+        resourceEntity.setTeamEntity(teamRepository.findById(resourceRequest.getTeamId()).orElseThrow(()
+                -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
+        resourceEntity.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElseThrow(()
+                -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
+        resourceEntity.setWorkspaceEntityResource(workspaceRepository.findById(id).orElseThrow(()
+                -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
+        resourceRepository.save(resourceEntity);
         return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
     }
 
@@ -85,22 +89,22 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public MessageResponse updateResource(ResourceRequest resourceRequest, Integer resourceId, Integer workspaceId, Integer accountId) {
         if (resourceRepository.findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).isPresent()) {
-            if (resourceRequest.getName().equals("") || resourceRequest.getName() == null) {
-                return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
-            } else {
-                ResourceEntity resourceEntityTarget = resourceRepository.findByIdAndWorkspaceEntityResource_Id
-                        (resourceId, workspaceId).get();
-                resourceEntityTarget.setModifiedBy(accountId);
-                resourceEntityTarget.setModifiedDate(new Date());
-                resourceEntityTarget.setAvatar(resourceRequest.getAvatar());
-                resourceEntityTarget.setName(resourceRequest.getName());
-                resourceEntityTarget.setTeamEntity(teamRepository.findById
-                        (resourceRequest.getTeamId()).orElse(null));
-                resourceEntityTarget.setPositionEntity(positionRepository.findById
-                        (resourceRequest.getPositionId()).orElse(null));
-                resourceRepository.save(resourceEntityTarget);
-                return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+            ResourceEntity resourceEntityTarget = resourceRepository.findByIdAndWorkspaceEntityResource_Id
+                    (resourceId, workspaceId).get();
+            resourceEntityTarget.setModifiedBy(accountId);
+            Date currentDate = new Date();
+            resourceEntityTarget.setModifiedDate(currentDate);
+            resourceEntityTarget.setAvatar(resourceRequest.getAvatar());
+            if(resourceRequest.getName().equals("") || resourceRequest.getName() == null){
+                throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
             }
+            resourceEntityTarget.setName(resourceRequest.getName());
+            resourceEntityTarget.setTeamEntity(teamRepository.findById(resourceRequest.getTeamId()).orElseThrow(()
+                    -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
+            resourceEntityTarget.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElseThrow(()
+                    -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
+            resourceRepository.save(resourceEntityTarget);
+            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
         }
         return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
     }

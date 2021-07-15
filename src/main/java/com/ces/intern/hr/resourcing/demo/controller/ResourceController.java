@@ -1,4 +1,5 @@
 package com.ces.intern.hr.resourcing.demo.controller;
+
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
@@ -35,6 +36,7 @@ public class ResourceController {
     private final ResourceService resourceService;
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
     private final CsvFileSerivce csvFileSerivce;
+    private static final String DATE_FORMAT = "yyyy-MM-dd_HH-mm-ss";
 
     @Autowired
     private ResourceController(ResourceService resourceService,
@@ -54,57 +56,45 @@ public class ResourceController {
                                                  @RequestParam String keyword,
                                                  @RequestParam String teamName,
                                                  @RequestParam String posName,
-                                                 @RequestParam String name,
+                                                 @RequestParam String sortColumn,
                                                  @RequestParam String type) {
         teamName = teamName == null ? "" : teamName;
         posName = posName == null ? "" : posName;
         keyword = keyword == null ? "" : keyword;
-        name = name == null ? "" : name;
-        type = type == null ? SortPara.DESC.getName() : type;
+        sortColumn = sortColumn == null ? "" : sortColumn;
+        //type = type == null ? SortPara.DESC.getName() : type;
+        if (type == null){
+            type = SortPara.DESC.getName();
+        }
+        else{
+            if (!type.equals(SortPara.DESC.getName()) && !type.equals(SortPara.ASC.getName())){
+                type = SortPara.DESC.getName();
+            }
+        }
+        System.out.println(teamName + posName + sortColumn + type);
         List<ResourceDTO> resourceDTOList = resourceService
-                .sortResources(workspaceId, keyword, teamName, posName, name, type, page, size);
+                .sortResources(workspaceId, keyword, teamName, posName, sortColumn, type, page, size);
         int listSize = resourceService.getResourcesOfWorkSpace(workspaceId).size();
         int numberOfPages;
-        if (listSize % size == 0){
-            numberOfPages = listSize / size;
-        }
-        else {
-            numberOfPages = (listSize / size) + 1;
+        if (listSize == 0) {
+            numberOfPages = 0;
+        } else {
+            if (listSize % size == 0) {
+                numberOfPages = listSize / size;
+            } else {
+                numberOfPages = (listSize / size) + 1;
+            }
         }
         return new ResourceListResponse(resourceDTOList, numberOfPages);
     }
 
-//    @GetMapping("/{workspaceId}/resources/filterByTeam")
-//    public List<ResourceDTO> showResourceByTeam(@PathVariable Integer workspaceId,
-//                                                @RequestParam String teamName,
-//                                                @RequestParam Integer page,
-//                                                @RequestParam Integer size) {
-//        return resourceService.filterByTeam(workspaceId, teamName, page, size);
-//    }
-//
-//    @GetMapping("/{workspaceId}/resources/filterByPosition")
-//    public List<ResourceDTO> showResourceByPosition(@PathVariable Integer workspaceId,
-//                                                    @RequestParam String posName,
-//                                                    @RequestParam Integer page,
-//                                                    @RequestParam Integer size) {
-//        return resourceService.filterByPosition(workspaceId, posName, page, size);
-//    }
-//
-//    @GetMapping("/{workspaceId}/resources/filterByTeamAndPosition")
-//    public List<ResourceDTO> showResourceByTeamAndPosition(@PathVariable Integer workspaceId,
-//                                                           @RequestParam String teamName,
-//                                                           @RequestParam String posName,
-//                                                           @RequestParam Integer page,
-//                                                           @RequestParam Integer size) {
-//        return resourceService.filterByTeamAndPosition(workspaceId, teamName, posName, page, size);
-//    }
 
     @GetMapping("/{workspaceId}/resources/export")
     public void exportCSV(HttpServletResponse response,
-                              @PathVariable Integer workspaceId
+                          @PathVariable Integer workspaceId
     ) throws IOException {
         response.setContentType("text/csv");
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         String currentDateTime = dateFormat.format(new Date());
 
         String headerKey = "Content-Disposition";
@@ -113,8 +103,8 @@ public class ResourceController {
         List<ResourceDTO> resourceDTOS = resourceService.getResourcesOfWorkSpace(workspaceId);
 
         ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
-        String[] csvHeader = {"Project ID", "Name", "Client Name", "Color", "Text Color", "Color Pattern", "Activate"};
-        String[] nameMapping = {"id", "name", "clientName", "color", "textColor", "colorPattern", "isActivate"};
+        String[] csvHeader = {"Resource ID", "Name", "Workspace Name", "Team", "Position", "Bookings"};
+        String[] nameMapping = {"id", "name", "workspaceName", "teamDTO", "positionDTO", "times"};
 
         csvWriter.writeHeader(csvHeader);
 
@@ -128,27 +118,26 @@ public class ResourceController {
     @GetMapping("/{workspaceId}/resources/import")
     public Response importCSV(@RequestHeader("AccountId") Integer idAccount,
                               @PathVariable Integer workspaceId,
-                              @RequestParam("csvfile") MultipartFile csvfile
+                              @RequestParam("csvFile") MultipartFile csvFile
     ){
         Response response = new Response();
-        if (Objects.requireNonNull(csvfile.getOriginalFilename()).isEmpty()) {
-            response.addMessage(new Message(csvfile.getOriginalFilename(),
+        if (Objects.requireNonNull(csvFile.getOriginalFilename()).isEmpty()) {
+            response.addMessage(new Message(csvFile.getOriginalFilename(),
                     "No selected file to upload! Please do the checking", Status.FAIL.getCode()));
 
             return response;
         }
-        if (!ApacheCommonsCsvUtil.isCSVFile(csvfile)) {
-            response.addMessage(new Message(csvfile.getOriginalFilename(), "Error: this is not a CSV file!", Status.FAIL.getCode()));
+        if (!ApacheCommonsCsvUtil.isCSVFile(csvFile)) {
+            response.addMessage(new Message(csvFile.getOriginalFilename(), "Error: this is not a CSV file!", Status.FAIL.getCode()));
             return response;
         }
 
 
         try {
-
-            csvFileSerivce.store(csvfile.getInputStream(), workspaceId, idAccount);
-            response.addMessage(new Message(csvfile.getOriginalFilename(), "Upload File Successfully!", Status.SUCCESS.getCode()));
+            csvFileSerivce.store(csvFile.getInputStream(), workspaceId, idAccount);
+            response.addMessage(new Message(csvFile.getOriginalFilename(), "Upload File Successfully!", Status.SUCCESS.getCode()));
         } catch (Exception e) {
-            response.addMessage(new Message(csvfile.getOriginalFilename(), e.getMessage(), Status.FAIL.getCode()));
+            response.addMessage(new Message(csvFile.getOriginalFilename(), e.getMessage(), Status.FAIL.getCode()));
         }
 
         return response;

@@ -72,8 +72,8 @@ public class TimeServiceImpl implements TimeService {
     public MessageResponse updateBooking(TimeRequest timeRequest, Integer timeId){
         TimeEntity timeEntity = new TimeEntity();
         if(timeRepository.findById(timeId).isPresent()
-        && projectRepository.findById(timeRequest.getProjectId()).isPresent()
-        && resourceRepository.findById(timeRequest.getResourceId()).isPresent()){
+                && projectRepository.findById(timeRequest.getProjectId()).isPresent()
+                && resourceRepository.findById(timeRequest.getResourceId()).isPresent()){
             timeEntity.setTask(timeRequest.getTaskName());
             timeEntity.setResourceEntity(resourceRepository.findById(timeRequest.getResourceId()).get());
             timeEntity.setProjectEntity(projectRepository.findById(timeRequest.getProjectId()).get());
@@ -139,6 +139,7 @@ public class TimeServiceImpl implements TimeService {
         }
         return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
     }
+
 
     @Override
     public Map<Date, List<TimeDTO>> getBookingByMonth(Integer month, Integer year, Integer workspaceId){
