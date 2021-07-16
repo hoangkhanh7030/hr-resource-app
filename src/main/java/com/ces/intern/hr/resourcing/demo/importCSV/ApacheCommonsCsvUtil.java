@@ -93,6 +93,7 @@ public class ApacheCommonsCsvUtil {
         return resourceRequests;
     }
 
+
     public static boolean isCSVFile(MultipartFile file) {
         String extension = Objects.requireNonNull(file.getOriginalFilename()).split("\\.")[1];
 

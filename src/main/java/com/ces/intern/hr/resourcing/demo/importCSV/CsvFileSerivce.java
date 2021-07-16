@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -52,9 +51,7 @@ public class CsvFileSerivce {
             List<ProjectDTO> projectDTOList = ApacheCommonsCsvUtil.parseCsvFile(file);
 
             for (ProjectDTO projectDTO : projectDTOList) {
-                if (projectRepository.findByName(projectDTO.getName()).isPresent()){
-                    continue;
-                }else {
+                if (!projectRepository.findByName(projectDTO.getName()).isPresent()){
                     ProjectEntity projectEntity = modelMapper.map(projectDTO, ProjectEntity.class);
                     projectEntity.setWorkspaceEntityProject(workspaceEntity);
                     projectEntity.setIsActivate(projectDTO.getIsActivate());

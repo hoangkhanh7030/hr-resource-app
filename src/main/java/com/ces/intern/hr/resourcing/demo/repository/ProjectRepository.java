@@ -30,12 +30,18 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> 
 
     List<ProjectEntity> findAllByWorkspaceEntityProject_Id(Integer idWorkspace);
 
-    @Query(value = "select p from ProjectEntity p where p.workspaceEntityProject.id=:idWorkspace and lower(p.name) like lower(concat('%',:name,'%')) or lower(p.clientName) like lower(concat('%',:name,'%')) " +
-            "and p.isActivate=:isActivate")
+    @Query(value = "select p from ProjectEntity p where p.workspaceEntityProject.id=:idWorkspace and p.isActivate=:isActivate and (lower(p.name) " +
+            "like lower(concat('%',:name,'%')) or lower(p.clientName) like lower(concat('%',:name,'%')))")
     Page<ProjectEntity> findAllByNameAndClientNameAndIsActivate(@Param("idWorkspace") Integer idWorkspace,
                                                                 @Param("name") String name,
                                                                 @Param("isActivate") Boolean isActivate,
                                                                 Pageable pageable);
+
+    @Query(value = "select p from ProjectEntity p where p.workspaceEntityProject.id=:idWorkspace and (lower(p.name) " +
+            "like lower(concat('%',:name,'%')) or lower(p.clientName) like lower(concat('%',:name,'%')))")
+    Page<ProjectEntity> findAllByNameAndClientName(@Param("idWorkspace") Integer idWorkspace,
+                                                   @Param("name") String name,
+                                                   Pageable pageable);
     Optional<ProjectEntity> findByName(String name);
     Optional<ProjectEntity> findByIdAndWorkspaceEntityProject_Id(Integer idProject,Integer idWorkspace);
 

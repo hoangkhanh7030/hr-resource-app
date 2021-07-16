@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -93,24 +94,32 @@ public class ResourceController {
     public void exportCSV(HttpServletResponse response,
                           @PathVariable Integer workspaceId
     ) throws IOException {
-        response.setContentType("text/csv");
-        DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+        response.setContentType(CSVFile.CONTENT_TYPE);
+        DateFormat dateFormat = new SimpleDateFormat(CSVFile.DATE);
         String currentDateTime = dateFormat.format(new Date());
 
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=project_" + currentDateTime + ".csv";
+        String headerKey = CSVFile.HEADER_KEY;
+        String headerValue = CSVFile.HEADER_VALUE_RESOURCE + currentDateTime + CSVFile.FILE_TYPE;
         response.setHeader(headerKey, headerValue);
         List<ResourceDTO> resourceDTOS = resourceService.getResourcesOfWorkSpace(workspaceId);
+        List<ResourceRequest> resourceRequests = new ArrayList<>();
 
         ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
-        String[] csvHeader = {"Resource ID", "Name", "Workspace Name", "Team", "Position", "Bookings"};
-        String[] nameMapping = {"id", "name", "workspaceName", "teamDTO", "positionDTO", "times"};
+        String[] csvHeader = CSVFile.CSV_HEADER_RESOURCE;
+        String[] nameMapping = CSVFile.NAME_MAPPING_RESOURCE;
 
         csvWriter.writeHeader(csvHeader);
-
         for (ResourceDTO resourceDTO : resourceDTOS) {
-            csvWriter.write(resourceDTO, nameMapping);
-
+            ResourceRequest resourceRequest = new ResourceRequest();
+            resourceRequest.setId(resourceDTO.getId());
+            resourceRequest.setName(resourceDTO.getName());
+            resourceRequest.setAvatar(resourceDTO.getAvatar());
+            resourceRequest.setTeamId(resourceDTO.getTeamDTO().getId());
+            resourceRequest.setPositionId(resourceDTO.getPositionDTO().getId());
+            resourceRequests.add(resourceRequest);
+        }
+        for (ResourceRequest resourceRequest : resourceRequests) {
+            csvWriter.write(resourceRequest, nameMapping);
         }
 
         csvWriter.close();
@@ -135,7 +144,7 @@ public class ResourceController {
 
 
         try {
-            csvFileSerivce.store(csvFile.getInputStream(), workspaceId, idAccount);
+            csvFileSerivce.storeResource(csvFile.getInputStream(), workspaceId, idAccount);
             response.addMessage(new Message(csvFile.getOriginalFilename(), "Upload File Successfully!", Status.SUCCESS.getCode()));
         } catch (Exception e) {
             response.addMessage(new Message(csvFile.getOriginalFilename(), e.getMessage(), Status.FAIL.getCode()));
@@ -144,6 +153,7 @@ public class ResourceController {
         return response;
 
     }
+
 
     @PostMapping("/{workspaceId}/resources")
     public MessageResponse createResource(@RequestBody ResourceRequest resourceRequest,

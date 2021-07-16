@@ -6,6 +6,7 @@ public class CSVFile {
     public static final String CONTENT_TYPE = "text/csv";
     public static final String FILE_TYPE = ".csv";
     public static final String HEADER_VALUE = "attachment; filename=project_";
+    public static final String HEADER_VALUE_RESOURCE = "attachment; filename=resource_";
     public static final String[] CSV_HEADER = {"Project ID", "Name", "Client Name", "Color", "Text Color", "Color Pattern", "Activate"};
     public static final String[] NAME_MAPPING = {"id", "name", "clientName", "color", "textColor", "colorPattern", "isActivate"};
 
