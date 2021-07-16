@@ -1,6 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.importCSV;
 
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
+import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -52,6 +53,44 @@ public class ApacheCommonsCsvUtil {
         }
 
         return projectDTOList;
+    }
+
+
+    public static List<ResourceRequest> parseCsvFileResource(InputStream is) {
+        BufferedReader fileReader = null;
+        CSVParser csvParser = null;
+
+        List<ResourceRequest> resourceRequests = new ArrayList<>();
+
+        try {
+            fileReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            csvParser = new CSVParser(fileReader,
+                    CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
+
+            Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+
+            for (CSVRecord csvRecord : csvRecords) {
+                ResourceRequest resourceRequest = new ResourceRequest();
+                resourceRequest.setName(csvRecord.get("name"));
+                resourceRequest.setAvatar(csvRecord.get("avatar"));
+                resourceRequest.setTeamId(Integer.parseInt(csvRecord.get("teamId")));
+                resourceRequest.setPositionId(Integer.parseInt(csvRecord.get("positionId")));
+                resourceRequests.add(resourceRequest);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                assert fileReader != null;
+                fileReader.close();
+                Objects.requireNonNull(csvParser).close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return resourceRequests;
     }
 
     public static boolean isCSVFile(MultipartFile file) {
