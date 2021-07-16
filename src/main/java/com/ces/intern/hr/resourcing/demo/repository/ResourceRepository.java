@@ -77,5 +77,14 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
                                     @Param("posName") String posName,
                                     Pageable pageable);
 
+    @Query("select count(r) from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId AND" +
+            " lower(r.name) like lower(concat('%',:searchName,'%')) " +
+            "AND lower(r.teamEntity.name) like lower(concat('%',:teamName,'%')) AND lower(r.positionEntity.name) " +
+            "like lower(concat('%',:posName,'%'))")
+    Integer getNumberOfResourcesOfWorkspace(@Param("workspaceId") Integer workspaceId,
+                                            @Param("searchName") String searchName,
+                                            @Param("teamName") String teamName,
+                                            @Param("posName") String posName);
+
     List<ResourceEntity> findAllByWorkspaceEntityResource_Id(Integer workspaceId);
 }

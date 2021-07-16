@@ -41,6 +41,11 @@ public class ResourceServiceImpl implements ResourceService {
     private final TeamRepository teamRepository;
     private final PositionRepository positionRepository;
 
+    private static final String TEAM_NAME_PARAMETER = "teamEntity.name";
+    private static final String POSITION_NAME_PARAMETER = "positionEntity.name";
+    private static final String RESOURCE_NAME_PARAMETER = "name";
+    private static final String CREATED_DATE_NAME_PARAMETER = "createdDate";
+
     @Autowired
     public ResourceServiceImpl(ResourceRepository resourceRepository,
                                WorkspaceConverter workSpaceConverter,
@@ -60,8 +65,6 @@ public class ResourceServiceImpl implements ResourceService {
     public MessageResponse addNewResource(ResourceRequest resourceRequest, Integer id, Integer accountId) {
         Date currentDate = new Date();
         ResourceEntity resourceEntity = new ResourceEntity();
-        resourceEntity.setCreatedDate(currentDate);
-        resourceEntity.setCreatedBy(accountId);
         if(resourceRequest.getName().equals("") || resourceRequest.getName() == null){
             throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
         }
@@ -71,6 +74,8 @@ public class ResourceServiceImpl implements ResourceService {
                 -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
         resourceEntity.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElseThrow(()
                 -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
+        resourceEntity.setCreatedDate(currentDate);
+        resourceEntity.setCreatedBy(accountId);
         resourceEntity.setWorkspaceEntityResource(workspaceRepository.findById(id).orElseThrow(()
                 -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
         resourceRepository.save(resourceEntity);
@@ -170,59 +175,32 @@ public class ResourceServiceImpl implements ResourceService {
         }
     }
 
-    @Override
-    public List<ResourceDTO> filterByTeam(Integer id, String teamName, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
-        List<ResourceDTO> result = new ArrayList<>();
-        Page<ResourceEntity> found = resourceRepository.
-                filterByTeam(id, teamName, pageable);
-        List<ResourceEntity> resourceEntityList = found.getContent();
-        for (ResourceEntity resourceEntity : resourceEntityList) {
-            result.add(resourceConverter.convertToDto(resourceEntity));
-        }
-        return result;
-    }
-
-    @Override
-    public List<ResourceDTO> filterByPosition(Integer id, String posName, Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
-        List<ResourceDTO> result = new ArrayList<>();
-        Page<ResourceEntity> found = resourceRepository.
-                filterByPosition(id, posName, pageable);
-        List<ResourceEntity> resourceEntityList = found.getContent();
-        for (ResourceEntity resourceEntity : resourceEntityList) {
-            result.add(resourceConverter.convertToDto(resourceEntity));
-        }
-        return result;
-    }
-
-    @Override
-    public List<ResourceDTO> filterByTeamAndPosition(Integer id, String teamName, String posName,
-                                                     Integer page, Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
-        List<ResourceDTO> searchResult = new ArrayList<>();
-        Page<ResourceEntity> queryResult = resourceRepository.
-                filterByTeamAndPosition(id, teamName, posName, pageable);
-        List<ResourceEntity> resourceEntityList = queryResult.getContent();
-        for (ResourceEntity resourceEntity : resourceEntityList) {
-            searchResult.add(resourceConverter.convertToDto(resourceEntity));
-        }
-        return searchResult;
-    }
 
     @Override
     public List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String teamName, String posName,
-                                           String name, String type, Integer page, Integer size){
+                                           String sortColumn, String type, Integer page, Integer size){
+        switch (sortColumn) {
+            case "team":
+                sortColumn = TEAM_NAME_PARAMETER;
+                break;
+            case "position":
+                sortColumn = POSITION_NAME_PARAMETER;
+                break;
+            case "name":
+                sortColumn = RESOURCE_NAME_PARAMETER;
+                break;
+            default:
+                sortColumn = CREATED_DATE_NAME_PARAMETER;
+                break;
+        }
+        Page<ResourceEntity> resourceEntityPage;
         Pageable pageable;
-        if (name == null){
-            name = "createdDate";
-        }
         if (type.equals(SortPara.ASC.getName())) {
-            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, name));
+            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortColumn));
         }else {
-            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, name));
+            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
         }
-        Page<ResourceEntity> resourceEntityPage = resourceRepository
+        resourceEntityPage = resourceRepository
                 .filterList(idWorkspace, searchName, teamName, posName, pageable);
         List<ResourceEntity> resourceEntityList = resourceEntityPage.getContent();
         List<ResourceDTO> result = new ArrayList<>();
@@ -230,6 +208,11 @@ public class ResourceServiceImpl implements ResourceService {
             result.add(resourceConverter.convertToDto(resourceEntity));
         }
         return result;
+    }
+
+    @Override
+    public Integer getNumberOfResources(Integer idWorkspace, String searchName, String teamName, String posName){
+        return resourceRepository.getNumberOfResourcesOfWorkspace(idWorkspace, searchName, teamName, posName);
     }
 }
 

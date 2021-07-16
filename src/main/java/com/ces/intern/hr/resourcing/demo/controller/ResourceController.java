@@ -74,7 +74,7 @@ public class ResourceController {
         System.out.println(teamName + posName + sortColumn + type);
         List<ResourceDTO> resourceDTOList = resourceService
                 .sortResources(workspaceId, keyword, teamName, posName, sortColumn, type, page, size);
-        int listSize = resourceService.getResourcesOfWorkSpace(workspaceId).size();
+        int listSize = resourceService.getNumberOfResources(workspaceId, keyword, teamName, posName);
         int numberOfPages;
         if (listSize == 0) {
             numberOfPages = 0;
@@ -110,12 +110,13 @@ public class ResourceController {
 
         for (ResourceDTO resourceDTO : resourceDTOS) {
             csvWriter.write(resourceDTO, nameMapping);
+
         }
 
         csvWriter.close();
     }
 
-    @GetMapping("/{workspaceId}/resources/import")
+    @PostMapping("/{workspaceId}/resources/import")
     public Response importCSV(@RequestHeader("AccountId") Integer idAccount,
                               @PathVariable Integer workspaceId,
                               @RequestParam("csvFile") MultipartFile csvFile
