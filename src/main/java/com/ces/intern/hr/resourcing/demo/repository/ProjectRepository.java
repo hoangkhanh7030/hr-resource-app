@@ -18,14 +18,12 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> 
     @Query("select p from ProjectEntity p where p.workspaceEntityProject.id =:idworkspace")
     Page<ProjectEntity> findAllById(@Param("idworkspace") Integer idworkspace, Pageable pageable);
 
-    @Query("select p from ProjectEntity p where p.workspaceEntityProject.id =:idworkspace")
-    List<ProjectEntity> findAllByidWorkspace(@Param("idworkspace") Integer idworkspace);
+    @Query(value = "select p from ProjectEntity p where p.workspaceEntityProject.id=:idWorkspace and (lower(p.name) " +
+            "like lower(concat('%',:name,'%')) or lower(p.clientName) like lower(concat('%',:name,'%')))")
+    List<ProjectEntity> findAllByidWorkspaceAndSearchName(@Param("idWorkspace") Integer idWorkspace,
+                                                    @Param("name") String name);
 
-    @Query("select p from ProjectEntity p where p.id=:idProject and p.workspaceEntityProject.id=:idWorkspace")
-    Optional<ProjectEntity> findByIdWorkspaceAndIdProject(@Param("idWorkspace") Integer idWorkspace,@Param("idProject") Integer idProject);
 
-    @Query("select p from ProjectEntity p where p.isActivate=:activate and p.id=:idProject")
-    Optional<ProjectEntity> findByIdAndIsActivate(@Param("activate") boolean activate,@Param("idProject") Integer idProject);
 
 
     List<ProjectEntity> findAllByWorkspaceEntityProject_Id(Integer idWorkspace);
@@ -36,6 +34,7 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> 
                                                                 @Param("name") String name,
                                                                 @Param("isActivate") Boolean isActivate,
                                                                 Pageable pageable);
+
 
     @Query(value = "select p from ProjectEntity p where p.workspaceEntityProject.id=:idWorkspace and (lower(p.name) " +
             "like lower(concat('%',:name,'%')) or lower(p.clientName) like lower(concat('%',:name,'%')))")

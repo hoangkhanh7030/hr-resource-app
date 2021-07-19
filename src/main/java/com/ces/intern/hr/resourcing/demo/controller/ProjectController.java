@@ -12,10 +12,7 @@ import com.ces.intern.hr.resourcing.demo.importCSV.Message.Message;
 import com.ces.intern.hr.resourcing.demo.importCSV.Message.Response;
 import com.ces.intern.hr.resourcing.demo.repository.ProjectRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;
-import com.ces.intern.hr.resourcing.demo.utils.CSVFile;
-import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
-import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
-import com.ces.intern.hr.resourcing.demo.utils.Status;
+import com.ces.intern.hr.resourcing.demo.utils.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -51,21 +48,13 @@ public class ProjectController {
         this.modelMapper = modelMapper;
         this.csvFileSerivce = csvFileSerivce;
     }
+    private List<ProjectEntity> listAll(Integer idWorkspace) {
+        return projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
+    }
+    private List<ProjectEntity> listSearch(Integer idWorkspace,String searchName){
+        return projectRepository.findAllByidWorkspaceAndSearchName(idWorkspace,searchName);
+    }
 
-//    @GetMapping(value = "/{idWorkspace}/projects")
-//    private NumberSizeResponse getAll(@PathVariable Integer idWorkspace,
-//                                      @RequestParam int page,
-//                                      @RequestParam int size) {
-//
-//        int numberSize;
-//        int sizeListProject = list(idWorkspace).size();
-//        if (sizeListProject % size == 0) {
-//            numberSize = sizeListProject / size;
-//        } else {
-//            numberSize = (sizeListProject / size) + 1;
-//        }
-//        return new NumberSizeResponse(projectService.getAllProjects(idWorkspace, page, size), numberSize);
-//    }
 
     @GetMapping(value = "/{idWorkspace}/projects/export")
     public void exportToCSV(HttpServletResponse response,
@@ -175,43 +164,6 @@ public class ProjectController {
     }
 
 
-//    @GetMapping(value = "/{idWorkspace}/projects/searchParam")
-//    private NumberSizeResponse searchPara(@PathVariable Integer idWorkspace,
-//                                          @RequestParam String name,
-//                                          @RequestParam Boolean isActivate,
-//                                          @RequestParam int page,
-//                                          @RequestParam int size
-//    ) {
-//
-//        int numberSize;
-//        int sizeListProject = list(idWorkspace).size();
-//        if (sizeListProject % size == 0) {
-//            numberSize = sizeListProject / size;
-//        } else {
-//            numberSize = (sizeListProject / size) + 1;
-//        }
-//        return new NumberSizeResponse(projectService.searchParameter(name, isActivate, idWorkspace, page, size), numberSize);
-//    }
-
-//    @GetMapping(value = "/{idWorkspace}/projects/sort")
-//    private NumberSizeResponse sortProject(@PathVariable Integer idWorkspace,
-//                                           @RequestParam int page,
-//                                           @RequestParam int size,
-//                                           @RequestParam String name,
-//                                           @RequestParam String type) {
-//        int numberSize;
-//        int sizeListProject = list(idWorkspace).size();
-//        if (sizeListProject % size == 0) {
-//            numberSize = sizeListProject / size;
-//        } else {
-//            numberSize = (sizeListProject / size) + 1;
-//        }
-//        return new NumberSizeResponse(projectService.sortProject(page, size, idWorkspace, name, type), numberSize);
-//    }
-//
-    private List<ProjectEntity> list(Integer idWorkspace) {
-        return projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
-    }
 
     @PutMapping(value = "/{idWorkspace}/projects/{idProject}/isActivate")
     private MessageResponse isActivate(@PathVariable Integer idWorkspace,
@@ -246,17 +198,31 @@ public class ProjectController {
         isActivate=isActivate==null?"":isActivate;
 
         int numberSize;
-        int sizeListProject = list(idWorkspace).size();
-        if (sizeListProject % size == 0) {
-            numberSize = sizeListProject / size;
-        } else {
-            numberSize = (sizeListProject / size) + 1;
-        }
-        if (sortName.isEmpty()&&searchName.isEmpty()&&type.isEmpty()&&isActivate.isEmpty()){
+        int sizeListProject;
+        if (sortName.isEmpty()&&searchName.isEmpty()&&type.equals(SortPara.ASC.getName())&&isActivate.isEmpty()){
+            sizeListProject = listAll(idWorkspace).size();
+            if (sizeListProject % size == 0) {
+                numberSize = sizeListProject / size;
+            } else {
+                numberSize = (sizeListProject / size) + 1;
+            }
             return new NumberSizeResponse(projectService.getAllProjects(idWorkspace,page,size),numberSize);
         }else if (searchName.isEmpty()&&isActivate.isEmpty()){
+
+            sizeListProject =listAll(idWorkspace).size();
+            if (sizeListProject % size == 0) {
+                numberSize = sizeListProject / size;
+            } else {
+                numberSize = (sizeListProject / size) + 1;
+            }
             return new NumberSizeResponse(projectService.sortProject(page,size,idWorkspace,sortName,type),numberSize);
         }else{
+            sizeListProject =listSearch(idWorkspace,searchName).size();
+            if (sizeListProject % size == 0) {
+                numberSize = sizeListProject / size;
+            } else {
+                numberSize = (sizeListProject / size) + 1;
+            }
             if (isActivate.isEmpty()){
                 return new NumberSizeResponse(projectService.searchParameterNotIsActivate(searchName,idWorkspace,page,size),numberSize);
             }else {
@@ -265,4 +231,5 @@ public class ProjectController {
             }
         }
     }
+
 }
