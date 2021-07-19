@@ -27,11 +27,8 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
     Page<ResourceEntity> findResourcesOfWorkSpace(@Param("id") Integer id, Pageable pageable);
 
 
-    @Query(value = "SELECT res from ResourceEntity res where res.positionEntity.id = 1 and res.positionEntity.teamEntity.workspaceEntityTeam.id = :id")
-    List<ResourceEntity> findAllProductManagersOfWorkspace(@Param("id") Integer id);
+    //Optional<ResourceEntity> findByIdAndPositionEntityTeamEntityWorkspaceEntityId(Integer resourceId, Integer workspaceId);
 
-    @Query(value = "SELECT res from ResourceEntity res where res.positionEntity.id = 2 and res.positionEntity.teamEntity.workspaceEntityTeam.id = :id")
-    List<ResourceEntity> findAllAccountManagersOfWorkspace(@Param("id") Integer id);
 
     Optional<ResourceEntity> findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(Integer resourceId, Integer workspaceId);
 
@@ -43,6 +40,29 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
                                                  @Param("teamName") String teamName,
                                                  @Param("workspaceId") Integer workspaceId,
                                                  Pageable pageable);
+
+//    @Query("select r from ResourceEntity r where r.positionEntity.teamEntity.workspaceEntity.id = :workspaceId" +
+//            " AND r.positionEntity.teamEntity.name = :teamName")
+//    Page<ResourceEntity> filterByTeam(@Param("workspaceId") Integer workspaceId,
+//                                      @Param("teamName") String teamName,
+//                                      Pageable pageable);
+//
+//    @Query("select r from ResourceEntity r where r.positionEntity.teamEntity.workspaceEntity.id = :workspaceId" +
+//            " AND r.positionEntity.name = :posName")
+//    Page<ResourceEntity> filterByPosition(@Param("workspaceId") Integer workspaceId,
+//                                          @Param("posName") String posName,
+//                                          Pageable pageable);
+//
+//    @Query("select r from ResourceEntity r where r.positionEntity.teamEntity.workspaceEntity.id = :workspaceId" +
+//            " AND r.positionEntity.teamEntity.name = :teamName AND r.positionEntity.name = :posName")
+//    Page<ResourceEntity> filterByTeamAndPosition(@Param("workspaceId") Integer workspaceId,
+//                                                 @Param("teamName") String teamName,
+//                                                 @Param("posName") String posName,
+//                                                 Pageable pageable);
+
+
+    //Optional<ResourceEntity> findByPositionEntityTeamEntity_IdAndId(Integer idTeam,Integer idResource);
+
 
     @Query("select r from ResourceEntity r where r.positionEntity.teamEntity.workspaceEntityTeam.id = :workspaceId" +
             " AND r.positionEntity.teamEntity.name = :teamName")
@@ -62,7 +82,10 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
                                                  @Param("teamName") String teamName,
                                                  @Param("posName") String posName,
                                                  Pageable pageable);
-    Optional<ResourceEntity> findByPositionEntity_TeamEntity_IdAndId(Integer idTeam,Integer idResource);
+
+    Optional<ResourceEntity> findByPositionEntity_TeamEntity_IdAndId(Integer idTeam, Integer idResource);
+
+    Optional<ResourceEntity> findByPositionEntity_TeamEntity_WorkspaceEntityTeam_IdAndId(Integer workspaceId,Integer idResource);
 
 
     @Query("select r from ResourceEntity r where r.positionEntity.teamEntity.workspaceEntityTeam.id = :workspaceId AND" +
@@ -88,4 +111,5 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
 
     @Query(value = "select r from ResourceEntity r where r.positionEntity.teamEntity.workspaceEntityTeam.id =:idWorkspace")
     List<ResourceEntity> findAllByIdWorkspace(@Param("idWorkspace") Integer idWorkspace);
+
 }

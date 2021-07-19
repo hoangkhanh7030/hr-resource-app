@@ -32,7 +32,7 @@ public class ResourceServiceImpl implements ResourceService {
     private final TeamRepository teamRepository;
     private final PositionRepository positionRepository;
 
-    private static final String TEAM_PARAMETER = "teamEntity.name";
+    private static final String TEAM_PARAMETER = "positionEntity.teamEntity.name";
     private static final String POSITION_PARAMETER = "positionEntity.name";
     private static final String RESOURCE_NAME_PARAMETER = "name";
     private static final String MODIFIED_DATE_PARAMETER = "modifiedDate";
@@ -80,11 +80,15 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public MessageResponse updateResource(ResourceRequest resourceRequest, Integer resourceId, Integer workspaceId, Integer accountId) {
-        if (resourceRepository.findByPositionEntity_TeamEntity_IdAndId(resourceId, workspaceId).isPresent()) {
+        if (resourceRepository.findByPositionEntity_TeamEntity_WorkspaceEntityTeam_IdAndId(workspaceId, resourceId).isPresent()) {
             ResourceEntity resourceEntityTarget = resourceRepository.findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(resourceId,workspaceId).get();
+            resourceEntityTarget.setId(resourceRequest.getId());
             resourceEntityTarget.setModifiedBy(accountId);
             Date currentDate = new Date();
             resourceEntityTarget.setModifiedDate(currentDate);
+            if(resourceRequest.getAvatar().equals("") || resourceRequest.getAvatar() == null){
+                throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
+            }
             resourceEntityTarget.setAvatar(resourceRequest.getAvatar());
             if(resourceRequest.getName().equals("") || resourceRequest.getName() == null){
                 throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
@@ -181,6 +185,7 @@ public class ResourceServiceImpl implements ResourceService {
     public Integer getNumberOfResources(Integer idWorkspace, String searchName, String teamName, String posName){
         return resourceRepository.getNumberOfResourcesOfWorkspace(idWorkspace, searchName, teamName, posName);
     }
+
 
 }
 

@@ -21,13 +21,10 @@ public class WorkspaceEntity extends BaseEnity {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "workspaceEntity")
 
     private List<AccountWorkspaceRoleEntity> entityList = new ArrayList<>();
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "workspaceEntityTeam")
-    private List<TeamEntity> teamEntities = new ArrayList<>();
-
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "workspaceEntityProject")
 
     private List<ProjectEntity> projectEntities = new ArrayList<>();
 
-
+    @OneToMany(cascade = CascadeType.ALL,mappedBy = "workspaceEntityTeam")
+    private List<TeamEntity> teamEntities = new ArrayList<>();
 }
