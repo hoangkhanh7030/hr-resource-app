@@ -240,6 +240,10 @@ public class ProjectController {
                                       @RequestParam String searchName,
                                       @RequestParam String type,
                                       @RequestParam String isActivate){
+        sortName=sortName==null?"":sortName;
+        searchName=searchName==null?"":searchName;
+        type=type==null?"":type;
+        isActivate=isActivate==null?"":isActivate;
 
         int numberSize;
         int sizeListProject = list(idWorkspace).size();
