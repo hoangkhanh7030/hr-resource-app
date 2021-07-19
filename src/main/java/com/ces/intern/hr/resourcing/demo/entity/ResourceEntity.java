@@ -27,9 +27,7 @@ public class ResourceEntity extends BaseEnity{
     @JoinColumn(name = "team_id")
     private TeamEntity teamEntity;
 
-    @ManyToOne
-    @JoinColumn(name = "position_id")
-    private PositionEntity positionEntity;
+
 
 
     @ManyToOne
