@@ -22,7 +22,6 @@ public class PositionEntity {
     @Column(name = "name")
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "team_id")
-    private TeamEntity team;
+    @OneToMany(cascade = CascadeType.ALL,mappedBy = "positionEntity")
+    private List<ResourceEntity> resourceEntities = new ArrayList<>();
 }
