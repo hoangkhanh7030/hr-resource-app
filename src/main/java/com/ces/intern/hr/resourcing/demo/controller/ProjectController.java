@@ -52,20 +52,20 @@ public class ProjectController {
         this.csvFileSerivce = csvFileSerivce;
     }
 
-    @GetMapping(value = "/{idWorkspace}/projects")
-    private NumberSizeResponse getAll(@PathVariable Integer idWorkspace,
-                                      @RequestParam int page,
-                                      @RequestParam int size) {
-
-        int numberSize;
-        int sizeListProject = list(idWorkspace).size();
-        if (sizeListProject % size == 0) {
-            numberSize = sizeListProject / size;
-        } else {
-            numberSize = (sizeListProject / size) + 1;
-        }
-        return new NumberSizeResponse(projectService.getAllProjects(idWorkspace, page, size), numberSize);
-    }
+//    @GetMapping(value = "/{idWorkspace}/projects")
+//    private NumberSizeResponse getAll(@PathVariable Integer idWorkspace,
+//                                      @RequestParam int page,
+//                                      @RequestParam int size) {
+//
+//        int numberSize;
+//        int sizeListProject = list(idWorkspace).size();
+//        if (sizeListProject % size == 0) {
+//            numberSize = sizeListProject / size;
+//        } else {
+//            numberSize = (sizeListProject / size) + 1;
+//        }
+//        return new NumberSizeResponse(projectService.getAllProjects(idWorkspace, page, size), numberSize);
+//    }
 
     @GetMapping(value = "/{idWorkspace}/projects/export")
     public void exportToCSV(HttpServletResponse response,
@@ -175,40 +175,40 @@ public class ProjectController {
     }
 
 
-    @GetMapping(value = "/{idWorkspace}/projects/searchParam")
-    private NumberSizeResponse searchPara(@PathVariable Integer idWorkspace,
-                                          @RequestParam String name,
-                                          @RequestParam Boolean isActivate,
-                                          @RequestParam int page,
-                                          @RequestParam int size
-    ) {
+//    @GetMapping(value = "/{idWorkspace}/projects/searchParam")
+//    private NumberSizeResponse searchPara(@PathVariable Integer idWorkspace,
+//                                          @RequestParam String name,
+//                                          @RequestParam Boolean isActivate,
+//                                          @RequestParam int page,
+//                                          @RequestParam int size
+//    ) {
+//
+//        int numberSize;
+//        int sizeListProject = list(idWorkspace).size();
+//        if (sizeListProject % size == 0) {
+//            numberSize = sizeListProject / size;
+//        } else {
+//            numberSize = (sizeListProject / size) + 1;
+//        }
+//        return new NumberSizeResponse(projectService.searchParameter(name, isActivate, idWorkspace, page, size), numberSize);
+//    }
 
-        int numberSize;
-        int sizeListProject = list(idWorkspace).size();
-        if (sizeListProject % size == 0) {
-            numberSize = sizeListProject / size;
-        } else {
-            numberSize = (sizeListProject / size) + 1;
-        }
-        return new NumberSizeResponse(projectService.searchParameter(name, isActivate, idWorkspace, page, size), numberSize);
-    }
-
-    @GetMapping(value = "/{idWorkspace}/projects/sort")
-    private NumberSizeResponse sortProject(@PathVariable Integer idWorkspace,
-                                           @RequestParam int page,
-                                           @RequestParam int size,
-                                           @RequestParam String name,
-                                           @RequestParam String type) {
-        int numberSize;
-        int sizeListProject = list(idWorkspace).size();
-        if (sizeListProject % size == 0) {
-            numberSize = sizeListProject / size;
-        } else {
-            numberSize = (sizeListProject / size) + 1;
-        }
-        return new NumberSizeResponse(projectService.sortProject(page, size, idWorkspace, name, type), numberSize);
-    }
-
+//    @GetMapping(value = "/{idWorkspace}/projects/sort")
+//    private NumberSizeResponse sortProject(@PathVariable Integer idWorkspace,
+//                                           @RequestParam int page,
+//                                           @RequestParam int size,
+//                                           @RequestParam String name,
+//                                           @RequestParam String type) {
+//        int numberSize;
+//        int sizeListProject = list(idWorkspace).size();
+//        if (sizeListProject % size == 0) {
+//            numberSize = sizeListProject / size;
+//        } else {
+//            numberSize = (sizeListProject / size) + 1;
+//        }
+//        return new NumberSizeResponse(projectService.sortProject(page, size, idWorkspace, name, type), numberSize);
+//    }
+//
     private List<ProjectEntity> list(Integer idWorkspace) {
         return projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
     }
@@ -231,5 +231,34 @@ public class ProjectController {
         }
 
 
+    }
+    @GetMapping(value = "/{idWorkspace}/projects")
+    private NumberSizeResponse getAll(@PathVariable Integer idWorkspace,
+                                      @RequestParam int page,
+                                      @RequestParam int size,
+                                      @RequestParam String sortName,
+                                      @RequestParam String searchName,
+                                      @RequestParam String type,
+                                      @RequestParam String isActivate){
+
+        int numberSize;
+        int sizeListProject = list(idWorkspace).size();
+        if (sizeListProject % size == 0) {
+            numberSize = sizeListProject / size;
+        } else {
+            numberSize = (sizeListProject / size) + 1;
+        }
+        if (sortName.isEmpty()&&searchName.isEmpty()&&type.isEmpty()&&isActivate.isEmpty()){
+            return new NumberSizeResponse(projectService.getAllProjects(idWorkspace,page,size),numberSize);
+        }else if (searchName.isEmpty()&&isActivate.isEmpty()){
+            return new NumberSizeResponse(projectService.sortProject(page,size,idWorkspace,sortName,type),numberSize);
+        }else{
+            if (isActivate.isEmpty()){
+                return new NumberSizeResponse(projectService.searchParameterNotIsActivate(searchName,idWorkspace,page,size),numberSize);
+            }else {
+                Boolean is_Activate = isActivate.equals("true");
+                return new NumberSizeResponse(projectService.searchParameter(searchName,is_Activate,idWorkspace,page,size),numberSize);
+            }
+        }
     }
 }

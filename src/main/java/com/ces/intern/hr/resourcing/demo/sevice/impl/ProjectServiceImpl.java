@@ -36,10 +36,11 @@ public class ProjectServiceImpl implements ProjectService {
         this.workspaceRepository = workspaceRepository;
     }
     public static final String IS_ACTIVATE = "isActivate";
+    public static final String CREATED_DATE="createdDate";
 
     @Override
     public List<ProjectDTO> getAllProjects(Integer idWorkspace, int page,int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size,Sort.by(CREATED_DATE).descending());
         Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, pageable);
         List<ProjectEntity> projectEntities = projectEntityPage.getContent();
         return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
@@ -83,6 +84,14 @@ public class ProjectServiceImpl implements ProjectService {
         List<ProjectEntity> projectEntities = projectEntityPage.getContent();
         return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
     }
+    @Override
+    public List<ProjectDTO> searchParameterNotIsActivate(String name, Integer idWorkspace, int page, int size) {
+        Pageable pageable = PageRequest.of(page,size);
+        Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientName(idWorkspace,name,pageable);
+        List<ProjectEntity> projectEntities = projectEntityPage.getContent();
+        return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+    }
+
 
     @Override
     public List<ProjectDTO> sortProject(int page, int size, Integer idWorkspace, String name, String type) {
@@ -127,6 +136,13 @@ public class ProjectServiceImpl implements ProjectService {
         projectRepository.save(projectEntity);
     }
 
+    @Override
+    public List<ProjectDTO> listSortAndSearch(Integer idWorkspace, int page, int size, Boolean isActivate, String nameSearch, String nameSort, String type) {
+        return null;
+    }
+
+
+
 
     @Override
     public void deleteProject(Integer idProject) {
@@ -134,6 +150,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         projectRepository.delete(projectEntity);
     }
+
 
 
 

@@ -14,7 +14,8 @@ public interface ProjectService {
     List<ProjectDTO> searchParameter(String name,Boolean isActivate,Integer idWorkspace,int page,int size);
     List<ProjectDTO> sortProject(int page,int size,Integer idWorkspace,String name,String type);
     void isActivate(Integer idProject);
-
+    List<ProjectDTO> listSortAndSearch(Integer idWorkspace,int page,int size,Boolean isActivate,String nameSearch,String nameSort,String type);
+    List<ProjectDTO> searchParameterNotIsActivate(String name,Integer idWorkspace,int page,int size);
 
 
 
