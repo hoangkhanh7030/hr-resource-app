@@ -5,6 +5,7 @@ import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
 import com.ces.intern.hr.resourcing.demo.http.request.PositionRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.PositionRepository;
+import com.ces.intern.hr.resourcing.demo.repository.TeamRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.PositionService;
 import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
@@ -22,14 +23,17 @@ public class PositionController {
     private final PositionRepository positionRepository;
     private final PositionService positionService;
     private final ModelMapper modelMapper;
+    private final TeamRepository teamRepository;
 
     @Autowired
     public PositionController(PositionRepository positionRepository,
                               PositionService positionService,
-                              ModelMapper modelMapper) {
+                              ModelMapper modelMapper,
+                              TeamRepository teamRepository) {
         this.positionRepository = positionRepository;
         this.positionService = positionService;
         this.modelMapper = modelMapper;
+        this.teamRepository = teamRepository;
     }
 
     @GetMapping(value = "/{idWorkspace}/position")
@@ -37,25 +41,30 @@ public class PositionController {
 
         return positionService.getAll(idWorkspace);
     }
+
     @GetMapping(value = "/{idWorkspace}/team/{idTeam}/position")
-        private List<PositionDTO> getAllByIdTeam(@PathVariable Integer idWorkspace,
-                                                 @PathVariable Integer idTeam){
-        return positionService.getAllByIdTeam(idWorkspace,idTeam);
+    private List<PositionDTO> getAllByIdTeam(@PathVariable Integer idWorkspace,
+                                             @PathVariable Integer idTeam) {
+        return positionService.getAllByIdTeam(idWorkspace, idTeam);
     }
 
 
-
-    @PutMapping(value = "/position")
-    private MessageResponse updatePosition(@RequestBody List<PositionRequest> positionRequestList
+    @PutMapping(value = "/{idWorkspace}/team/{idTeam}/position")
+    private MessageResponse updatePosition(@RequestBody List<PositionRequest> positionRequestList,
+                                           @PathVariable Integer idWorkspace,
+                                           @PathVariable Integer idTeam
     ) {
-        positionService.updatePosition(positionRequestList);
-        List<PositionEntity> positionEntityList = positionRepository.findAll();
-        List<PositionRequest> list = positionEntityList.stream().map(s -> modelMapper.map(s, PositionRequest.class)).collect(Collectors.toList());
-        if (listEquals(list, positionRequestList)) {
-            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
-        } else {
-            return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
-        }
+        if (teamRepository.findByidWorkspaceAndIdTeam(idWorkspace,idTeam).isPresent()){
+            positionService.updatePosition(positionRequestList, idWorkspace, idTeam);
+            List<PositionEntity> positionEntityList = positionRepository.findAllByidWorkspaceAndidTeam(idWorkspace, idTeam);
+            List<PositionRequest> list = positionEntityList.stream().map(s -> modelMapper.map(s, PositionRequest.class)).collect(Collectors.toList());
+            if (listEquals(list, positionRequestList)) {
+                return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+            } else {
+                return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+            }
+        }else return new MessageResponse(ResponseMessage.NOT_FOUND,Status.FAIL.getCode());
+
 
     }
 

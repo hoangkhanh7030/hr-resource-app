@@ -2,9 +2,15 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
 import com.ces.intern.hr.resourcing.demo.dto.PositionDTO;
 import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
+import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
+import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
+import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.PositionRequest;
 import com.ces.intern.hr.resourcing.demo.repository.PositionRepository;
+import com.ces.intern.hr.resourcing.demo.repository.TeamRepository;
+import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.PositionService;
+import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,12 +22,19 @@ import java.util.stream.Collectors;
 public class PositionServiceImpl implements PositionService {
     private final PositionRepository positionRepository;
     private final ModelMapper modelMapper;
+    private final WorkspaceRepository workspaceRepository;
+    private final TeamRepository teamRepository;
 
     @Autowired
     public PositionServiceImpl(PositionRepository positionRepository,
-                               ModelMapper modelMapper) {
+                               ModelMapper modelMapper,
+                               WorkspaceRepository workspaceRepository,
+                               TeamRepository teamRepository
+                               ) {
         this.positionRepository = positionRepository;
         this.modelMapper = modelMapper;
+        this.teamRepository=teamRepository;
+        this.workspaceRepository=workspaceRepository;
     }
 
     @Override
@@ -37,16 +50,21 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public void updatePosition(List<PositionRequest> positionRequests) {
-        List<PositionEntity> positionEntities = positionRepository.findAll();
+    public void updatePosition(List<PositionRequest> positionRequests,Integer idWorkspace,Integer idTeam) {
+        List<PositionEntity> positionEntities = positionRepository.findAllByidWorkspaceAndidTeam(idWorkspace,idTeam);
         deletePosition(positionRequests,positionEntities);
-        for (PositionRequest positionRequest : positionRequests){
-            if (!positionRepository.findByName(positionRequest.getName()).isPresent()){
-                PositionEntity positionEntity = new PositionEntity();
-                positionEntity.setName(positionRequest.getName());
-                positionRepository.save(positionEntity);
+            for (PositionRequest positionRequest : positionRequests){
+                if (!positionRepository.findByidWorkspaceAndidTeam(idWorkspace,idTeam,positionRequest.getName()).isPresent()){
+                    PositionEntity positionEntity = new PositionEntity();
+                    TeamEntity teamEntity = teamRepository.findById(idTeam)
+                            .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+                    positionEntity.setName(positionRequest.getName());
+                    positionEntity.setTeamEntity(teamEntity);
+
+                    positionRepository.save(positionEntity);
+                }
             }
-        }
+
     }
 
     private void deletePosition(List<PositionRequest> positionRequests,List<PositionEntity> positionEntities){

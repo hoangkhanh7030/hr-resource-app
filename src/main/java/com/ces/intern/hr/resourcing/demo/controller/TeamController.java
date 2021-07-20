@@ -107,7 +107,8 @@ public class TeamController {
     @PutMapping(value = "/{idWorkspace}/team/update")
     private MessageResponse updatePosition(@RequestBody List<TeamDTO> teamDTOS,
                                            @PathVariable Integer idWorkspace
-    ) {
+    )
+    {
         teamService.updateTeam(teamDTOS,idWorkspace);
         List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
         List<TeamDTO> list = teamEntities.stream().map(s -> modelMapper.map(s, TeamDTO.class)).collect(Collectors.toList());

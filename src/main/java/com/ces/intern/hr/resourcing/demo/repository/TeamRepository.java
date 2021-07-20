@@ -18,4 +18,8 @@ public interface TeamRepository extends JpaRepository<TeamEntity,Integer> {
     @Query(value = "select t from TeamEntity t where t.workspaceEntityTeam.id=:idWorkspace")
     List<TeamEntity> findAllByidWorkspace(@Param("idWorkspace") Integer idWorkspace);
 
+    @Query(value = "select t from TeamEntity t where t.workspaceEntityTeam.id=:idWorkspace and t.id=:idTeam")
+    Optional<TeamEntity> findByidWorkspaceAndIdTeam(@Param("idWorkspace") Integer idWorkspace,
+                                                    @Param("idTeam") Integer idTeam);
+
 }
