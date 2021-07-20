@@ -2,10 +2,8 @@ package com.ces.intern.hr.resourcing.demo.security.filter;
 
 import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

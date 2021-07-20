@@ -63,10 +63,9 @@ public class SecurityConfigApp extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, SecurityContact.SIGN_UP_URL).permitAll()
                 .antMatchers(HttpMethod.POST, SecurityContact.SIGN_IN_URL).permitAll()
                 .antMatchers(HttpMethod.POST, SecurityContact.GOOGLE_URL).permitAll()
-                .anyRequest().authenticated();
-
-
-        http.addFilter(new AuthorizationFilter(authenticationManager()));
+                .anyRequest().authenticated()
+                .and()
+                .addFilter(new AuthorizationFilter(authenticationManager()));
 
     }
 
