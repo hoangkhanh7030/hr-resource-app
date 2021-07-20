@@ -22,20 +22,9 @@ public class ResourceEntity extends BaseEnity{
     @Column(name = "avatar")
     private String avatar;
 
-
-    @ManyToOne
-    @JoinColumn(name = "team_id")
-    private TeamEntity teamEntity;
     @ManyToOne
     @JoinColumn(name = "position_id")
     private PositionEntity positionEntity;
-
-
-
-
-    @ManyToOne
-    @JoinColumn(name = "workspace_id")
-    private WorkspaceEntity workspaceEntityResource;
 
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "resourceEntity")
     private List<TimeEntity> timeEntities = new ArrayList<>();

@@ -48,11 +48,27 @@ public class ProjectController {
         this.modelMapper = modelMapper;
         this.csvFileSerivce = csvFileSerivce;
     }
+
     private List<ProjectEntity> listAll(Integer idWorkspace) {
         return projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
     }
-    private List<ProjectEntity> listSearch(Integer idWorkspace,String searchName){
-        return projectRepository.findAllByidWorkspaceAndSearchName(idWorkspace,searchName);
+
+    private List<ProjectEntity> listSearch(Integer idWorkspace, String searchName) {
+        return projectRepository.findAllByidWorkspaceAndSearchName(idWorkspace, searchName);
+    }
+
+    private List<ProjectEntity> listSearchIsActivate(Integer idWorkspace, String searchName, Boolean isActivate) {
+        return projectRepository.findAllByNameAndClientNameAndActivate(idWorkspace, searchName, isActivate);
+    }
+
+    private int numberSize(int sizeListProject, int size) {
+        int numberSize;
+        if (sizeListProject % size == 0) {
+            numberSize = sizeListProject / size;
+        } else {
+            numberSize = (sizeListProject / size) + 1;
+        }
+        return numberSize;
     }
 
 
@@ -150,40 +166,40 @@ public class ProjectController {
     @DeleteMapping(value = "{idWorkspace}/projects/{idProject}")
     private MessageResponse deleteProject(@PathVariable Integer idProject,
                                           @PathVariable Integer idWorkspace) {
-        if (projectRepository.findByIdAndWorkspaceEntityProject_Id(idProject,idWorkspace).isPresent()){
+        if (projectRepository.findByIdAndWorkspaceEntityProject_Id(idProject, idWorkspace).isPresent()) {
             projectService.deleteProject(idProject);
             if (projectRepository.findById(idProject).isPresent()) {
                 return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
             } else {
                 return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
             }
-        }else {
-            return new MessageResponse(ResponseMessage.NOT_FOUND,Status.FAIL.getCode());
+        } else {
+            return new MessageResponse(ResponseMessage.NOT_FOUND, Status.FAIL.getCode());
         }
 
     }
-
 
 
     @PutMapping(value = "/{idWorkspace}/projects/{idProject}/isActivate")
     private MessageResponse isActivate(@PathVariable Integer idWorkspace,
-                            @PathVariable Integer idProject){
-        if (projectRepository.findByIdAndWorkspaceEntityProject_Id(idProject,idWorkspace).isPresent()){
+                                       @PathVariable Integer idProject) {
+        if (projectRepository.findByIdAndWorkspaceEntityProject_Id(idProject, idWorkspace).isPresent()) {
             projectService.isActivate(idProject);
             ProjectEntity projectEntity = projectRepository.findById(idProject)
-                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-            if (projectEntity.getIsActivate()){
-                return new MessageResponse(ResponseMessage.IS_ACTIVATE,Status.SUCCESS.getCode());
+                    .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            if (projectEntity.getIsActivate()) {
+                return new MessageResponse(ResponseMessage.IS_ACTIVATE, Status.SUCCESS.getCode());
 
-            }else {
-                return new MessageResponse(ResponseMessage.ARCHIEVED,Status.SUCCESS.getCode());
+            } else {
+                return new MessageResponse(ResponseMessage.ARCHIEVED, Status.SUCCESS.getCode());
             }
-        }else {
-            return new MessageResponse(ResponseMessage.NOT_FOUND,Status.FAIL.getCode());
+        } else {
+            return new MessageResponse(ResponseMessage.NOT_FOUND, Status.FAIL.getCode());
         }
 
 
     }
+
     @GetMapping(value = "/{idWorkspace}/projects")
     private NumberSizeResponse getAll(@PathVariable Integer idWorkspace,
                                       @RequestParam int page,
@@ -191,43 +207,32 @@ public class ProjectController {
                                       @RequestParam String sortName,
                                       @RequestParam String searchName,
                                       @RequestParam String type,
-                                      @RequestParam String isActivate){
-        sortName=sortName==null?"":sortName;
-        searchName=searchName==null?"":searchName;
-        type=type==null?"":type;
-        isActivate=isActivate==null?"":isActivate;
+                                      @RequestParam String isActivate) {
+        sortName = sortName == null ? "" : sortName;
+        searchName = searchName == null ? "" : searchName;
+        type = type == null ? "" : type;
+        isActivate = isActivate == null ? "" : isActivate;
 
-        int numberSize;
+
         int sizeListProject;
-        if (sortName.isEmpty()&&searchName.isEmpty()&&type.equals(SortPara.ASC.getName())&&isActivate.isEmpty()){
+        if (sortName.isEmpty() && searchName.isEmpty() && type.equals(SortPara.DESC.getName()) && isActivate.isEmpty()) {
             sizeListProject = listAll(idWorkspace).size();
-            if (sizeListProject % size == 0) {
-                numberSize = sizeListProject / size;
-            } else {
-                numberSize = (sizeListProject / size) + 1;
-            }
-            return new NumberSizeResponse(projectService.getAllProjects(idWorkspace,page,size),numberSize);
-        }else if (searchName.isEmpty()&&isActivate.isEmpty()){
 
-            sizeListProject =listAll(idWorkspace).size();
-            if (sizeListProject % size == 0) {
-                numberSize = sizeListProject / size;
+            return new NumberSizeResponse(projectService.getAllProjects(idWorkspace, page, size), numberSize(sizeListProject,size));
+        } else if (searchName.isEmpty() && isActivate.isEmpty()) {
+            sizeListProject = listAll(idWorkspace).size();
+
+            return new NumberSizeResponse(projectService.sortProject(page, size, idWorkspace, sortName, type), numberSize(sizeListProject,size));
+        } else {
+            sizeListProject = listSearch(idWorkspace, searchName).size();
+
+            if (isActivate.isEmpty()) {
+                return new NumberSizeResponse(projectService.searchParameterNotIsActivate(searchName, idWorkspace, page, size), numberSize(sizeListProject, size));
             } else {
-                numberSize = (sizeListProject / size) + 1;
-            }
-            return new NumberSizeResponse(projectService.sortProject(page,size,idWorkspace,sortName,type),numberSize);
-        }else{
-            sizeListProject =listSearch(idWorkspace,searchName).size();
-            if (sizeListProject % size == 0) {
-                numberSize = sizeListProject / size;
-            } else {
-                numberSize = (sizeListProject / size) + 1;
-            }
-            if (isActivate.isEmpty()){
-                return new NumberSizeResponse(projectService.searchParameterNotIsActivate(searchName,idWorkspace,page,size),numberSize);
-            }else {
                 Boolean is_Activate = isActivate.equals("true");
-                return new NumberSizeResponse(projectService.searchParameter(searchName,is_Activate,idWorkspace,page,size),numberSize);
+                sizeListProject = listSearchIsActivate(idWorkspace, searchName, is_Activate).size();
+
+                return new NumberSizeResponse(projectService.searchParameter(searchName, is_Activate, idWorkspace, page, size), numberSize(sizeListProject, size));
             }
         }
     }

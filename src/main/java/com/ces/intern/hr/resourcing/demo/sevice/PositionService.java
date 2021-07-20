@@ -6,8 +6,8 @@ import com.ces.intern.hr.resourcing.demo.http.request.PositionRequest;
 import java.util.List;
 
 public interface PositionService {
-    List<PositionDTO> getAll();
-
+    List<PositionDTO> getAll(Integer idWorkspace);
+    List<PositionDTO> getAllByIdTeam(Integer idWorkspace,Integer idTeam);
     void updatePosition(List<PositionRequest> positionRequests);
 
 }

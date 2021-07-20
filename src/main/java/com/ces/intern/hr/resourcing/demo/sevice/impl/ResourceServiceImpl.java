@@ -1,15 +1,8 @@
 package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
 import com.ces.intern.hr.resourcing.demo.converter.ResourceConverter;
-import com.ces.intern.hr.resourcing.demo.converter.WorkspaceConverter;
-import com.ces.intern.hr.resourcing.demo.dto.PositionDTO;
-import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
-import com.ces.intern.hr.resourcing.demo.dto.TeamDTO;
-import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
-import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
-import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.BadRequestException;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
@@ -30,12 +23,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ResourceServiceImpl implements ResourceService {
     private final ResourceRepository resourceRepository;
-    private final WorkspaceConverter workSpaceConverter;
     private final ResourceConverter resourceConverter;
     private final WorkspaceRepository workspaceRepository;
     private final TeamRepository teamRepository;
@@ -48,13 +39,11 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Autowired
     public ResourceServiceImpl(ResourceRepository resourceRepository,
-                               WorkspaceConverter workSpaceConverter,
                                ResourceConverter resourceConverter,
                                WorkspaceRepository workspaceRepository,
                                TeamRepository teamRepository,
                                PositionRepository positionRepository) {
         this.resourceRepository = resourceRepository;
-        this.workSpaceConverter = workSpaceConverter;
         this.resourceConverter = resourceConverter;
         this.workspaceRepository = workspaceRepository;
         this.teamRepository = teamRepository;
@@ -70,13 +59,13 @@ public class ResourceServiceImpl implements ResourceService {
         }
         resourceEntity.setName(resourceRequest.getName());
         resourceEntity.setAvatar(resourceRequest.getAvatar());
-        resourceEntity.setTeamEntity(teamRepository.findById(resourceRequest.getTeamId()).orElseThrow(()
+        resourceEntity.getPositionEntity().setTeamEntity(teamRepository.findById(resourceRequest.getTeamId()).orElseThrow(()
                 -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
         resourceEntity.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElseThrow(()
                 -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
         resourceEntity.setCreatedDate(currentDate);
         resourceEntity.setCreatedBy(accountId);
-        resourceEntity.setWorkspaceEntityResource(workspaceRepository.findById(id).orElseThrow(()
+        resourceEntity.getPositionEntity().getTeamEntity().setWorkspaceEntityTeam(workspaceRepository.findById(id).orElseThrow(()
                 -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
         resourceRepository.save(resourceEntity);
         return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
@@ -93,9 +82,9 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public MessageResponse updateResource(ResourceRequest resourceRequest, Integer resourceId, Integer workspaceId, Integer accountId) {
-        if (resourceRepository.findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).isPresent()) {
-            ResourceEntity resourceEntityTarget = resourceRepository.findByIdAndWorkspaceEntityResource_Id
-                    (resourceId, workspaceId).get();
+        if (resourceRepository.findByPositionEntity_TeamEntity_IdAndId(resourceId, workspaceId).isPresent()) {
+            ResourceEntity resourceEntityTarget = resourceRepository.findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(resourceId,workspaceId).get();
+
             resourceEntityTarget.setModifiedBy(accountId);
             Date currentDate = new Date();
             resourceEntityTarget.setModifiedDate(currentDate);
@@ -104,7 +93,7 @@ public class ResourceServiceImpl implements ResourceService {
                 throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
             }
             resourceEntityTarget.setName(resourceRequest.getName());
-            resourceEntityTarget.setTeamEntity(teamRepository.findById(resourceRequest.getTeamId()).orElseThrow(()
+            resourceEntityTarget.getPositionEntity().setTeamEntity(teamRepository.findById(resourceRequest.getTeamId()).orElseThrow(()
                     -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
             resourceEntityTarget.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElseThrow(()
                     -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
@@ -116,7 +105,7 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public MessageResponse deleteResource(Integer id, Integer workspaceId) {
-        if (resourceRepository.findByIdAndWorkspaceEntityResource_Id(id, workspaceId).isPresent()) {
+        if (resourceRepository.findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(id, workspaceId).isPresent()) {
             resourceRepository.deleteById(id);
             return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
         }
@@ -126,7 +115,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public List<ResourceDTO> getResourcesOfWorkSpace(Integer id) {
         List<ResourceDTO> resourceDTOS = new ArrayList<>();
-        List<ResourceEntity> resourceEntityList = resourceRepository.findAllByWorkspaceEntityResource_Id(id);
+        List<ResourceEntity> resourceEntityList = resourceRepository.findAllByPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(id);
         for (ResourceEntity resourceEntity : resourceEntityList) {
             resourceDTOS.add(resourceConverter.convertToDto(resourceEntity));
         }
@@ -167,9 +156,9 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public ResourceDTO getResourceInfo(Integer resourceId, Integer workspaceId) {
-        if (resourceRepository.findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).isPresent()) {
+        if (resourceRepository.findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(resourceId, workspaceId).isPresent()) {
             return resourceConverter.convertToDto(resourceRepository
-                    .findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).get());
+                    .findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(resourceId, workspaceId).get());
         } else {
             return null;
         }

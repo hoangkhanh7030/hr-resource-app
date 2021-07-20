@@ -45,9 +45,9 @@ public class TeamController {
         this.modelMapper = modelMapper;
     }
 
-    @GetMapping(value = "/team")
-    private List<TeamDTO> getAll() {
-        return teamService.getAll();
+    @GetMapping(value = "/{idWorkspace}/team")
+    private List<TeamDTO> getAll(@PathVariable Integer idWorkspace) {
+        return teamService.getAll(idWorkspace);
     }
 
     @PutMapping("/{idWorkspace}/team/{idTeam}/{idResource}")
@@ -59,7 +59,7 @@ public class TeamController {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             teamService.addResourceToTeam(idTeam, idResource);
-            if (resourceRepository.findByTeamEntity_IdAndId(idTeam, idResource).isPresent()) {
+            if (resourceRepository.findByPositionEntity_TeamEntity_IdAndId(idTeam, idResource).isPresent()) {
                 return new MessageResponse(ResponseMessage.ADD_SUCCESS, Status.SUCCESS.getCode());
             } else return new MessageResponse(ResponseMessage.ADD_FAIL, Status.FAIL.getCode());
         } else return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
@@ -93,7 +93,7 @@ public class TeamController {
                 return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
             } else {
                 teamService.renameTeam(idTeam, name);
-                if (teamRepository.findByName(name).isPresent()) {
+                if (teamRepository.findByNameAndidWorkspace(name, idWorkspace).isPresent()) {
                     return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
                 }
                 return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
@@ -104,11 +104,12 @@ public class TeamController {
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
-    @PutMapping(value = "/team/update")
-    private MessageResponse updatePosition(@RequestBody List<TeamDTO> teamDTOS
+    @PutMapping(value = "/{idWorkspace}/team/update")
+    private MessageResponse updatePosition(@RequestBody List<TeamDTO> teamDTOS,
+                                           @PathVariable Integer idWorkspace
     ) {
-        teamService.updateTeam(teamDTOS);
-        List<TeamEntity> teamEntities = teamRepository.findAll();
+        teamService.updateTeam(teamDTOS,idWorkspace);
+        List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
         List<TeamDTO> list = teamEntities.stream().map(s -> modelMapper.map(s, TeamDTO.class)).collect(Collectors.toList());
         if (listEquals(list, teamDTOS)) {
             return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());

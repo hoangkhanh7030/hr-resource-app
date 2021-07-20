@@ -22,8 +22,8 @@ public class WorkspaceEntity extends BaseEnity {
 
     private List<AccountWorkspaceRoleEntity> entityList = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "workspaceEntityResource")
-    private List<ResourceEntity> resourceEntities = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "workspaceEntityTeam")
+    private List<TeamEntity> teamEntities = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "workspaceEntityProject")
 

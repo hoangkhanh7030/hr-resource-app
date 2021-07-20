@@ -25,8 +25,14 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
-    public List<PositionDTO> getAll() {
-        List<PositionEntity> positionEntities = positionRepository.findAll();
+    public List<PositionDTO> getAll(Integer idWorkspace) {
+        List<PositionEntity> positionEntities = positionRepository.findAllByidWorkspace(idWorkspace);
+        return positionEntities.stream().map(s -> modelMapper.map(s, PositionDTO.class)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PositionDTO> getAllByIdTeam(Integer idWorkspace, Integer idTeam) {
+        List<PositionEntity> positionEntities = positionRepository.findAllByidWorkspaceAndidTeam(idWorkspace,idTeam);
         return positionEntities.stream().map(s -> modelMapper.map(s, PositionDTO.class)).collect(Collectors.toList());
     }
 

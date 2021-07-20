@@ -21,7 +21,11 @@ public class TeamEntity {
     private Integer id;
     @Column(name = "name")
     private String name;
+    @ManyToOne
+    @JoinColumn(name = "workspace_id")
+    private WorkspaceEntity workspaceEntityTeam;
+
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "teamEntity")
-    private List<ResourceEntity> resourceEntities = new ArrayList<>();
+    private List<PositionEntity> positionEntities = new ArrayList<>();
 
 }

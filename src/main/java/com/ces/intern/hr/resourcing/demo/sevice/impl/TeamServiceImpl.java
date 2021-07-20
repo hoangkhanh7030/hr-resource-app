@@ -31,8 +31,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<TeamDTO> getAll() {
-        List<TeamEntity> teamEntityList = teamRepository.findAll();
+    public List<TeamDTO> getAll(Integer idWorkspace) {
+        List<TeamEntity> teamEntityList = teamRepository.findAllByidWorkspace(idWorkspace);
         return teamEntityList.stream().map(s -> modelMapper.map(s, TeamDTO.class)).collect(Collectors.toList());
     }
 
@@ -42,7 +42,7 @@ public class TeamServiceImpl implements TeamService {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         TeamEntity teamEntity = teamRepository.findById(idTeam)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        resourceEntity.setTeamEntity(teamEntity);
+        resourceEntity.getPositionEntity().setTeamEntity(teamEntity);
         resourceRepository.save(resourceEntity);
 
     }
@@ -64,13 +64,14 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public void updateTeam(List<TeamDTO> teamDTOS) {
-        List<TeamEntity> teamEntities = teamRepository.findAll();
+    public void updateTeam(List<TeamDTO> teamDTOS,Integer idWorkspace) {
+        List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
         deleteTeam(teamDTOS,teamEntities);
         for (TeamDTO teamDTO : teamDTOS){
-            if (!teamRepository.findByName(teamDTO.getName()).isPresent()){
+            if (!teamRepository.findByNameAndidWorkspace(teamDTO.getName(),idWorkspace).isPresent()){
                 TeamEntity teamEntity = new TeamEntity();
                 teamEntity.setName(teamDTO.getName());
+                teamEntity.getWorkspaceEntityTeam().setId(idWorkspace);
                 teamRepository.save(teamEntity);
             }
         }

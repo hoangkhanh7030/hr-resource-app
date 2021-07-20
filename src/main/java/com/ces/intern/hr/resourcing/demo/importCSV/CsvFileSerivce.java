@@ -78,8 +78,8 @@ public class CsvFileSerivce {
                 ResourceEntity resourceEntity = new ResourceEntity();
                 resourceEntity.setName(resourceRequest.getName());
                 resourceEntity.setAvatar(resourceRequest.getAvatar());
-                resourceEntity.setWorkspaceEntityResource(workspaceEntity);
-                resourceEntity.setTeamEntity(teamRepository.findById(resourceRequest.getTeamId()).orElse(null));
+                resourceEntity.getPositionEntity().getTeamEntity().setWorkspaceEntityTeam(workspaceEntity);
+                resourceEntity.getPositionEntity().setTeamEntity(teamRepository.findById(resourceRequest.getTeamId()).orElse(null));
                 resourceEntity.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElse(null));
                 resourceEntity.setCreatedDate(new Date());
                 resourceEntity.setCreatedBy(idAccount);

@@ -32,37 +32,43 @@ public class PositionController {
         this.modelMapper = modelMapper;
     }
 
-    @GetMapping(value = "/position")
-    private List<PositionDTO> getAll() {
-        return positionService.getAll();
+    @GetMapping(value = "/{idWorkspace}/position")
+    private List<PositionDTO> getAll(@PathVariable Integer idWorkspace) {
+
+        return positionService.getAll(idWorkspace);
+    }
+    @GetMapping(value = "/{idWorkspace}/team/{idTeam}/position")
+        private List<PositionDTO> getAllByIdTeam(@PathVariable Integer idWorkspace,
+                                                 @PathVariable Integer idTeam){
+        return positionService.getAllByIdTeam(idWorkspace,idTeam);
     }
 
 
 
     @PutMapping(value = "/position")
     private MessageResponse updatePosition(@RequestBody List<PositionRequest> positionRequestList
-                                           ) {
+    ) {
         positionService.updatePosition(positionRequestList);
         List<PositionEntity> positionEntityList = positionRepository.findAll();
-        List<PositionRequest> list = positionEntityList.stream().map(s->modelMapper.map(s,PositionRequest.class)).collect(Collectors.toList());
-        if (listEquals(list, positionRequestList)){
-            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS,Status.SUCCESS.getCode());
-        }else {
-            return new MessageResponse(ResponseMessage.UPDATE_FAIL,Status.FAIL.getCode());
+        List<PositionRequest> list = positionEntityList.stream().map(s -> modelMapper.map(s, PositionRequest.class)).collect(Collectors.toList());
+        if (listEquals(list, positionRequestList)) {
+            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+        } else {
+            return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
         }
 
     }
+
     private static boolean listEquals(List<PositionRequest> list1, List<PositionRequest> list2) {
-        if(list1.size() != list2.size())
+        if (list1.size() != list2.size())
             return true;
 
         for (PositionRequest positionRequest : list1) {
-            if(!list2.contains(positionRequest))
+            if (!list2.contains(positionRequest))
                 return true;
         }
         return false;
     }
-
 
 
 }

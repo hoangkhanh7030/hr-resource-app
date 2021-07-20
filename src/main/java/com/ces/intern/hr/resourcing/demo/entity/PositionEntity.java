@@ -21,6 +21,9 @@ public class PositionEntity {
     private Integer id;
     @Column(name = "name")
     private String name;
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private TeamEntity teamEntity;
 
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "positionEntity")
     private List<ResourceEntity> resourceEntities = new ArrayList<>();

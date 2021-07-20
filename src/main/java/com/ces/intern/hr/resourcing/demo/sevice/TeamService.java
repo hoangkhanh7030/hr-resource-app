@@ -5,10 +5,10 @@ import com.ces.intern.hr.resourcing.demo.dto.TeamDTO;
 import java.util.List;
 
 public interface TeamService {
-    List<TeamDTO> getAll();
+    List<TeamDTO> getAll(Integer idWorkspace);
     void addResourceToTeam(Integer idTeam,Integer idResource);
 
     void deleteTeam(Integer idTeam);
     void renameTeam(Integer idTeam,String name);
-    void updateTeam(List<TeamDTO> teamDTOS);
+    void updateTeam(List<TeamDTO> teamDTOS,Integer idWorkspace);
 }
