@@ -14,6 +14,5 @@ public class ResourceRequest {
     private Integer id;
     private String name;
     private String avatar;
-    private Integer teamId;
     private Integer positionId;
 }
