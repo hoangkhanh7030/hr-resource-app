@@ -44,8 +44,6 @@ public class WorkspaceController {
 
     @GetMapping(value = "")
     private List<WorkspaceResponse> getAllWorkspace(@RequestHeader(value = "AccountId") Integer idAccount) {
-
-
         return workspaceService.getAllWorkspaceByIdAccount(idAccount);
     }
 

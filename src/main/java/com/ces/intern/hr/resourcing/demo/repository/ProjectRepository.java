@@ -46,6 +46,7 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> 
     Page<ProjectEntity> findAllByNameAndClientName(@Param("idWorkspace") Integer idWorkspace,
                                                    @Param("name") String name,
                                                    Pageable pageable);
+
     Optional<ProjectEntity> findByName(String name);
 
 

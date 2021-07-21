@@ -15,6 +15,10 @@ import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;
 import com.ces.intern.hr.resourcing.demo.utils.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercsv.io.CsvBeanWriter;
@@ -61,6 +65,7 @@ public class ProjectController {
         return projectRepository.findAllByNameAndClientNameAndActivate(idWorkspace, searchName, isActivate);
     }
 
+
     private int numberSize(int sizeListProject, int size) {
         int numberSize;
         if (sizeListProject % size == 0) {
@@ -70,6 +75,31 @@ public class ProjectController {
         }
         return numberSize;
     }
+//    @GetMapping(value = "/{idWorkspace}/projects/getAll")
+//    private NumberSizeResponse getAllP(@PathVariable Integer idWorkspace,
+//                                      @RequestParam int page,
+//                                      @RequestParam int size,
+//                                      @RequestParam String sortColumn,
+//                                      @RequestParam String searchName,
+//                                      @RequestParam String type,
+//                                      @RequestParam String isActivate){
+//        searchName = searchName == null ? "" : searchName;
+//        isActivate = isActivate == null ? "true" : isActivate;
+//        sortColumn = sortColumn == null ? "" : sortColumn;
+//        if (type == null){
+//            type = SortPara.DESC.getName();
+//        }
+//        else{
+//            if (!type.equals(SortPara.DESC.getName()) && !type.equals(SortPara.ASC.getName())){
+//                type = SortPara.DESC.getName();
+//            }
+//        }
+//        Boolean is_Activate = isActivate.equals("true");
+//        List<ProjectDTO> projectDTOS=projectService.listSortAndSearch(idWorkspace,page,size,is_Activate,searchName,sortColumn,type);
+//        List<ProjectEntity> listSize=projectRepository.findAllByNameAndClientNameAndActivate(idWorkspace,searchName,is_Activate);
+//        int sizeListProject =listSize.size();
+//        return new NumberSizeResponse(projectDTOS,numberSize(sizeListProject,size));
+//    }
 
 
     @GetMapping(value = "/{idWorkspace}/projects/export")
@@ -211,30 +241,39 @@ public class ProjectController {
         sortName = sortName == null ? "" : sortName;
         searchName = searchName == null ? "" : searchName;
         type = type == null ? "" : type;
-        isActivate = isActivate == null ? "" : isActivate;
 
 
         int sizeListProject;
         if (sortName.isEmpty() && searchName.isEmpty() && type.equals(SortPara.DESC.getName()) && isActivate.isEmpty()) {
             sizeListProject = listAll(idWorkspace).size();
 
-            return new NumberSizeResponse(projectService.getAllProjects(idWorkspace, page, size), numberSize(sizeListProject,size));
+            return new NumberSizeResponse(projectService.getAllProjects(idWorkspace, page, size), numberSize(sizeListProject, size));
         } else if (searchName.isEmpty() && isActivate.isEmpty()) {
             sizeListProject = listAll(idWorkspace).size();
 
-            return new NumberSizeResponse(projectService.sortProject(page, size, idWorkspace, sortName, type), numberSize(sizeListProject,size));
-        } else {
-            sizeListProject = listSearch(idWorkspace, searchName).size();
-
+            return new NumberSizeResponse(projectService.sortProject(page, size, idWorkspace, sortName, type), numberSize(sizeListProject, size));
+        } else if (!sortName.isEmpty() && !searchName.isEmpty() && !type.isEmpty()) {
             if (isActivate.isEmpty()) {
+
+                sizeListProject = listSearch(idWorkspace, searchName).size();
+                return new NumberSizeResponse(projectService.listSortAndSearch(idWorkspace, page, size, searchName, sortName, type), numberSize(sizeListProject, size));
+            } else {
+                Boolean is_Activate = isActivate.equals("active");
+                sizeListProject = listSearchIsActivate(idWorkspace, searchName, is_Activate).size();
+                return new NumberSizeResponse(projectService.listSortAndSearchAndIsActivate(idWorkspace, page, size, is_Activate, searchName, sortName, type),
+                        numberSize(sizeListProject, size));
+            }
+        } else {
+            if (isActivate.isEmpty()) {
+                sizeListProject = listSearch(idWorkspace, searchName).size();
                 return new NumberSizeResponse(projectService.searchParameterNotIsActivate(searchName, idWorkspace, page, size), numberSize(sizeListProject, size));
             } else {
-                Boolean is_Activate = isActivate.equals("true");
+                Boolean is_Activate = isActivate.equals("active");
                 sizeListProject = listSearchIsActivate(idWorkspace, searchName, is_Activate).size();
-
                 return new NumberSizeResponse(projectService.searchParameter(searchName, is_Activate, idWorkspace, page, size), numberSize(sizeListProject, size));
             }
         }
     }
+
 
 }

@@ -12,9 +12,10 @@ public interface ProjectService {
     void updateProject(ProjectRequest projectRequest,Integer idAccount,Integer idProject);
     void deleteProject(Integer idProject);
     List<ProjectDTO> searchParameter(String name,Boolean isActivate,Integer idWorkspace,int page,int size);
-    List<ProjectDTO> sortProject(int page,int size,Integer idWorkspace,String name,String type);
+    List<ProjectDTO> sortProject(int page,int size,Integer idWorkspace,String sortColumn,String type);
     void isActivate(Integer idProject);
-    List<ProjectDTO> listSortAndSearch(Integer idWorkspace,int page,int size,Boolean isActivate,String nameSearch,String nameSort,String type);
+    List<ProjectDTO> listSortAndSearch(Integer idWorkspace,int page,int size,String nameSearch,String sortColumn,String type);
+    List<ProjectDTO> listSortAndSearchAndIsActivate(Integer idWorkspace,int page,int size,Boolean isActivate,String nameSearch,String sortColumn,String type);
     List<ProjectDTO> searchParameterNotIsActivate(String name,Integer idWorkspace,int page,int size);
 
 
