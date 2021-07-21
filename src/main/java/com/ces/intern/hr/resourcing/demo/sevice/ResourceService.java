@@ -10,7 +10,7 @@ public interface ResourceService {
     List<ResourceDTO> searchByName(String name, String posName, String teamName,
                                    Integer workspaceId, Integer page, Integer size);
 
-    MessageResponse addNewResource(ResourceRequest resourceRequest, Integer id, Integer accountId);
+    MessageResponse addNewResource(ResourceRequest resourceRequest, Integer accountId);
 
     ResourceDTO findById(Integer id);
 
@@ -20,13 +20,11 @@ public interface ResourceService {
 
     List<ResourceDTO> getResourcesOfWorkSpace(Integer id);
 
-    List<ResourceDTO> getProductManagers(Integer id);
-    List<ResourceDTO> getAccountManagers(Integer id);
-
     ResourceDTO getResourceInfo(Integer resourceId, Integer workspaceId);
 
     List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String teamName, String posName,
                                     String sortColumn, String type, Integer page, Integer size);
 
     Integer getNumberOfResources(Integer idWorkspace, String searchName, String teamName, String posName);
+
 }

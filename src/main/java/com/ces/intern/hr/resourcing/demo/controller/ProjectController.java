@@ -7,7 +7,7 @@ import com.ces.intern.hr.resourcing.demo.http.request.ProjectRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.NumberSizeResponse;
 import com.ces.intern.hr.resourcing.demo.importCSV.ApacheCommonsCsvUtil;
-import com.ces.intern.hr.resourcing.demo.importCSV.CsvFileSerivce;
+import com.ces.intern.hr.resourcing.demo.importCSV.CsvFileService;
 import com.ces.intern.hr.resourcing.demo.importCSV.Message.Message;
 import com.ces.intern.hr.resourcing.demo.importCSV.Message.Response;
 import com.ces.intern.hr.resourcing.demo.repository.ProjectRepository;
@@ -15,10 +15,6 @@ import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;
 import com.ces.intern.hr.resourcing.demo.utils.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.supercsv.io.CsvBeanWriter;
@@ -40,17 +36,17 @@ public class ProjectController {
     private final ProjectService projectService;
     private final ProjectRepository projectRepository;
     private final ModelMapper modelMapper;
-    private final CsvFileSerivce csvFileSerivce;
+    private final CsvFileService csvFileService;
 
     @Autowired
     public ProjectController(ProjectService projectService,
                              ProjectRepository projectRepository,
                              ModelMapper modelMapper,
-                             CsvFileSerivce csvFileSerivce) {
+                             CsvFileService csvFileService) {
         this.projectService = projectService;
         this.projectRepository = projectRepository;
         this.modelMapper = modelMapper;
-        this.csvFileSerivce = csvFileSerivce;
+        this.csvFileService = csvFileService;
     }
 
     private List<ProjectEntity> listAll(Integer idWorkspace) {
@@ -147,7 +143,7 @@ public class ProjectController {
 
         try {
 
-            csvFileSerivce.store(csvfile.getInputStream(), idWorkspace, idAccount);
+            csvFileService.store(csvfile.getInputStream(), idWorkspace, idAccount);
             response.addMessage(new Message(csvfile.getOriginalFilename(), CSVFile.UPLOAD_FILE, Status.SUCCESS.getCode()));
         } catch (Exception e) {
             response.addMessage(new Message(csvfile.getOriginalFilename(), e.getMessage(), Status.FAIL.getCode()));

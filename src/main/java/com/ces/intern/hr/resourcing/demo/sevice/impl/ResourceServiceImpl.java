@@ -32,10 +32,10 @@ public class ResourceServiceImpl implements ResourceService {
     private final TeamRepository teamRepository;
     private final PositionRepository positionRepository;
 
-    private static final String TEAM_NAME_PARAMETER = "teamEntity.name";
-    private static final String POSITION_NAME_PARAMETER = "positionEntity.name";
+    private static final String TEAM_PARAMETER = "teamEntity.name";
+    private static final String POSITION_PARAMETER = "positionEntity.name";
     private static final String RESOURCE_NAME_PARAMETER = "name";
-    private static final String CREATED_DATE_NAME_PARAMETER = "createdDate";
+    private static final String MODIFIED_DATE_PARAMETER = "modifiedDate";
 
     @Autowired
     public ResourceServiceImpl(ResourceRepository resourceRepository,
@@ -51,7 +51,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public MessageResponse addNewResource(ResourceRequest resourceRequest, Integer id, Integer accountId) {
+    public MessageResponse addNewResource(ResourceRequest resourceRequest, Integer accountId) {
         Date currentDate = new Date();
         ResourceEntity resourceEntity = new ResourceEntity();
         if(resourceRequest.getName().equals("") || resourceRequest.getName() == null){
@@ -59,14 +59,12 @@ public class ResourceServiceImpl implements ResourceService {
         }
         resourceEntity.setName(resourceRequest.getName());
         resourceEntity.setAvatar(resourceRequest.getAvatar());
-        resourceEntity.getPositionEntity().setTeamEntity(teamRepository.findById(resourceRequest.getTeamId()).orElseThrow(()
-                -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
         resourceEntity.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElseThrow(()
                 -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
         resourceEntity.setCreatedDate(currentDate);
         resourceEntity.setCreatedBy(accountId);
-        resourceEntity.getPositionEntity().getTeamEntity().setWorkspaceEntityTeam(workspaceRepository.findById(id).orElseThrow(()
-                -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
+        resourceEntity.setModifiedDate(currentDate);
+        resourceEntity.setModifiedBy(accountId);
         resourceRepository.save(resourceEntity);
         return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
     }
@@ -84,7 +82,6 @@ public class ResourceServiceImpl implements ResourceService {
     public MessageResponse updateResource(ResourceRequest resourceRequest, Integer resourceId, Integer workspaceId, Integer accountId) {
         if (resourceRepository.findByPositionEntity_TeamEntity_IdAndId(resourceId, workspaceId).isPresent()) {
             ResourceEntity resourceEntityTarget = resourceRepository.findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(resourceId,workspaceId).get();
-
             resourceEntityTarget.setModifiedBy(accountId);
             Date currentDate = new Date();
             resourceEntityTarget.setModifiedDate(currentDate);
@@ -93,8 +90,6 @@ public class ResourceServiceImpl implements ResourceService {
                 throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
             }
             resourceEntityTarget.setName(resourceRequest.getName());
-            resourceEntityTarget.getPositionEntity().setTeamEntity(teamRepository.findById(resourceRequest.getTeamId()).orElseThrow(()
-                    -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
             resourceEntityTarget.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElseThrow(()
                     -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
             resourceRepository.save(resourceEntityTarget);
@@ -136,23 +131,6 @@ public class ResourceServiceImpl implements ResourceService {
         return result;
     }
 
-    @Override
-    public List<ResourceDTO> getProductManagers(Integer id) {
-        ArrayList<ResourceDTO> list = new ArrayList<>();
-        for (ResourceEntity resourceEntity : resourceRepository.findAllProductManagersOfWorkspace(id)) {
-            list.add(resourceConverter.convertToDto(resourceEntity));
-        }
-        return list;
-    }
-
-    @Override
-    public List<ResourceDTO> getAccountManagers(Integer id) {
-        ArrayList<ResourceDTO> list = new ArrayList<>();
-        for (ResourceEntity resourceEntity : resourceRepository.findAllAccountManagersOfWorkspace(id)) {
-            list.add(resourceConverter.convertToDto(resourceEntity));
-        }
-        return list;
-    }
 
     @Override
     public ResourceDTO getResourceInfo(Integer resourceId, Integer workspaceId) {
@@ -170,16 +148,16 @@ public class ResourceServiceImpl implements ResourceService {
                                            String sortColumn, String type, Integer page, Integer size){
         switch (sortColumn) {
             case "team":
-                sortColumn = TEAM_NAME_PARAMETER;
+                sortColumn = TEAM_PARAMETER;
                 break;
             case "position":
-                sortColumn = POSITION_NAME_PARAMETER;
+                sortColumn = POSITION_PARAMETER;
                 break;
             case "name":
                 sortColumn = RESOURCE_NAME_PARAMETER;
                 break;
             default:
-                sortColumn = CREATED_DATE_NAME_PARAMETER;
+                sortColumn = MODIFIED_DATE_PARAMETER;
                 break;
         }
         Page<ResourceEntity> resourceEntityPage;
@@ -203,5 +181,6 @@ public class ResourceServiceImpl implements ResourceService {
     public Integer getNumberOfResources(Integer idWorkspace, String searchName, String teamName, String posName){
         return resourceRepository.getNumberOfResourcesOfWorkspace(idWorkspace, searchName, teamName, posName);
     }
+
 }
 

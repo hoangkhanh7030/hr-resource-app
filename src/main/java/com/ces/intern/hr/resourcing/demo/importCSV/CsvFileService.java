@@ -19,8 +19,7 @@ import java.util.List;
 
 
 @Service
-public class CsvFileSerivce {
-
+public class CsvFileService {
     private final ProjectRepository projectRepository;
     private final ModelMapper modelMapper;
     private final WorkspaceRepository workspaceRepository;
@@ -29,7 +28,7 @@ public class CsvFileSerivce {
     private final ResourceRepository resourceRepository;
 
     @Autowired
-    public CsvFileSerivce(ProjectRepository projectRepository,
+    public CsvFileService(ProjectRepository projectRepository,
                           ModelMapper modelMapper,
                           WorkspaceRepository workspaceRepository,
                           TeamRepository teamRepository,
@@ -78,8 +77,6 @@ public class CsvFileSerivce {
                 ResourceEntity resourceEntity = new ResourceEntity();
                 resourceEntity.setName(resourceRequest.getName());
                 resourceEntity.setAvatar(resourceRequest.getAvatar());
-                resourceEntity.getPositionEntity().getTeamEntity().setWorkspaceEntityTeam(workspaceEntity);
-                resourceEntity.getPositionEntity().setTeamEntity(teamRepository.findById(resourceRequest.getTeamId()).orElse(null));
                 resourceEntity.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElse(null));
                 resourceEntity.setCreatedDate(new Date());
                 resourceEntity.setCreatedBy(idAccount);
@@ -91,4 +88,5 @@ public class CsvFileSerivce {
             throw new RuntimeException(CSVFile.FAIL_MESSAGE + e.getMessage());
         }
     }
+
 }

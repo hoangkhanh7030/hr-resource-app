@@ -21,18 +21,11 @@ public class ResourceConverter {
         resourceDTO.setModifiedDate(resourceEntity.getModifiedDate());
         resourceDTO.setAvatar(resourceEntity.getAvatar());
         resourceDTO.setName(resourceEntity.getName());
-        if(resourceEntity.getPositionEntity().getTeamEntity() != null){
-            resourceDTO.setTeamDTO(ObjectMapperUtils.map(resourceEntity.getPositionEntity().getTeamEntity(), TeamDTO.class));
-        }
         if(resourceEntity.getPositionEntity() != null){
             resourceDTO.setPositionDTO(ObjectMapperUtils.map(resourceEntity.getPositionEntity(), PositionDTO.class));
         }
         if (resourceEntity.getTimeEntities() != null){
             resourceDTO.setListTime(ObjectMapperUtils.mapAll(resourceEntity.getTimeEntities(), TimeDTO.class));
-        }
-        if (resourceEntity.getPositionEntity().getTeamEntity().getWorkspaceEntityTeam() != null){
-            resourceDTO.setWorkspaceName(ObjectMapperUtils.map(resourceEntity.
-                    getPositionEntity().getTeamEntity().getWorkspaceEntityTeam(), WorkspaceDTO.class));
         }
         return resourceDTO;
     }
@@ -46,18 +39,13 @@ public class ResourceConverter {
         resourceEntity.setModifiedDate(resourceDTO.getModifiedDate());
         resourceEntity.setAvatar(resourceDTO.getAvatar());
         resourceEntity.setName(resourceDTO.getName());
-        if(resourceDTO.getTeamDTO() != null){
-            resourceEntity.getPositionEntity().setTeamEntity(ObjectMapperUtils.map(resourceDTO.getTeamDTO(), TeamEntity.class));
-        }
         if(resourceDTO.getPositionDTO() != null){
             resourceEntity.setPositionEntity(ObjectMapperUtils.map(resourceDTO.getPositionDTO(), PositionEntity.class));
         }
         if (resourceDTO.getListTime() != null){
             resourceEntity.setTimeEntities(ObjectMapperUtils.mapAll(resourceDTO.getListTime(), TimeEntity.class));
         }
-        if (resourceDTO.getWorkspaceName() != null){
-            resourceEntity.getPositionEntity().getTeamEntity().setWorkspaceEntityTeam(ObjectMapperUtils.map(resourceDTO.getWorkspaceName(), WorkspaceEntity.class));
-        }
         return resourceEntity;
     }
+
 }

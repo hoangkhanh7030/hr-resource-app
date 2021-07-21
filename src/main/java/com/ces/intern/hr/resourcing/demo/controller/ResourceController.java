@@ -1,15 +1,13 @@
 package com.ces.intern.hr.resourcing.demo.controller;
 
-import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
-import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.ResourceListResponse;
 import com.ces.intern.hr.resourcing.demo.importCSV.ApacheCommonsCsvUtil;
-import com.ces.intern.hr.resourcing.demo.importCSV.CsvFileSerivce;
+import com.ces.intern.hr.resourcing.demo.importCSV.CsvFileService;
 import com.ces.intern.hr.resourcing.demo.importCSV.Message.Message;
 import com.ces.intern.hr.resourcing.demo.importCSV.Message.Response;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
@@ -36,17 +34,16 @@ import java.util.Objects;
 public class ResourceController {
     private final ResourceService resourceService;
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
-    private final CsvFileSerivce csvFileSerivce;
-    private static final String DATE_FORMAT = "yyyy-MM-dd_HH-mm-ss";
+    private final CsvFileService csvFileService;
 
     @Autowired
     private ResourceController(ResourceService resourceService,
                                AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
-                               CsvFileSerivce csvFileSerivce
+                               CsvFileService csvFileService
     ) {
         this.resourceService = resourceService;
         this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
-        this.csvFileSerivce = csvFileSerivce;
+        this.csvFileService = csvFileService;
     }
 
 
@@ -114,7 +111,7 @@ public class ResourceController {
             resourceRequest.setId(resourceDTO.getId());
             resourceRequest.setName(resourceDTO.getName());
             resourceRequest.setAvatar(resourceDTO.getAvatar());
-            resourceRequest.setTeamId(resourceDTO.getTeamDTO().getId());
+            //resourceRequest.setTeamId(resourceDTO.getPositionDTO().getId());
             resourceRequest.setPositionId(resourceDTO.getPositionDTO().getId());
             resourceRequests.add(resourceRequest);
         }
@@ -144,7 +141,7 @@ public class ResourceController {
 
 
         try {
-            csvFileSerivce.storeResource(csvFile.getInputStream(), workspaceId, idAccount);
+            csvFileService.storeResource(csvFile.getInputStream(), workspaceId, idAccount);
             response.addMessage(new Message(csvFile.getOriginalFilename(), "Upload File Successfully!", Status.SUCCESS.getCode()));
         } catch (Exception e) {
             response.addMessage(new Message(csvFile.getOriginalFilename(), e.getMessage(), Status.FAIL.getCode()));
@@ -164,9 +161,8 @@ public class ResourceController {
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             //resourceService.addNewResource(resourceRequest, workspaceId, accountId);
             resourceRequest.setName(resourceRequest.getName() == null? "" : resourceRequest.getName());
-            resourceRequest.setTeamId(resourceRequest.getTeamId() == null? 0 : resourceRequest.getTeamId());
             resourceRequest.setPositionId(resourceRequest.getPositionId() == null? 0 : resourceRequest.getPositionId());
-            return resourceService.addNewResource(resourceRequest, workspaceId, accountId);
+            return resourceService.addNewResource(resourceRequest, accountId);
         }
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
@@ -196,7 +192,6 @@ public class ResourceController {
                 (workspaceId, accountId).orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             resourceRequest.setName(resourceRequest.getName() == null? "" : resourceRequest.getName());
-            resourceRequest.setTeamId(resourceRequest.getTeamId() == null? 0 : resourceRequest.getTeamId());
             resourceRequest.setPositionId(resourceRequest.getPositionId() == null? 0 : resourceRequest.getPositionId());
             return resourceService.updateResource(resourceRequest, resourceId, workspaceId, accountId);
         }
@@ -215,13 +210,5 @@ public class ResourceController {
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
-//    @GetMapping(value = "/{workspaceId}/resources/sort")
-//    private List<ResourceDTO> sortProject(@PathVariable Integer workspaceId,
-//                                         @RequestParam Integer page,
-//                                         @RequestParam Integer size,
-//                                         @RequestParam String name,
-//                                         @RequestParam String type){
-//        return resourceService.sortResources(workspaceId, name, type, page, size);
-//    }
 
 }
