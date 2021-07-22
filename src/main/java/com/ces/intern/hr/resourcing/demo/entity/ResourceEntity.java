@@ -24,7 +24,7 @@ public class ResourceEntity extends BaseEnity{
     @ManyToOne
     @JoinColumn(name = "position_id")
     private PositionEntity positionEntity;
-
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "resourceEntity")
     private List<TimeEntity> timeEntities = new ArrayList<>();
+
 }

@@ -14,4 +14,5 @@ public class WorkspaceResponse extends BaseResponse {
     private String Role;
     private Integer projectListLength;
     private Integer resourceListLength;
+
 }

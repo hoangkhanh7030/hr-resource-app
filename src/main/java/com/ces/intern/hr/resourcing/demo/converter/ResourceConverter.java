@@ -23,6 +23,11 @@ public class ResourceConverter {
         resourceDTO.setName(resourceEntity.getName());
         if(resourceEntity.getPositionEntity() != null){
             resourceDTO.setPositionDTO(ObjectMapperUtils.map(resourceEntity.getPositionEntity(), PositionDTO.class));
+            if(resourceEntity.getPositionEntity().getTeamEntity() != null){
+                resourceDTO.getPositionDTO()
+                        .setTeamDTO(ObjectMapperUtils.map(resourceEntity
+                                .getPositionEntity().getTeamEntity(), TeamDTO.class));
+            }
         }
         if (resourceEntity.getTimeEntities() != null){
             resourceDTO.setListTime(ObjectMapperUtils.mapAll(resourceEntity.getTimeEntities(), TimeDTO.class));
@@ -41,11 +46,17 @@ public class ResourceConverter {
         resourceEntity.setName(resourceDTO.getName());
         if(resourceDTO.getPositionDTO() != null){
             resourceEntity.setPositionEntity(ObjectMapperUtils.map(resourceDTO.getPositionDTO(), PositionEntity.class));
+            if(resourceDTO.getPositionDTO() != null){
+                resourceEntity.getPositionEntity()
+                        .setTeamEntity(ObjectMapperUtils.map(resourceDTO
+                                .getPositionDTO().getTeamDTO(), TeamEntity.class));
+            }
         }
         if (resourceDTO.getListTime() != null){
             resourceEntity.setTimeEntities(ObjectMapperUtils.mapAll(resourceDTO.getListTime(), TimeEntity.class));
         }
         return resourceEntity;
     }
+
 
 }

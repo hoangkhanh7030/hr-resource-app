@@ -75,11 +75,14 @@ public class CsvFileService {
 
             for (ResourceRequest resourceRequest : resourceRequests) {
                 ResourceEntity resourceEntity = new ResourceEntity();
+                Date current = new Date();
                 resourceEntity.setName(resourceRequest.getName());
                 resourceEntity.setAvatar(resourceRequest.getAvatar());
                 resourceEntity.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElse(null));
-                resourceEntity.setCreatedDate(new Date());
+                resourceEntity.setCreatedDate(current);
                 resourceEntity.setCreatedBy(idAccount);
+                resourceEntity.setModifiedBy(idAccount);
+                resourceEntity.setModifiedDate(current);
                 resourceRepository.save(resourceEntity);
             }
 

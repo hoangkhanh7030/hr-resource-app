@@ -36,7 +36,6 @@ public class ResourceController {
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
     private final CsvFileService csvFileService;
 
-
     @Autowired
     private ResourceController(ResourceService resourceService,
                                AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
@@ -62,7 +61,7 @@ public class ResourceController {
         keyword = keyword == null ? "" : keyword;
         sortColumn = sortColumn == null ? "" : sortColumn;
         //type = type == null ? SortPara.DESC.getName() : type;
-        if (type == null){
+        if (type == null || type.isEmpty()){
             type = SortPara.DESC.getName();
         }
         else{
@@ -192,6 +191,7 @@ public class ResourceController {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId
                 (workspaceId, accountId).orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
+            resourceRequest.setId(resourceId);
             resourceRequest.setName(resourceRequest.getName() == null? "" : resourceRequest.getName());
             resourceRequest.setPositionId(resourceRequest.getPositionId() == null? 0 : resourceRequest.getPositionId());
             return resourceService.updateResource(resourceRequest, resourceId, workspaceId, accountId);
@@ -211,5 +211,13 @@ public class ResourceController {
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
+//    @GetMapping(value = "/{workspaceId}/resources/sort")
+//    private List<ResourceDTO> sortProject(@PathVariable Integer workspaceId,
+//                                         @RequestParam Integer page,
+//                                         @RequestParam Integer size,
+//                                         @RequestParam String name,
+//                                         @RequestParam String type){
+//        return resourceService.sortResources(workspaceId, name, type, page, size);
+//    }
 
 }

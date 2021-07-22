@@ -32,9 +32,7 @@ public class ResourceServiceImpl implements ResourceService {
     private final TeamRepository teamRepository;
     private final PositionRepository positionRepository;
 
-
-    private static final String TEAM_PARAMETER = "teamEntity.name";
-
+    private static final String TEAM_PARAMETER = "positionEntity.teamEntity.name";
     private static final String POSITION_PARAMETER = "positionEntity.name";
     private static final String RESOURCE_NAME_PARAMETER = "name";
     private static final String MODIFIED_DATE_PARAMETER = "modifiedDate";
@@ -187,6 +185,7 @@ public class ResourceServiceImpl implements ResourceService {
     public Integer getNumberOfResources(Integer idWorkspace, String searchName, String teamName, String posName){
         return resourceRepository.getNumberOfResourcesOfWorkspace(idWorkspace, searchName, teamName, posName);
     }
+
 
 
 }
