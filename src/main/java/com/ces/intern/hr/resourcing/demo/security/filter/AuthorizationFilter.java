@@ -2,6 +2,7 @@ package com.ces.intern.hr.resourcing.demo.security.filter;
 
 import com.ces.intern.hr.resourcing.demo.security.config.SecurityContact;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,6 +29,7 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws
             IOException, ServletException {
         String header = request.getHeader(SecurityContact.HEADER_STRING);
+
         if (header == null || header.isEmpty()) {
             chain.doFilter(request, response);
             return;
@@ -46,7 +48,8 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
     private Authentication getAuthentication(String header) throws IllegalAccessException {
         try {
 
-            Claims claims = Jwts.parser().setSigningKey(SecurityContact.TOKEN_SECRET).parseClaimsJws(header).getBody();
+            Claims claims = Jwts.parser().setSigningKey(SecurityContact.TOKEN_SECRET)
+                    .parseClaimsJws(header).getBody();
             String email = claims.getSubject();
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     email,

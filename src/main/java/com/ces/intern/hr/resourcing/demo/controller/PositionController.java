@@ -54,16 +54,20 @@ public class PositionController {
                                            @PathVariable Integer idWorkspace,
                                            @PathVariable Integer idTeam
     ) {
-        if (teamRepository.findByidWorkspaceAndIdTeam(idWorkspace,idTeam).isPresent()){
-            positionService.updatePosition(positionRequestList, idWorkspace, idTeam);
-            List<PositionEntity> positionEntityList = positionRepository.findAllByidWorkspaceAndidTeam(idWorkspace, idTeam);
-            List<PositionRequest> list = positionEntityList.stream().map(s -> modelMapper.map(s, PositionRequest.class)).collect(Collectors.toList());
-            if (listEquals(list, positionRequestList)) {
-                return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
-            } else {
-                return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
-            }
-        }else return new MessageResponse(ResponseMessage.NOT_FOUND,Status.FAIL.getCode());
+        if (positionRequestList.isEmpty()) {
+            return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
+        } else {
+            if (teamRepository.findByidWorkspaceAndIdTeam(idWorkspace, idTeam).isPresent()) {
+                positionService.updatePosition(positionRequestList, idWorkspace, idTeam);
+                List<PositionEntity> positionEntities = positionRepository.findAllByidWorkspaceAndidTeam(idWorkspace, idTeam);
+                List<PositionRequest> list = positionEntities.stream().map(s -> modelMapper.map(s, PositionRequest.class)).collect(Collectors.toList());
+                if (listEquals(list, positionRequestList)) {
+                    return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+                } else {
+                    return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+                }
+            } else return new MessageResponse(ResponseMessage.NOT_FOUND, Status.FAIL.getCode());
+        }
 
 
     }

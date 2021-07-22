@@ -107,16 +107,20 @@ public class TeamController {
     @PutMapping(value = "/{idWorkspace}/team/update")
     private MessageResponse updatePosition(@RequestBody List<TeamDTO> teamDTOS,
                                            @PathVariable Integer idWorkspace
-    )
-    {
-        teamService.updateTeam(teamDTOS,idWorkspace);
-        List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
-        List<TeamDTO> list = teamEntities.stream().map(s -> modelMapper.map(s, TeamDTO.class)).collect(Collectors.toList());
-        if (listEquals(list, teamDTOS)) {
-            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+    ) {
+        if (teamDTOS.isEmpty()) {
+            return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
         } else {
-            return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+            teamService.updateTeam(teamDTOS, idWorkspace);
+            List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
+            List<TeamDTO> list = teamEntities.stream().map(s -> modelMapper.map(s, TeamDTO.class)).collect(Collectors.toList());
+            if (listEquals(list, teamDTOS)) {
+                return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+            } else {
+                return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+            }
         }
+
 
     }
 

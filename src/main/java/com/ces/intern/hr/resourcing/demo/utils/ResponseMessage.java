@@ -16,6 +16,7 @@ public class ResponseMessage {
     public static final String INCRECT_EMAIL="Email Incorrect";
     public static final String NOT_FOUND ="Not Found";
     public static final String IS_ACTIVATE ="isActivate";
-    public static final String ARCHIEVED = "Archieved";
+    public static final String ARCHIEVED = "Archieve";
+
 
 }

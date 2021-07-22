@@ -12,8 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 
-
+import java.security.Key;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @Component
@@ -25,7 +26,7 @@ public class JwtTokenProvider {
                 .claim("email", accountDTO.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + SecurityContact.EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS256, SecurityContact.TOKEN_SECRET)
+                .signWith(SignatureAlgorithm.HS512, SecurityContact.TOKEN_SECRET)
                 .compact();
     }
 

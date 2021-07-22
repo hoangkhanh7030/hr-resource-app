@@ -71,31 +71,6 @@ public class ProjectController {
         }
         return numberSize;
     }
-//    @GetMapping(value = "/{idWorkspace}/projects/getAll")
-//    private NumberSizeResponse getAllP(@PathVariable Integer idWorkspace,
-//                                      @RequestParam int page,
-//                                      @RequestParam int size,
-//                                      @RequestParam String sortColumn,
-//                                      @RequestParam String searchName,
-//                                      @RequestParam String type,
-//                                      @RequestParam String isActivate){
-//        searchName = searchName == null ? "" : searchName;
-//        isActivate = isActivate == null ? "true" : isActivate;
-//        sortColumn = sortColumn == null ? "" : sortColumn;
-//        if (type == null){
-//            type = SortPara.DESC.getName();
-//        }
-//        else{
-//            if (!type.equals(SortPara.DESC.getName()) && !type.equals(SortPara.ASC.getName())){
-//                type = SortPara.DESC.getName();
-//            }
-//        }
-//        Boolean is_Activate = isActivate.equals("true");
-//        List<ProjectDTO> projectDTOS=projectService.listSortAndSearch(idWorkspace,page,size,is_Activate,searchName,sortColumn,type);
-//        List<ProjectEntity> listSize=projectRepository.findAllByNameAndClientNameAndActivate(idWorkspace,searchName,is_Activate);
-//        int sizeListProject =listSize.size();
-//        return new NumberSizeResponse(projectDTOS,numberSize(sizeListProject,size));
-//    }
 
 
     @GetMapping(value = "/{idWorkspace}/projects/export")
@@ -259,6 +234,11 @@ public class ProjectController {
                 return new NumberSizeResponse(projectService.listSortAndSearchAndIsActivate(idWorkspace, page, size, is_Activate, searchName, sortName, type),
                         numberSize(sizeListProject, size));
             }
+        } else if (!sortName.isEmpty() && searchName.isEmpty() && !type.isEmpty()) {
+            Boolean is_Activate = isActivate.equals("active");
+            sizeListProject = listSearchIsActivate(idWorkspace, searchName, is_Activate).size();
+            return new NumberSizeResponse(projectService.listSortAndSearchAndIsActivate(idWorkspace, page, size, is_Activate, searchName, sortName, type),
+                    numberSize(sizeListProject, size));
         } else {
             if (isActivate.isEmpty()) {
                 sizeListProject = listSearch(idWorkspace, searchName).size();
