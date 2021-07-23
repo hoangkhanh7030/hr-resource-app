@@ -16,6 +16,8 @@ public interface ResourceService {
 
     MessageResponse updateResource(ResourceRequest resourceRequest, Integer resourceId, Integer workspaceId, Integer accountId);
 
+    //MessageResponse archiveResource(Integer resourceId, Integer workspaceId, Boolean toggle);
+
     MessageResponse deleteResource(Integer id, Integer workspaceId);
 
     List<ResourceDTO> getResourcesOfWorkSpace(Integer id);

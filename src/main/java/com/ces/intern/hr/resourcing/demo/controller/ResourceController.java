@@ -69,7 +69,6 @@ public class ResourceController {
                 type = SortPara.DESC.getName();
             }
         }
-        System.out.println(teamName + posName + sortColumn + type);
         List<ResourceDTO> resourceDTOList = resourceService
                 .sortResources(workspaceId, keyword, teamName, posName, sortColumn, type, page, size);
         int listSize = resourceService.getNumberOfResources(workspaceId, keyword, teamName, posName);
@@ -198,6 +197,13 @@ public class ResourceController {
         }
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
+
+//    @PutMapping("/{workspaceId}/resources/{resourceId}/archive")
+//    public MessageResponse archiveResource(@PathVariable Integer workspaceId,
+//                                          @PathVariable Integer resourceId,
+//                                          @RequestParam Boolean toggle) {
+//        return resourceService.archiveResource(resourceId, workspaceId, toggle);
+//    }
 
     @DeleteMapping("/{workspaceId}/resources/{resourceId}")
     public MessageResponse deleteResource(@PathVariable Integer resourceId,

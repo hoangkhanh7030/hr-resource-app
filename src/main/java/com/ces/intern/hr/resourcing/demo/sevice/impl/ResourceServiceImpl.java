@@ -28,25 +28,20 @@ import java.util.List;
 public class ResourceServiceImpl implements ResourceService {
     private final ResourceRepository resourceRepository;
     private final ResourceConverter resourceConverter;
-    private final WorkspaceRepository workspaceRepository;
-    private final TeamRepository teamRepository;
     private final PositionRepository positionRepository;
 
     private static final String TEAM_PARAMETER = "positionEntity.teamEntity.name";
     private static final String POSITION_PARAMETER = "positionEntity.name";
     private static final String RESOURCE_NAME_PARAMETER = "name";
-    private static final String MODIFIED_DATE_PARAMETER = "modifiedDate";
+    private static final String CREATED_DATE_PARAMETER = "createdDate";
+
 
     @Autowired
     public ResourceServiceImpl(ResourceRepository resourceRepository,
                                ResourceConverter resourceConverter,
-                               WorkspaceRepository workspaceRepository,
-                               TeamRepository teamRepository,
                                PositionRepository positionRepository) {
         this.resourceRepository = resourceRepository;
         this.resourceConverter = resourceConverter;
-        this.workspaceRepository = workspaceRepository;
-        this.teamRepository = teamRepository;
         this.positionRepository = positionRepository;
     }
 
@@ -58,6 +53,9 @@ public class ResourceServiceImpl implements ResourceService {
             throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
         }
         resourceEntity.setName(resourceRequest.getName());
+        if(resourceRequest.getAvatar() == null){
+            resourceEntity.setAvatar("");
+        }
         resourceEntity.setAvatar(resourceRequest.getAvatar());
         resourceEntity.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElseThrow(()
                 -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
@@ -86,8 +84,8 @@ public class ResourceServiceImpl implements ResourceService {
             resourceEntityTarget.setModifiedBy(accountId);
             Date currentDate = new Date();
             resourceEntityTarget.setModifiedDate(currentDate);
-            if(resourceRequest.getAvatar().equals("") || resourceRequest.getAvatar() == null){
-                throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
+            if(resourceRequest.getAvatar() == null) {
+                resourceEntityTarget.setAvatar("");
             }
             resourceEntityTarget.setAvatar(resourceRequest.getAvatar());
             if(resourceRequest.getName().equals("") || resourceRequest.getName() == null){
@@ -101,6 +99,18 @@ public class ResourceServiceImpl implements ResourceService {
         }
         return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
     }
+
+//    @Override
+//    public MessageResponse archiveResource(Integer resourceId, Integer workspaceId, Boolean toggle){
+//        if (resourceRepository.findByPositionEntity_TeamEntity_WorkspaceEntityTeam_IdAndId(workspaceId, resourceId).isPresent()) {
+//            ResourceEntity resourceEntityTarget = resourceRepository
+//                    .findByPositionEntity_TeamEntity_WorkspaceEntityTeam_IdAndId(workspaceId, resourceId).get();
+//            resourceEntityTarget.setIsArchived(toggle);
+//            resourceRepository.save(resourceEntityTarget);
+//            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+//        }
+//        return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+//    }
 
     @Override
     public MessageResponse deleteResource(Integer id, Integer workspaceId) {
@@ -161,7 +171,7 @@ public class ResourceServiceImpl implements ResourceService {
                 sortColumn = RESOURCE_NAME_PARAMETER;
                 break;
             default:
-                sortColumn = MODIFIED_DATE_PARAMETER;
+                sortColumn = CREATED_DATE_PARAMETER;
                 break;
         }
         Page<ResourceEntity> resourceEntityPage;
@@ -185,8 +195,6 @@ public class ResourceServiceImpl implements ResourceService {
     public Integer getNumberOfResources(Integer idWorkspace, String searchName, String teamName, String posName){
         return resourceRepository.getNumberOfResourcesOfWorkspace(idWorkspace, searchName, teamName, posName);
     }
-
-
 
 }
 
