@@ -12,7 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface PositionRepository extends JpaRepository<PositionEntity, Integer> {
-    Optional<PositionEntity> findByName(String name);
+    Optional<PositionEntity> findByNameAndTeamEntity_Id(String name,Integer idTeam);
+    List<PositionEntity> findAllByTeamEntity_Id(Integer idTeam);
     @Query(value = "select p from PositionEntity p where p.teamEntity.workspaceEntityTeam.id=:idWorkspace")
     List<PositionEntity> findAllByidWorkspace(@Param("idWorkspace") Integer idWorkspace);
 
@@ -26,4 +27,5 @@ public interface PositionRepository extends JpaRepository<PositionEntity, Intege
     Optional<PositionEntity> findByidWorkspaceAndidTeam(@Param("idWorkspace") Integer idWorkspace,
                                                        @Param("idTeam") Integer idTeam,
                                                         @Param("name") String name);
+
 }

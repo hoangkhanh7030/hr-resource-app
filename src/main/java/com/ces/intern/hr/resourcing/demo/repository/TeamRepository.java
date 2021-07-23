@@ -12,8 +12,13 @@ import java.util.Optional;
 
 @Repository
 public interface TeamRepository extends JpaRepository<TeamEntity,Integer> {
-    @Query(value = "select t from TeamEntity t where t.name=:name and t.workspaceEntityTeam.id=:idWorkspace")
+    @Query(value = "select t from TeamEntity t where t.name=:name and t.workspaceEntityTeam.id=:idWorkspace ")
     Optional<TeamEntity> findByNameAndidWorkspace(@Param("name") String name,
+                                                  @Param("idWorkspace") Integer idWorkspace);
+    @Query(value = "select t from TeamEntity t where t.name=:name and t.workspaceEntityTeam.id=:idWorkspace " +
+            "and t.id=:idTeam")
+    Optional<TeamEntity> findByNameAndidWorkspaceAndIdTeam(@Param("idTeam") Integer idTeam,
+                                                  @Param("name") String name,
                                                   @Param("idWorkspace") Integer idWorkspace);
     @Query(value = "select t from TeamEntity t where t.workspaceEntityTeam.id=:idWorkspace")
     List<TeamEntity> findAllByidWorkspace(@Param("idWorkspace") Integer idWorkspace);

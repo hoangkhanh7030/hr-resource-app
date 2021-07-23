@@ -1,6 +1,8 @@
 package com.ces.intern.hr.resourcing.demo.sevice;
 
 import com.ces.intern.hr.resourcing.demo.dto.TeamDTO;
+import com.ces.intern.hr.resourcing.demo.http.request.TeamRequest;
+import com.ces.intern.hr.resourcing.demo.http.response.TeamResponse;
 
 import java.util.List;
 
@@ -10,5 +12,8 @@ public interface TeamService {
 
     void deleteTeam(Integer idTeam);
     void renameTeam(Integer idTeam,String name);
-    void updateTeam(List<TeamDTO> teamDTOS,Integer idWorkspace);
+
+    List<TeamResponse> getTeams(Integer idWorkspace);
+    void created(List<TeamRequest> teamRequests, Integer idWorkspace);
+    void update(List<TeamRequest> teamRequests,Integer idWorkspace);
 }

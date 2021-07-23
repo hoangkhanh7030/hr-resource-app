@@ -5,11 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PositionRequest {
+public class TeamRequest {
     private Integer id;
     private String name;
+    private List<PositionRequest> positions;
 }

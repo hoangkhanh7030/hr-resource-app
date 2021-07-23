@@ -25,6 +25,13 @@ public class PositionEntity {
     @JoinColumn(name = "team_id")
     private TeamEntity teamEntity;
 
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "positionEntity")
+    @OneToMany(cascade = {
+            CascadeType.DETACH,CascadeType.MERGE,
+            CascadeType.PERSIST,CascadeType.REFRESH
+    },mappedBy = "positionEntity")
     private List<ResourceEntity> resourceEntities = new ArrayList<>();
+    @PreRemove
+    private void preRemove() {
+        resourceEntities.forEach( child -> child.setPositionEntity(null));
+    }
 }
