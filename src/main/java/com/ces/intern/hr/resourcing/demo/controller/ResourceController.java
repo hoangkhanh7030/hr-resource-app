@@ -104,6 +104,7 @@ public class ResourceController {
                 type = SortPara.DESC.getName();
             }
         }
+
         if (isArchived == null || isArchived.isEmpty()){
             isArchived = StatusPara.ALL.getName();
         }

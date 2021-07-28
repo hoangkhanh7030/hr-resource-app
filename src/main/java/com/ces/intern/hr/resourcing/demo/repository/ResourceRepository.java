@@ -53,6 +53,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
 //                                          @Param("posName") String posName,
 //                                          Pageable pageable);
 //
+
 //    @Query("select r from ResourceEntity r where r.positionEntity.teamEntity.workspaceEntity.id = :workspaceId" +
 //            " AND r.positionEntity.teamEntity.name = :teamName AND r.positionEntity.name = :posName")
 //    Page<ResourceEntity> filterByTeamAndPosition(@Param("workspaceId") Integer workspaceId,
@@ -98,6 +99,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
 //                                    @Param("posName") String posName,
 //                                    Pageable pageable);
 
+
     @Query("select r from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId AND " +
             "(lower(r.name) like lower(concat('%',:searchName,'%')) " +
             "OR lower(r.positionEntity.teamEntity.name) like lower(concat('%',:searchName,'%')) OR lower(r.positionEntity.name) " +
@@ -105,6 +107,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
     Page<ResourceEntity> filterList(@Param("workspaceId") Integer workspaceId,
                                     @Param("searchName") String searchName,
                                     Pageable pageable);
+
 
 
 
@@ -127,6 +130,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
 //                                            @Param("searchName") String searchName,
 //                                            @Param("teamName") String teamName,
 //                                            @Param("posName") String posName);
+
 
     @Query("select count(r) from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId AND" +
             " (lower(r.name) like lower(concat('%',:searchName,'%')) " +

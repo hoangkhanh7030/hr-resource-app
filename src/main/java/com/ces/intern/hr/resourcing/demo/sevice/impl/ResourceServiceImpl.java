@@ -9,7 +9,6 @@ import com.ces.intern.hr.resourcing.demo.http.exception.BadRequestException;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.ResourceListResponse;
 import com.ces.intern.hr.resourcing.demo.repository.PositionRepository;
 import com.ces.intern.hr.resourcing.demo.repository.ResourceRepository;
 import com.ces.intern.hr.resourcing.demo.repository.TeamRepository;
@@ -115,6 +114,7 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
+
     public MessageResponse archiveResource(Integer resourceId, Integer workspaceId) {
         if (resourceRepository.findByWorkspaceEntityResource_IdAndId(workspaceId, resourceId).isPresent()) {
             ResourceEntity resourceEntityTarget = resourceRepository
@@ -207,21 +207,26 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String isArchived,
-                                           String sortColumn, String type, Integer page, Integer size) {
-        if (sortColumn.equals(ColumnPara.TEAM.getName())) {
+                                           String sortColumn, String type, Integer page, Integer size){
+        if (sortColumn.equals(ColumnPara.TEAM.getName())){
             sortColumn = TEAM_PARAMETER;
-        } else if (sortColumn.equals(ColumnPara.POSITION.getName())) {
+        }
+        else if (sortColumn.equals(ColumnPara.POSITION.getName())){
             sortColumn = POSITION_PARAMETER;
-        } else if (sortColumn.equals(ColumnPara.NAME.getName())) {
+        }
+        else if (sortColumn.equals(ColumnPara.NAME.getName())){
             sortColumn = RESOURCE_NAME_PARAMETER;
-        } else if (sortColumn.equals(ColumnPara.STATUS.getName())) {
+        }
+        else if (sortColumn.equals(ColumnPara.STATUS.getName())){
             sortColumn = STATUS_PARAMETER;
-            if (type.equals(SortPara.ASC.getName())) {
+            if (type.equals(SortPara.ASC.getName())){
                 type = SortPara.DESC.getName();
-            } else {
+            }
+            else {
                 type = SortPara.ASC.getName();
             }
-        } else {
+        }
+        else {
             sortColumn = CREATED_DATE_PARAMETER;
         }
         Page<ResourceEntity> resourceEntityPage;
@@ -231,10 +236,11 @@ public class ResourceServiceImpl implements ResourceService {
         } else {
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
         }
-        if (isArchived.equals(StatusPara.ARCHIVED.getName())) {
+        if (isArchived.equals(StatusPara.ARCHIVED.getName())){
             resourceEntityPage = resourceRepository
                     .filterListByStatus(idWorkspace, searchName, true, pageable);
-        } else if (isArchived.equals(StatusPara.ACTIVE.getName())) {
+        }
+        else if (isArchived.equals(StatusPara.ACTIVE.getName())){
             resourceEntityPage = resourceRepository
                     .filterListByStatus(idWorkspace, searchName, false, pageable);
         }  else {

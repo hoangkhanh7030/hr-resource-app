@@ -18,6 +18,4 @@ public class ResourceDTO extends BaseDTO{
     private PositionDTO positionDTO;
     private Boolean isArchived;
     private List<TimeDTO> listTime;
-
-
 }
