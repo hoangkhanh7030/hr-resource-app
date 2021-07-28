@@ -21,6 +21,7 @@ public class ResourceConverter {
         resourceDTO.setModifiedDate(resourceEntity.getModifiedDate());
         resourceDTO.setAvatar(resourceEntity.getAvatar());
         resourceDTO.setName(resourceEntity.getName());
+        resourceDTO.setIsArchived(resourceEntity.getIsArchived());
         if(resourceEntity.getPositionEntity() != null){
             resourceDTO.setPositionDTO(ObjectMapperUtils.map(resourceEntity.getPositionEntity(), PositionDTO.class));
             if(resourceEntity.getPositionEntity().getTeamEntity() != null){
@@ -44,6 +45,7 @@ public class ResourceConverter {
         resourceEntity.setModifiedDate(resourceDTO.getModifiedDate());
         resourceEntity.setAvatar(resourceDTO.getAvatar());
         resourceEntity.setName(resourceDTO.getName());
+        resourceEntity.setIsArchived(resourceDTO.getIsArchived());
         if(resourceDTO.getPositionDTO() != null){
             resourceEntity.setPositionEntity(ObjectMapperUtils.map(resourceDTO.getPositionDTO(), PositionEntity.class));
             if(resourceDTO.getPositionDTO() != null){

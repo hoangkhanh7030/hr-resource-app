@@ -47,19 +47,55 @@ public class ResourceController {
     }
 
 
+//    @GetMapping("/{workspaceId}/resources")
+//    public ResourceListResponse showResourceList(@PathVariable Integer workspaceId,
+//                                                 @RequestParam Integer page,
+//                                                 @RequestParam Integer size,
+//                                                 @RequestParam String keyword,
+//                                                 @RequestParam String teamName,
+//                                                 @RequestParam String posName,
+//                                                 @RequestParam String sortColumn,
+//                                                 @RequestParam String type) {
+//        teamName = teamName == null ? "" : teamName;
+//        posName = posName == null ? "" : posName;
+//        keyword = keyword == null ? "" : keyword;
+//        sortColumn = sortColumn == null ? "" : sortColumn;
+//        //type = type == null ? SortPara.DESC.getName() : type;
+//        if (type == null || type.isEmpty()){
+//            type = SortPara.DESC.getName();
+//        }
+//        else{
+//            if (!type.equals(SortPara.DESC.getName()) && !type.equals(SortPara.ASC.getName())){
+//                type = SortPara.DESC.getName();
+//            }
+//        }
+//        List<ResourceDTO> resourceDTOList = resourceService
+//                .sortResources(workspaceId, keyword, teamName, posName, sortColumn, type, page, size);
+//        int listSize = resourceService.getNumberOfResources(workspaceId, keyword, teamName, posName);
+//        int numberOfPages;
+//        if (listSize == 0) {
+//            numberOfPages = 0;
+//        } else {
+//            if (listSize % size == 0) {
+//                numberOfPages = listSize / size;
+//            } else {
+//                numberOfPages = (listSize / size) + 1;
+//            }
+//        }
+//        return new ResourceListResponse(resourceDTOList, numberOfPages);
+//    }
+
     @GetMapping("/{workspaceId}/resources")
     public ResourceListResponse showResourceList(@PathVariable Integer workspaceId,
                                                  @RequestParam Integer page,
                                                  @RequestParam Integer size,
                                                  @RequestParam String keyword,
-                                                 @RequestParam String teamName,
-                                                 @RequestParam String posName,
+                                                 @RequestParam String isArchived,
                                                  @RequestParam String sortColumn,
                                                  @RequestParam String type) {
-        teamName = teamName == null ? "" : teamName;
-        posName = posName == null ? "" : posName;
         keyword = keyword == null ? "" : keyword;
         sortColumn = sortColumn == null ? "" : sortColumn;
+        isArchived = isArchived == null ? "" : isArchived;
         //type = type == null ? SortPara.DESC.getName() : type;
         if (type == null || type.isEmpty()){
             type = SortPara.DESC.getName();
@@ -70,8 +106,8 @@ public class ResourceController {
             }
         }
         List<ResourceDTO> resourceDTOList = resourceService
-                .sortResources(workspaceId, keyword, teamName, posName, sortColumn, type, page, size);
-        int listSize = resourceService.getNumberOfResources(workspaceId, keyword, teamName, posName);
+                .sortResources(workspaceId, keyword, isArchived, sortColumn, type, page, size);
+        int listSize = resourceService.getNumberOfResources(workspaceId, keyword, isArchived);
         int numberOfPages;
         if (listSize == 0) {
             numberOfPages = 0;
@@ -198,12 +234,11 @@ public class ResourceController {
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 
-//    @PutMapping("/{workspaceId}/resources/{resourceId}/archive")
-//    public MessageResponse archiveResource(@PathVariable Integer workspaceId,
-//                                          @PathVariable Integer resourceId,
-//                                          @RequestParam Boolean toggle) {
-//        return resourceService.archiveResource(resourceId, workspaceId, toggle);
-//    }
+    @PutMapping("/{workspaceId}/resources/{resourceId}/archive")
+    public MessageResponse archiveResource(@PathVariable Integer workspaceId,
+                                           @PathVariable Integer resourceId) {
+        return resourceService.archiveResource(resourceId, workspaceId);
+    }
 
     @DeleteMapping("/{workspaceId}/resources/{resourceId}")
     public MessageResponse deleteResource(@PathVariable Integer resourceId,
@@ -216,14 +251,5 @@ public class ResourceController {
         }
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
-
-//    @GetMapping(value = "/{workspaceId}/resources/sort")
-//    private List<ResourceDTO> sortProject(@PathVariable Integer workspaceId,
-//                                         @RequestParam Integer page,
-//                                         @RequestParam Integer size,
-//                                         @RequestParam String name,
-//                                         @RequestParam String type){
-//        return resourceService.sortResources(workspaceId, name, type, page, size);
-//    }
 
 }

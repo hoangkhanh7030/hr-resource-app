@@ -21,6 +21,9 @@ public class ResourceEntity extends BaseEnity{
     private String name;
     @Column(name = "avatar")
     private String avatar;
+    @Column(name = "is_archived")
+    private Boolean isArchived = false;
+
     @ManyToOne
     @JoinColumn(name = "position_id")
     private PositionEntity positionEntity;

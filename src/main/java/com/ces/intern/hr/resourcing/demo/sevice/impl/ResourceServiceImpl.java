@@ -7,6 +7,7 @@ import com.ces.intern.hr.resourcing.demo.http.exception.BadRequestException;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.ResourceListResponse;
 import com.ces.intern.hr.resourcing.demo.repository.PositionRepository;
 import com.ces.intern.hr.resourcing.demo.repository.ResourceRepository;
 import com.ces.intern.hr.resourcing.demo.repository.TeamRepository;
@@ -100,17 +101,17 @@ public class ResourceServiceImpl implements ResourceService {
         return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
     }
 
-//    @Override
-//    public MessageResponse archiveResource(Integer resourceId, Integer workspaceId, Boolean toggle){
-//        if (resourceRepository.findByPositionEntity_TeamEntity_WorkspaceEntityTeam_IdAndId(workspaceId, resourceId).isPresent()) {
-//            ResourceEntity resourceEntityTarget = resourceRepository
-//                    .findByPositionEntity_TeamEntity_WorkspaceEntityTeam_IdAndId(workspaceId, resourceId).get();
-//            resourceEntityTarget.setIsArchived(toggle);
-//            resourceRepository.save(resourceEntityTarget);
-//            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
-//        }
-//        return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
-//    }
+    @Override
+    public MessageResponse archiveResource(Integer resourceId, Integer workspaceId){
+        if (resourceRepository.findByPositionEntity_TeamEntity_WorkspaceEntityTeam_IdAndId(workspaceId, resourceId).isPresent()) {
+            ResourceEntity resourceEntityTarget = resourceRepository
+                    .findByPositionEntity_TeamEntity_WorkspaceEntityTeam_IdAndId(workspaceId, resourceId).get();
+            resourceEntityTarget.setIsArchived(!resourceEntityTarget.getIsArchived());
+            resourceRepository.save(resourceEntityTarget);
+            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+        }
+        return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+    }
 
     @Override
     public MessageResponse deleteResource(Integer id, Integer workspaceId) {
@@ -157,8 +158,42 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
 
+//    @Override
+//    public List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String teamName, String posName,
+//                                           String sortColumn, String type, Integer page, Integer size){
+//        switch (sortColumn) {
+//            case "team":
+//                sortColumn = TEAM_PARAMETER;
+//                break;
+//            case "position":
+//                sortColumn = POSITION_PARAMETER;
+//                break;
+//            case "name":
+//                sortColumn = RESOURCE_NAME_PARAMETER;
+//                break;
+//            default:
+//                sortColumn = CREATED_DATE_PARAMETER;
+//                break;
+//        }
+//        Page<ResourceEntity> resourceEntityPage;
+//        Pageable pageable;
+//        if (type.equals(SortPara.ASC.getName())) {
+//            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortColumn));
+//        }else {
+//            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
+//        }
+//        resourceEntityPage = resourceRepository
+//                .filterList(idWorkspace, searchName, teamName, posName, pageable);
+//        List<ResourceEntity> resourceEntityList = resourceEntityPage.getContent();
+//        List<ResourceDTO> result = new ArrayList<>();
+//        for (ResourceEntity resourceEntity : resourceEntityList) {
+//            result.add(resourceConverter.convertToDto(resourceEntity));
+//        }
+//        return result;
+//    }
+
     @Override
-    public List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String teamName, String posName,
+    public List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String isArchived,
                                            String sortColumn, String type, Integer page, Integer size){
         switch (sortColumn) {
             case "team":
@@ -181,8 +216,18 @@ public class ResourceServiceImpl implements ResourceService {
         }else {
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
         }
-        resourceEntityPage = resourceRepository
-                .filterList(idWorkspace, searchName, teamName, posName, pageable);
+        if (isArchived.equals("true")){
+            resourceEntityPage = resourceRepository
+                    .filterListByStatus(idWorkspace, searchName, true, pageable);
+        }
+        else if (isArchived.equals("false")){
+            resourceEntityPage = resourceRepository
+                    .filterListByStatus(idWorkspace, searchName, false, pageable);
+        }
+        else {
+            resourceEntityPage = resourceRepository
+                    .filterList(idWorkspace, searchName, pageable);
+        }
         List<ResourceEntity> resourceEntityList = resourceEntityPage.getContent();
         List<ResourceDTO> result = new ArrayList<>();
         for (ResourceEntity resourceEntity : resourceEntityList) {
@@ -191,9 +236,18 @@ public class ResourceServiceImpl implements ResourceService {
         return result;
     }
 
+
     @Override
-    public Integer getNumberOfResources(Integer idWorkspace, String searchName, String teamName, String posName){
-        return resourceRepository.getNumberOfResourcesOfWorkspace(idWorkspace, searchName, teamName, posName);
+    public Integer getNumberOfResources(Integer idWorkspace, String searchName, String isArchived){
+        if (isArchived.equals("true")){
+            return resourceRepository.getNumberOfResourcesOfWorkspaceWithStatus(idWorkspace, true, searchName);
+        }
+        else if (isArchived.equals("false")){
+            return resourceRepository.getNumberOfResourcesOfWorkspaceWithStatus(idWorkspace, false, searchName);
+        }
+        else {
+            return resourceRepository.getNumberOfResourcesOfWorkspace(idWorkspace, searchName);
+        }
     }
 
 }
