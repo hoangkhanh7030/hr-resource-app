@@ -17,6 +17,7 @@ public class ResponseMessage {
     public static final String NOT_FOUND ="Not Found";
     public static final String IS_ACTIVATE ="isActivate";
     public static final String ARCHIEVED = "Archieve";
-
+    public static final String SETTING_SUCCESS = "Setting Successfully";
+    public static final String SETTING_FAIL = "Setting Fail";
 
 }

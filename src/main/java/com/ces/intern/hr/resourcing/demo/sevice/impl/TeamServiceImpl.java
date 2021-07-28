@@ -4,7 +4,6 @@ import com.ces.intern.hr.resourcing.demo.dto.TeamDTO;
 import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
-import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.PositionRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.TeamRequest;
@@ -79,7 +78,6 @@ public class TeamServiceImpl implements TeamService {
     }
 
 
-
     @Override
     public List<TeamResponse> getTeams(Integer idWorkspace) {
         List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
@@ -100,8 +98,25 @@ public class TeamServiceImpl implements TeamService {
 
     private void updateTeam(TeamRequest teamRequest, Integer idWorkspace) {
         TeamEntity teamEntity = teamRepository.findById(teamRequest.getId())
-                .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         teamEntity.setName(teamRequest.getName());
+        teamRepository.save(teamEntity);
+        for (PositionRequest positionRequest : teamRequest.getPositions()) {
+            if (positionRequest.getId() == null) {
+                if (!positionRepository.findByNameAndTeamEntity_Id(positionRequest.getName(),teamRequest.getId()).isPresent()){
+                    PositionEntity positionEntity = new PositionEntity();
+                    positionEntity.setName(positionRequest.getName());
+                    positionEntity.setTeamEntity(teamRepository.findById(teamRequest.getId()).orElse(null));
+                    positionRepository.save(positionEntity);
+                }
+            } else {
+                PositionEntity positionEntity = positionRepository.findById(positionRequest.getId()).orElse(null);
+                positionEntity.setName(positionRequest.getName());
+                positionEntity.setTeamEntity(teamRepository.findById(teamRequest.getId()).orElse(null));
+                positionRepository.save(positionEntity);
+            }
+
+        }
     }
 
     @Override
@@ -131,36 +146,38 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public void update(List<TeamRequest> teamRequests, Integer idWorkspace) {
         List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
-        deleteTeam(teamRequests,teamEntities);
-        for (TeamRequest teamRequest:teamRequests){
+        for (TeamRequest teamRequest : teamRequests) {
             List<PositionEntity> positionEntities = positionRepository.findAllByTeamEntity_Id(teamRequest.getId());
-            deletePosition(teamRequest.getPositions(),positionEntities);
-            createWithIdTeam(teamRequest,idWorkspace);
-
+            if (teamRequest.getId() == null) {
+                createWithIdTeam(teamRequest, idWorkspace);
+            } else {
+               updateTeam(teamRequest, idWorkspace);
+            }
+            deletePosition(teamRequest.getPositions(), positionEntities);
         }
-
-
+        deleteTeam(teamRequests, teamEntities);
 
 
     }
-    private void createWithIdTeam(TeamRequest teamRequest,Integer idWorkspace){
-            if (!teamRepository.findByNameAndidWorkspaceAndIdTeam(teamRequest.getId(),teamRequest.getName(), idWorkspace).isPresent()) {
-                TeamEntity teamEntity = new TeamEntity();
-                teamEntity.setName(teamRequest.getName());
-                teamEntity.setWorkspaceEntityTeam(workspaceRepository.findById(idWorkspace).orElse(null));
-                teamRepository.save(teamEntity);
-                for (PositionRequest positionRequest : teamRequest.getPositions()) {
-                    if (!positionRepository.findByNameAndTeamEntity_Id(positionRequest.getName(),
-                            teamRepository.findByNameAndidWorkspace(teamRequest.getName(), idWorkspace)
-                                    .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())).getId()).isPresent()) {
-                        PositionEntity positionEntity = new PositionEntity();
-                        positionEntity.setName(positionRequest.getName());
-                        positionEntity.setTeamEntity(teamRepository.findByNameAndidWorkspace(teamRequest.getName(), idWorkspace)
-                                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
-                        positionRepository.save(positionEntity);
-                    }
+
+    private void createWithIdTeam(TeamRequest teamRequest, Integer idWorkspace) {
+        if (!teamRepository.findByNameAndidWorkspaceAndIdTeam(teamRequest.getId(), teamRequest.getName(), idWorkspace).isPresent()) {
+            TeamEntity teamEntity = new TeamEntity();
+            teamEntity.setName(teamRequest.getName());
+            teamEntity.setWorkspaceEntityTeam(workspaceRepository.findById(idWorkspace).orElse(null));
+            teamRepository.save(teamEntity);
+            for (PositionRequest positionRequest : teamRequest.getPositions()) {
+                if (!positionRepository.findByNameAndTeamEntity_Id(positionRequest.getName(),
+                        teamRepository.findByNameAndidWorkspace(teamRequest.getName(), idWorkspace)
+                                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())).getId()).isPresent()) {
+                    PositionEntity positionEntity = new PositionEntity();
+                    positionEntity.setName(positionRequest.getName());
+                    positionEntity.setTeamEntity(teamRepository.findByNameAndidWorkspace(teamRequest.getName(), idWorkspace)
+                            .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
+                    positionRepository.save(positionEntity);
                 }
             }
+        }
 
     }
 
@@ -172,10 +189,11 @@ public class TeamServiceImpl implements TeamService {
             }
         }
     }
-    private void deletePosition(List<PositionRequest> positionRequests,List<PositionEntity> positionEntities){
 
-        for (PositionEntity positionEntity: positionEntities){
-            if (positionRequests.stream().filter(s->positionEntity.getName().equals(s.getName())).findAny().orElse(null)==null){
+    private void deletePosition(List<PositionRequest> positionRequests, List<PositionEntity> positionEntities) {
+
+        for (PositionEntity positionEntity : positionEntities) {
+            if (positionRequests.stream().filter(s -> positionEntity.getName().equals(s.getName())).findAny().orElse(null) == null) {
                 positionRepository.delete(positionEntity);
             }
         }
