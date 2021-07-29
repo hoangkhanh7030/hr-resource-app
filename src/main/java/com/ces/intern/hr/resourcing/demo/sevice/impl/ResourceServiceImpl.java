@@ -35,6 +35,7 @@ public class ResourceServiceImpl implements ResourceService {
     private static final String POSITION_PARAMETER = "positionEntity.name";
     private static final String RESOURCE_NAME_PARAMETER = "name";
     private static final String CREATED_DATE_PARAMETER = "createdDate";
+    private static final String STATUS_PARAMETER = "isArchived";
 
 
     @Autowired
@@ -204,6 +205,15 @@ public class ResourceServiceImpl implements ResourceService {
                 break;
             case "name":
                 sortColumn = RESOURCE_NAME_PARAMETER;
+                break;
+            case "status":
+                sortColumn = STATUS_PARAMETER;
+                if (type.equals(SortPara.ASC.getName())){
+                    type = SortPara.DESC.getName();
+                }
+                else {
+                    type = SortPara.ASC.getName();
+                }
                 break;
             default:
                 sortColumn = CREATED_DATE_PARAMETER;
