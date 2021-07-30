@@ -95,7 +95,6 @@ public class ResourceController {
                                                  @RequestParam String type) {
         keyword = keyword == null ? "" : keyword;
         sortColumn = sortColumn == null ? "" : sortColumn;
-        isArchived = isArchived == null ? "" : isArchived;
         //type = type == null ? SortPara.DESC.getName() : type;
         if (type == null || type.isEmpty()){
             type = SortPara.DESC.getName();
@@ -103,6 +102,14 @@ public class ResourceController {
         else{
             if (!type.equals(SortPara.DESC.getName()) && !type.equals(SortPara.ASC.getName())){
                 type = SortPara.DESC.getName();
+            }
+        }
+        if (isArchived == null || isArchived.isEmpty()){
+            isArchived = StatusPara.ALL.getName();
+        }
+        else {
+            if (!isArchived.equals(StatusPara.ACTIVE.getName()) && !isArchived.equals(StatusPara.ARCHIVED.getName())){
+                isArchived = StatusPara.ALL.getName();
             }
         }
         List<ResourceDTO> resourceDTOList = resourceService

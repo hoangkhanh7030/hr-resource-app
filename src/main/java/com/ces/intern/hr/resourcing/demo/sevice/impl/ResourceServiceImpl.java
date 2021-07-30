@@ -226,11 +226,11 @@ public class ResourceServiceImpl implements ResourceService {
         }else {
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
         }
-        if (isArchived.equals("true")){
+        if (isArchived.equals(StatusPara.ARCHIVED.getName())){
             resourceEntityPage = resourceRepository
                     .filterListByStatus(idWorkspace, searchName, true, pageable);
         }
-        else if (isArchived.equals("false")){
+        else if (isArchived.equals(StatusPara.ACTIVE.getName())){
             resourceEntityPage = resourceRepository
                     .filterListByStatus(idWorkspace, searchName, false, pageable);
         }
