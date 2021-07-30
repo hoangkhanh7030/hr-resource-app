@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 
 @AllArgsConstructor
-public enum StatusPara {
-    ACTIVE("active"),ARCHIVED("archived"),ALL("all");
+public enum ColumnPara {
+    TEAM("team"),POSITION("position"),NAME("name"),STATUS("status");
     private String name;
 }

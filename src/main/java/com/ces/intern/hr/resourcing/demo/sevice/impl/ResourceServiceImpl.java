@@ -196,28 +196,26 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String isArchived,
                                            String sortColumn, String type, Integer page, Integer size){
-        switch (sortColumn) {
-            case "team":
-                sortColumn = TEAM_PARAMETER;
-                break;
-            case "position":
-                sortColumn = POSITION_PARAMETER;
-                break;
-            case "name":
-                sortColumn = RESOURCE_NAME_PARAMETER;
-                break;
-            case "status":
-                sortColumn = STATUS_PARAMETER;
-                if (type.equals(SortPara.ASC.getName())){
-                    type = SortPara.DESC.getName();
-                }
-                else {
-                    type = SortPara.ASC.getName();
-                }
-                break;
-            default:
-                sortColumn = CREATED_DATE_PARAMETER;
-                break;
+        if (sortColumn.equals(ColumnPara.TEAM.getName())){
+            sortColumn = TEAM_PARAMETER;
+        }
+        else if (sortColumn.equals(ColumnPara.POSITION.getName())){
+            sortColumn = POSITION_PARAMETER;
+        }
+        else if (sortColumn.equals(ColumnPara.NAME.getName())){
+            sortColumn = RESOURCE_NAME_PARAMETER;
+        }
+        else if (sortColumn.equals(ColumnPara.STATUS.getName())){
+            sortColumn = STATUS_PARAMETER;
+            if (type.equals(SortPara.ASC.getName())){
+                type = SortPara.DESC.getName();
+            }
+            else {
+                type = SortPara.ASC.getName();
+            }
+        }
+        else {
+            sortColumn = CREATED_DATE_PARAMETER;
         }
         Page<ResourceEntity> resourceEntityPage;
         Pageable pageable;
