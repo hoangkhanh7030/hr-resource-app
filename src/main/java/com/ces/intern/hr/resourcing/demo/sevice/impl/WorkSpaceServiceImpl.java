@@ -65,7 +65,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
             WorkspaceResponse workspaceResponse = modelMapper.map(workspaceEntity, WorkspaceResponse.class);
             List<ProjectEntity> projectEntities = projectRepository.findAllByWorkspaceEntityProject_Id(accountWorkspaceRoleEntity.getWorkspaceEntity().getId());
             List<ProjectDTO> projectDTOS = projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
-            List<ResourceEntity> resourceEntities = resourceRepository.findAllByIdWorkspace(accountWorkspaceRoleEntity.getWorkspaceEntity().getId());
+            List<ResourceEntity> resourceEntities = resourceRepository.findAllByidWorkspace(accountWorkspaceRoleEntity.getWorkspaceEntity().getId());
             List<ResourceDTO> resourceDTOS = resourceEntities.stream().map(s -> modelMapper.map(s, ResourceDTO.class)).collect(Collectors.toList());
             if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
                 workspaceResponse.setRole(Role.EDIT.getName());

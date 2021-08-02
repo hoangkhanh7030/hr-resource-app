@@ -110,7 +110,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
     List<ResourceEntity> findAllByPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(Integer workspaceId);
 
     @Query(value = "select r from ResourceEntity r where r.positionEntity.teamEntity.workspaceEntityTeam.id =:idWorkspace")
-    List<ResourceEntity> findAllByIdWorkspace(@Param("idWorkspace") Integer idWorkspace);
+    List<ResourceEntity> findAllByidWorkspace(@Param("idWorkspace") Integer idWorkspace);
 
 
 }

@@ -24,7 +24,8 @@ public class TimeEntity {
     private Date startTime;
     @Column(name = "end_time")
     private Date endTime;
-
+    @Column(name = "total_hour")
+    private Double totalHour;
 
     @ManyToOne
     @JoinColumn(name = "resource_id")

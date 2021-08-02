@@ -19,5 +19,7 @@ public class ResponseMessage {
     public static final String ARCHIEVED = "Archieve";
     public static final String SETTING_SUCCESS = "Setting Successfully";
     public static final String SETTING_FAIL = "Setting Fail";
+    public static final String WRONG_TIME= "Wrong Time Choice (start time is less than end time)";
+
 
 }

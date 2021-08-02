@@ -3,7 +3,9 @@ package com.ces.intern.hr.resourcing.demo.controller;
 import com.ces.intern.hr.resourcing.demo.dto.TimeDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
+import com.ces.intern.hr.resourcing.demo.http.request.BookingRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.TimeRequest;
+import com.ces.intern.hr.resourcing.demo.http.response.BookingResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
 
@@ -17,6 +19,8 @@ import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -45,19 +49,7 @@ public class TimeController {
         return timeService.getBookingByMonth(month, year, workspaceId);
     }
 
-    @PostMapping("/{workspaceId}/bookings/{resourceId}")
-    public MessageResponse addNewBooking(@RequestBody TimeRequest timeRequest,
-                                         @PathVariable Integer resourceId,
-                                         @PathVariable Integer workspaceId,
-                                         @RequestHeader Integer accountId) {
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId
-                (workspaceId, accountId).orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
-            timeRequest.setResourceId(resourceId);
-            return timeService.addNewBooking(timeRequest);
-        }
-        return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
-    }
+
 
     @PutMapping("/{workspaceId}/bookings/{timeId}")
     public MessageResponse editBooking(@RequestBody TimeRequest timeRequest,
@@ -82,5 +74,18 @@ public class TimeController {
             return timeService.deleteBooking(timeId);
         }
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
+    }
+    @PostMapping("/{idWorkspace}/bookings")
+    public MessageResponse addBooking(@RequestBody BookingRequest bookingRequest,
+                               @PathVariable Integer idWorkspace) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDay = simpleDateFormat.parse(bookingRequest.getStartDate());
+        Date endDay = simpleDateFormat.parse(bookingRequest.getEndDate());
+        if (startDay.getTime()>endDay.getTime()){
+            return new MessageResponse(ResponseMessage.WRONG_TIME,Status.FAIL.getCode());
+        }else {
+            timeService.newBooking(bookingRequest,idWorkspace);
+            return new MessageResponse(ResponseMessage.CREATE_SUCCESS,Status.SUCCESS.getCode());
+        }
     }
 }

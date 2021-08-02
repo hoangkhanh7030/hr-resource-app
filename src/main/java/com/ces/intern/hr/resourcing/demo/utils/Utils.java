@@ -10,10 +10,13 @@ import java.util.Date;
 
 public class Utils {
 
-    public static String toFirtDayOfWeek(String date) throws ParseException{
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+
+
+    public static Date toMonDayOfWeek(Date date) {
+
         Calendar calendar =Calendar.getInstance();
-        calendar.setTime(simpleDateFormat.parse(date));
+        calendar.setTime(date);
         int dayOfWeek =calendar.get(Calendar.DAY_OF_WEEK);
         if (dayOfWeek==1){
             calendar.add(Calendar.DATE,-6);
@@ -21,22 +24,49 @@ public class Utils {
         else {
             calendar.add(Calendar.DATE,(2-dayOfWeek));
         }
-        String firtDay=simpleDateFormat.format(calendar.getTime());
-        return firtDay;
+        return calendar.getTime();
     }
-    public static String toEndDayOfWeek(String date) throws ParseException{
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    public static Date toSunDayOfWeek(Date date) {
+
         Calendar calendar =Calendar.getInstance();
-        calendar.setTime(simpleDateFormat.parse(date));
+        calendar.setTime(date);
         int dayOfWeek =calendar.get(Calendar.DAY_OF_WEEK);
         if (dayOfWeek==1){
-            calendar.add(Calendar.DATE,dayOfWeek);
+            calendar.add(Calendar.DATE,0);
         }
         else {
             calendar.add(Calendar.DATE,(8-dayOfWeek));
         }
-        String endDay=simpleDateFormat.format(calendar.getTime());
-        return endDay;
+        return calendar.getTime();
+    }
+    public static Date toSaturDayOfWeek(Date date) {
+        Calendar calendar =Calendar.getInstance();
+        calendar.setTime(date);
+        int dayOfWeek =calendar.get(Calendar.DAY_OF_WEEK);
+        if (dayOfWeek==7){
+            calendar.add(Calendar.DATE,0);
+        }else if (dayOfWeek==1){
+            calendar.add(Calendar.DATE,-1);
+        }
+        else {
+            calendar.add(Calendar.DATE,(7-dayOfWeek));
+        }
+        return calendar.getTime();
+    }
+    public static Date toFriDayOfWeek(Date date) {
+
+        Calendar calendar =Calendar.getInstance();
+        calendar.setTime(date);
+        int dayOfWeek =calendar.get(Calendar.DAY_OF_WEEK);
+        if (dayOfWeek==1){
+            calendar.add(Calendar.DATE,-2);
+        }else if (dayOfWeek==6){
+            calendar.add(Calendar.DATE,0);
+        }
+        else {
+            calendar.add(Calendar.DATE,(6-dayOfWeek));
+        }
+        return calendar.getTime();
     }
 
 }

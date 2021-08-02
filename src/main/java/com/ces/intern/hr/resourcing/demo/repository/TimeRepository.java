@@ -31,12 +31,12 @@ public interface TimeRepository extends JpaRepository<TimeEntity,Integer> {
                                                                @Param("day") Integer day, @Param("resourceId") Integer id,
                                                                @Param("timeId") Integer timeId);
 
-    @Query(value = "SELECT b.* from booking b\n" +
-            "    inner join resource r on b.resource_id = r.id\n" +
-            "    inner join workspace w on r.workspace_id = w.id\n" +
-            "where date_part('year', start_time) = :year and date_part('month', start_time) = :month and date_part('day', start_time) = :day \n" +
-            "and r.workspace_id = :workspaceId", nativeQuery = true)
-    Optional<List<TimeEntity>> findAllShiftOfMonth(@Param("year") Integer year, @Param("month") Integer month,
-                                                   @Param("day") Integer day, @Param("workspaceId") Integer workspaceId);
+//    @Query(value = "SELECT b.* from booking b\n" +
+//            "    inner join resource r on b.resource_id = r.id\n" +
+//            "    inner join workspace w on r.position_id = w.id\n" +
+//            "where date_part('year', start_time) = :year and date_part('month', start_time) = :month and date_part('day', start_time) = :day \n" +
+//            "and r.workspace_id = :workspaceId", nativeQuery = true)
+//    Optional<List<TimeEntity>> findAllShiftOfMonth(@Param("year") Integer year, @Param("month") Integer month,
+//                                                   @Param("day") Integer day, @Param("workspaceId") Integer workspaceId);
 
 }
