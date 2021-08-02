@@ -204,7 +204,7 @@ public class ResourceController {
             //resourceService.addNewResource(resourceRequest, workspaceId, accountId);
             resourceRequest.setName(resourceRequest.getName() == null? "" : resourceRequest.getName());
             resourceRequest.setPositionId(resourceRequest.getPositionId() == null? 0 : resourceRequest.getPositionId());
-            return resourceService.addNewResource(resourceRequest, accountId);
+            return resourceService.addNewResource(resourceRequest, accountId,workspaceId);
         }
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }

@@ -26,10 +26,14 @@ public class TeamEntity {
     private WorkspaceEntity workspaceEntityTeam;
 
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "teamEntity")
-
     private List<PositionEntity> positionEntities = new ArrayList<>();
-//    @PreRemove
-//    private void preRemove() {
-//        positionEntities.forEach( child -> child.setTeamEntity(null));
-//    }
+    @OneToMany(cascade = {
+            CascadeType.DETACH,CascadeType.MERGE,
+            CascadeType.PERSIST,CascadeType.REFRESH
+    },mappedBy = "teamEntityResource")
+    private List<ResourceEntity> resourceEntities = new ArrayList<>();
+    @PreRemove
+    private void preRemove() {
+        resourceEntities.forEach( child -> child.setTimeEntities(null));
+    }
 }

@@ -14,10 +14,10 @@ import java.util.List;
 public class ResourceDTO extends BaseDTO{
     private String name;
     private String avatar;
-    //private WorkspaceDTO workspaceName;
-    //private List<ProjectDTO> listProject;
-    //private TeamDTO teamDTO;
+    private TeamDTO teamDTO;
     private PositionDTO positionDTO;
-    private List<TimeDTO> listTime;
     private Boolean isArchived;
+    private List<TimeDTO> listTime;
+
+
 }

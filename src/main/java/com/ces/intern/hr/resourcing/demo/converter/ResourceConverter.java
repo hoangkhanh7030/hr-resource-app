@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ResourceConverter {
+
     @Autowired
     private ModelMapper modelMapper;
 
@@ -22,6 +23,12 @@ public class ResourceConverter {
         resourceDTO.setAvatar(resourceEntity.getAvatar());
         resourceDTO.setName(resourceEntity.getName());
         resourceDTO.setIsArchived(resourceEntity.getIsArchived());
+        if (resourceEntity.getTeamEntityResource()==null){
+            resourceDTO.setTeamDTO(null);
+        }else {
+            resourceDTO.setTeamDTO(modelMapper.map(resourceEntity.getTeamEntityResource(),TeamDTO.class));
+
+        }
         if(resourceEntity.getPositionEntity() != null){
             resourceDTO.setPositionDTO(ObjectMapperUtils.map(resourceEntity.getPositionEntity(), PositionDTO.class));
             if(resourceEntity.getPositionEntity().getTeamEntity() != null){

@@ -250,6 +250,11 @@ public class TimeServiceImpl implements TimeService {
 
     }
 
+    @Override
+    public void update(BookingRequest bookingRequest, Integer idWorkspace) {
+
+    }
+
 
     private void setShift(TimeEntity timeEntity, Integer start, Integer end, Calendar calendar) {
         calendar.set(Calendar.HOUR_OF_DAY, start);

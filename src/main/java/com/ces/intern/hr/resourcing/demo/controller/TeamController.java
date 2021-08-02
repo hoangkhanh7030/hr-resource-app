@@ -106,7 +106,7 @@ public class TeamController {
     }
 
 
-    @PostMapping(value = "/{idWorkspace}/team")
+    @PostMapping(value = "/{idWorkspace}/teams")
     private MessageResponse created(@PathVariable Integer idWorkspace,
                             @RequestBody List<TeamRequest> teamRequests){
             for (TeamRequest teamRequest:teamRequests){

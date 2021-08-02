@@ -125,7 +125,6 @@ public class TeamServiceImpl implements TeamService {
             if (!teamRepository.findByNameAndidWorkspace(teamRequest.getName(), idWorkspace).isPresent()) {
                 TeamEntity teamEntity = new TeamEntity();
                 teamEntity.setName(teamRequest.getName());
-                teamEntity.setWorkspaceEntityTeam(workspaceRepository.findById(idWorkspace).orElse(null));
                 teamRepository.save(teamEntity);
                 for (PositionRequest positionRequest : teamRequest.getPositions()) {
                     if (!positionRepository.findByNameAndTeamEntity_Id(positionRequest.getName(),
@@ -164,7 +163,6 @@ public class TeamServiceImpl implements TeamService {
         if (!teamRepository.findByNameAndidWorkspaceAndIdTeam(teamRequest.getId(), teamRequest.getName(), idWorkspace).isPresent()) {
             TeamEntity teamEntity = new TeamEntity();
             teamEntity.setName(teamRequest.getName());
-            teamEntity.setWorkspaceEntityTeam(workspaceRepository.findById(idWorkspace).orElse(null));
             teamRepository.save(teamEntity);
             for (PositionRequest positionRequest : teamRequest.getPositions()) {
                 if (!positionRepository.findByNameAndTeamEntity_Id(positionRequest.getName(),

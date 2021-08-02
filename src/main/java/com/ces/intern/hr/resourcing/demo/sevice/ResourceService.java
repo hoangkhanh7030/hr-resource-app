@@ -11,7 +11,7 @@ public interface ResourceService {
     List<ResourceDTO> searchByName(String name, String posName, String teamName,
                                    Integer workspaceId, Integer page, Integer size);
 
-    MessageResponse addNewResource(ResourceRequest resourceRequest, Integer accountId);
+    MessageResponse addNewResource(ResourceRequest resourceRequest, Integer accountId,Integer workspaceId);
 
     ResourceDTO findById(Integer id);
 

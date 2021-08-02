@@ -23,10 +23,16 @@ public class ResourceEntity extends BaseEnity{
     private String avatar;
     @Column(name = "is_archived")
     private Boolean isArchived = false;
-
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private TeamEntity teamEntityResource;
     @ManyToOne
     @JoinColumn(name = "position_id")
     private PositionEntity positionEntity;
+    @ManyToOne
+    @JoinColumn(name = "workspace_id")
+    private WorkspaceEntity workspaceEntityResource;
+
     @OneToMany(cascade = CascadeType.ALL,mappedBy = "resourceEntity")
     private List<TimeEntity> timeEntities = new ArrayList<>();
 

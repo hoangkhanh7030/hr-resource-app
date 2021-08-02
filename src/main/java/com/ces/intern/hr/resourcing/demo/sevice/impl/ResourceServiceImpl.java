@@ -3,6 +3,8 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.converter.ResourceConverter;
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
+import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
+import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.BadRequestException;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
@@ -30,6 +32,8 @@ public class ResourceServiceImpl implements ResourceService {
     private final ResourceRepository resourceRepository;
     private final ResourceConverter resourceConverter;
     private final PositionRepository positionRepository;
+    private final WorkspaceRepository workspaceRepository;
+    private final TeamRepository teamRepository;
 
     private static final String TEAM_PARAMETER = "positionEntity.teamEntity.name";
     private static final String POSITION_PARAMETER = "positionEntity.name";
@@ -41,21 +45,27 @@ public class ResourceServiceImpl implements ResourceService {
     @Autowired
     public ResourceServiceImpl(ResourceRepository resourceRepository,
                                ResourceConverter resourceConverter,
-                               PositionRepository positionRepository) {
+                               PositionRepository positionRepository,
+                               WorkspaceRepository workspaceRepository,
+                               TeamRepository teamRepository) {
         this.resourceRepository = resourceRepository;
         this.resourceConverter = resourceConverter;
         this.positionRepository = positionRepository;
+        this.workspaceRepository = workspaceRepository;
+        this.teamRepository = teamRepository;
     }
 
     @Override
-    public MessageResponse addNewResource(ResourceRequest resourceRequest, Integer accountId) {
+    public MessageResponse addNewResource(ResourceRequest resourceRequest, Integer accountId, Integer workspaceId) {
         Date currentDate = new Date();
         ResourceEntity resourceEntity = new ResourceEntity();
-        if(resourceRequest.getName().equals("") || resourceRequest.getName() == null){
+        TeamEntity teamEntity =teamRepository.findById(resourceRequest.getTeamId()).orElse(null);
+                WorkspaceEntity workspaceEntity = workspaceRepository.findById(workspaceId).orElse(null);
+        if (resourceRequest.getName().equals("") || resourceRequest.getName() == null) {
             throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
         }
         resourceEntity.setName(resourceRequest.getName());
-        if(resourceRequest.getAvatar() == null){
+        if (resourceRequest.getAvatar() == null) {
             resourceEntity.setAvatar("");
         }
         resourceEntity.setAvatar(resourceRequest.getAvatar());
@@ -63,6 +73,8 @@ public class ResourceServiceImpl implements ResourceService {
                 -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
         resourceEntity.setCreatedDate(currentDate);
         resourceEntity.setCreatedBy(accountId);
+        resourceEntity.setWorkspaceEntityResource(workspaceEntity);
+        resourceEntity.setTeamEntityResource(teamEntity);
         resourceEntity.setModifiedDate(currentDate);
         resourceEntity.setModifiedBy(accountId);
         resourceRepository.save(resourceEntity);
@@ -80,17 +92,17 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public MessageResponse updateResource(ResourceRequest resourceRequest, Integer resourceId, Integer workspaceId, Integer accountId) {
-        if (resourceRepository.findByPositionEntity_TeamEntity_WorkspaceEntityTeam_IdAndId(workspaceId, resourceId).isPresent()) {
-            ResourceEntity resourceEntityTarget = resourceRepository.findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(resourceId,workspaceId).get();
+        if (resourceRepository.findByWorkspaceEntityResource_IdAndId(workspaceId, resourceId).isPresent()) {
+            ResourceEntity resourceEntityTarget = resourceRepository.findByWorkspaceEntityResource_IdAndId(workspaceId, resourceId).get();
             resourceEntityTarget.setId(resourceRequest.getId());
             resourceEntityTarget.setModifiedBy(accountId);
             Date currentDate = new Date();
             resourceEntityTarget.setModifiedDate(currentDate);
-            if(resourceRequest.getAvatar() == null) {
+            if (resourceRequest.getAvatar() == null) {
                 resourceEntityTarget.setAvatar("");
             }
             resourceEntityTarget.setAvatar(resourceRequest.getAvatar());
-            if(resourceRequest.getName().equals("") || resourceRequest.getName() == null){
+            if (resourceRequest.getName().equals("") || resourceRequest.getName() == null) {
                 throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
             }
             resourceEntityTarget.setName(resourceRequest.getName());
@@ -103,10 +115,10 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public MessageResponse archiveResource(Integer resourceId, Integer workspaceId){
-        if (resourceRepository.findByPositionEntity_TeamEntity_WorkspaceEntityTeam_IdAndId(workspaceId, resourceId).isPresent()) {
+    public MessageResponse archiveResource(Integer resourceId, Integer workspaceId) {
+        if (resourceRepository.findByWorkspaceEntityResource_IdAndId(workspaceId, resourceId).isPresent()) {
             ResourceEntity resourceEntityTarget = resourceRepository
-                    .findByPositionEntity_TeamEntity_WorkspaceEntityTeam_IdAndId(workspaceId, resourceId).get();
+                    .findByWorkspaceEntityResource_IdAndId(workspaceId, resourceId).get();
             resourceEntityTarget.setIsArchived(!resourceEntityTarget.getIsArchived());
             resourceRepository.save(resourceEntityTarget);
             return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
@@ -126,7 +138,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public List<ResourceDTO> getResourcesOfWorkSpace(Integer id) {
         List<ResourceDTO> resourceDTOS = new ArrayList<>();
-        List<ResourceEntity> resourceEntityList = resourceRepository.findAllByPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(id);
+        List<ResourceEntity> resourceEntityList = resourceRepository.findAllByWorkspaceEntityResource_Id(id);
         for (ResourceEntity resourceEntity : resourceEntityList) {
             resourceDTOS.add(resourceConverter.convertToDto(resourceEntity));
         }
@@ -195,44 +207,37 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String isArchived,
-                                           String sortColumn, String type, Integer page, Integer size){
-        if (sortColumn.equals(ColumnPara.TEAM.getName())){
+                                           String sortColumn, String type, Integer page, Integer size) {
+        if (sortColumn.equals(ColumnPara.TEAM.getName())) {
             sortColumn = TEAM_PARAMETER;
-        }
-        else if (sortColumn.equals(ColumnPara.POSITION.getName())){
+        } else if (sortColumn.equals(ColumnPara.POSITION.getName())) {
             sortColumn = POSITION_PARAMETER;
-        }
-        else if (sortColumn.equals(ColumnPara.NAME.getName())){
+        } else if (sortColumn.equals(ColumnPara.NAME.getName())) {
             sortColumn = RESOURCE_NAME_PARAMETER;
-        }
-        else if (sortColumn.equals(ColumnPara.STATUS.getName())){
+        } else if (sortColumn.equals(ColumnPara.STATUS.getName())) {
             sortColumn = STATUS_PARAMETER;
-            if (type.equals(SortPara.ASC.getName())){
+            if (type.equals(SortPara.ASC.getName())) {
                 type = SortPara.DESC.getName();
-            }
-            else {
+            } else {
                 type = SortPara.ASC.getName();
             }
-        }
-        else {
+        } else {
             sortColumn = CREATED_DATE_PARAMETER;
         }
         Page<ResourceEntity> resourceEntityPage;
         Pageable pageable;
         if (type.equals(SortPara.ASC.getName())) {
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortColumn));
-        }else {
+        } else {
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
         }
-        if (isArchived.equals(StatusPara.ARCHIVED.getName())){
+        if (isArchived.equals(StatusPara.ARCHIVED.getName())) {
             resourceEntityPage = resourceRepository
                     .filterListByStatus(idWorkspace, searchName, true, pageable);
-        }
-        else if (isArchived.equals(StatusPara.ACTIVE.getName())){
+        } else if (isArchived.equals(StatusPara.ACTIVE.getName())) {
             resourceEntityPage = resourceRepository
                     .filterListByStatus(idWorkspace, searchName, false, pageable);
-        }
-        else {
+        }  else {
             resourceEntityPage = resourceRepository
                     .filterList(idWorkspace, searchName, pageable);
         }
@@ -246,14 +251,12 @@ public class ResourceServiceImpl implements ResourceService {
 
 
     @Override
-    public Integer getNumberOfResources(Integer idWorkspace, String searchName, String isArchived){
-        if (isArchived.equals("true")){
+    public Integer getNumberOfResources(Integer idWorkspace, String searchName, String isArchived) {
+        if (isArchived.equals("true")) {
             return resourceRepository.getNumberOfResourcesOfWorkspaceWithStatus(idWorkspace, true, searchName);
-        }
-        else if (isArchived.equals("false")){
+        } else if (isArchived.equals("false")) {
             return resourceRepository.getNumberOfResourcesOfWorkspaceWithStatus(idWorkspace, false, searchName);
-        }
-        else {
+        } else {
             return resourceRepository.getNumberOfResourcesOfWorkspace(idWorkspace, searchName);
         }
     }

@@ -21,6 +21,6 @@ public interface TimeService {
     Map<Date, List<TimeDTO>> getBookingByMonth(Integer month, Integer year, Integer workspaceId);
 
     void newBooking(BookingRequest bookingRequest,Integer idWorkspace) throws ParseException;
-
+    void update(BookingRequest bookingRequest,Integer idWorkspace);
 
 }
