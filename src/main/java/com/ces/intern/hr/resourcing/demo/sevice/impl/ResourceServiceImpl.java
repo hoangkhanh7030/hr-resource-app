@@ -15,6 +15,7 @@ import com.ces.intern.hr.resourcing.demo.repository.TeamRepository;
 import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.ResourceService;
 import com.ces.intern.hr.resourcing.demo.utils.*;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ResourceServiceImpl implements ResourceService {
@@ -33,6 +35,7 @@ public class ResourceServiceImpl implements ResourceService {
     private final PositionRepository positionRepository;
     private final WorkspaceRepository workspaceRepository;
     private final TeamRepository teamRepository;
+    private final ModelMapper modelMapper;
 
     private static final String TEAM_PARAMETER = "positionEntity.teamEntity.name";
     private static final String POSITION_PARAMETER = "positionEntity.name";
@@ -46,20 +49,23 @@ public class ResourceServiceImpl implements ResourceService {
                                ResourceConverter resourceConverter,
                                PositionRepository positionRepository,
                                WorkspaceRepository workspaceRepository,
-                               TeamRepository teamRepository) {
+                               TeamRepository teamRepository,
+                               ModelMapper modelMapper
+    ) {
         this.resourceRepository = resourceRepository;
         this.resourceConverter = resourceConverter;
         this.positionRepository = positionRepository;
         this.workspaceRepository = workspaceRepository;
         this.teamRepository = teamRepository;
+        this.modelMapper = modelMapper;
     }
 
     @Override
     public MessageResponse addNewResource(ResourceRequest resourceRequest, Integer accountId, Integer workspaceId) {
         Date currentDate = new Date();
         ResourceEntity resourceEntity = new ResourceEntity();
-        TeamEntity teamEntity =teamRepository.findById(resourceRequest.getTeamId()).orElse(null);
-                WorkspaceEntity workspaceEntity = workspaceRepository.findById(workspaceId).orElse(null);
+        TeamEntity teamEntity = teamRepository.findById(resourceRequest.getTeamId()).orElse(null);
+        WorkspaceEntity workspaceEntity = workspaceRepository.findById(workspaceId).orElse(null);
         if (resourceRequest.getName().equals("") || resourceRequest.getName() == null) {
             throw new BadRequestException(ExceptionMessage.MISSING_REQUIRE_FIELD.getMessage());
         }
@@ -207,26 +213,21 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String isArchived,
-                                           String sortColumn, String type, Integer page, Integer size){
-        if (sortColumn.equals(ColumnPara.TEAM.getName())){
+                                           String sortColumn, String type, Integer page, Integer size) {
+        if (sortColumn.equals(ColumnPara.TEAM.getName())) {
             sortColumn = TEAM_PARAMETER;
-        }
-        else if (sortColumn.equals(ColumnPara.POSITION.getName())){
+        } else if (sortColumn.equals(ColumnPara.POSITION.getName())) {
             sortColumn = POSITION_PARAMETER;
-        }
-        else if (sortColumn.equals(ColumnPara.NAME.getName())){
+        } else if (sortColumn.equals(ColumnPara.NAME.getName())) {
             sortColumn = RESOURCE_NAME_PARAMETER;
-        }
-        else if (sortColumn.equals(ColumnPara.STATUS.getName())){
+        } else if (sortColumn.equals(ColumnPara.STATUS.getName())) {
             sortColumn = STATUS_PARAMETER;
-            if (type.equals(SortPara.ASC.getName())){
+            if (type.equals(SortPara.ASC.getName())) {
                 type = SortPara.DESC.getName();
-            }
-            else {
+            } else {
                 type = SortPara.ASC.getName();
             }
-        }
-        else {
+        } else {
             sortColumn = CREATED_DATE_PARAMETER;
         }
         Page<ResourceEntity> resourceEntityPage;
@@ -236,14 +237,13 @@ public class ResourceServiceImpl implements ResourceService {
         } else {
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
         }
-        if (isArchived.equals(StatusPara.ARCHIVED.getName())){
+        if (isArchived.equals(StatusPara.ARCHIVED.getName())) {
             resourceEntityPage = resourceRepository
                     .filterListByStatus(idWorkspace, searchName, true, pageable);
-        }
-        else if (isArchived.equals(StatusPara.ACTIVE.getName())){
+        } else if (isArchived.equals(StatusPara.ACTIVE.getName())) {
             resourceEntityPage = resourceRepository
                     .filterListByStatus(idWorkspace, searchName, false, pageable);
-        }  else {
+        } else {
             resourceEntityPage = resourceRepository
                     .filterList(idWorkspace, searchName, pageable);
         }
@@ -266,6 +266,15 @@ public class ResourceServiceImpl implements ResourceService {
             return resourceRepository.getNumberOfResourcesOfWorkspace(idWorkspace, searchName);
         }
     }
+
+    @Override
+    public List<ResourceDTO> getAll(Integer idWorkspace, String searchName) {
+        List<ResourceEntity> resourceEntities = resourceRepository.findAll(idWorkspace, searchName);
+        return resourceEntities.stream().map(
+                resourceEntity -> modelMapper.map(resourceEntity, ResourceDTO.class))
+                .collect(Collectors.toList());
+    }
+
 
 }
 

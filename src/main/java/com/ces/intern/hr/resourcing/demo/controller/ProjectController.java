@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(value = "/api/v1/workspaces")
 public class ProjectController {
+    private static final String ACTIVE="active";
     private final ProjectService projectService;
     private final ProjectRepository projectRepository;
     private final ModelMapper modelMapper;
@@ -229,13 +230,13 @@ public class ProjectController {
                 sizeListProject = listSearch(idWorkspace, searchName).size();
                 return new NumberSizeResponse(projectService.listSortAndSearch(idWorkspace, page, size, searchName, sortName, type), numberSize(sizeListProject, size));
             } else {
-                Boolean is_Activate = isActivate.equals("active");
+                Boolean is_Activate = isActivate.equals(ACTIVE);
                 sizeListProject = listSearchIsActivate(idWorkspace, searchName, is_Activate).size();
                 return new NumberSizeResponse(projectService.listSortAndSearchAndIsActivate(idWorkspace, page, size, is_Activate, searchName, sortName, type),
                         numberSize(sizeListProject, size));
             }
         } else if (!sortName.isEmpty() && searchName.isEmpty() && !type.isEmpty()) {
-            Boolean is_Activate = isActivate.equals("active");
+            Boolean is_Activate = isActivate.equals(ACTIVE);
             sizeListProject = listSearchIsActivate(idWorkspace, searchName, is_Activate).size();
             return new NumberSizeResponse(projectService.listSortAndSearchAndIsActivate(idWorkspace, page, size, is_Activate, searchName, sortName, type),
                     numberSize(sizeListProject, size));
@@ -244,7 +245,7 @@ public class ProjectController {
                 sizeListProject = listSearch(idWorkspace, searchName).size();
                 return new NumberSizeResponse(projectService.searchParameterNotIsActivate(searchName, idWorkspace, page, size), numberSize(sizeListProject, size));
             } else {
-                Boolean is_Activate = isActivate.equals("active");
+                Boolean is_Activate = isActivate.equals(ACTIVE);
                 sizeListProject = listSearchIsActivate(idWorkspace, searchName, is_Activate).size();
                 return new NumberSizeResponse(projectService.searchParameter(searchName, is_Activate, idWorkspace, page, size), numberSize(sizeListProject, size));
             }

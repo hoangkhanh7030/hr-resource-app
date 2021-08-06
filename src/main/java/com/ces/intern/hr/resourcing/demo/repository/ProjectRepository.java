@@ -54,4 +54,9 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> 
 
 
 
+    @Query(value = "select p from ProjectEntity p where p.workspaceEntityProject.id=:idWorkspace and p.isActivate=true and (lower(p.name) " +
+            "like lower(concat('%',:name,'%')) or lower(p.clientName) like lower(concat('%',:name,'%')))")
+    List<ProjectEntity> findAll(@Param("idWorkspace") Integer idWorkspace,
+                                                                @Param("name") String name);
+
 }

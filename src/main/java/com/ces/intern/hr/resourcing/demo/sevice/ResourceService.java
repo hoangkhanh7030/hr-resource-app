@@ -25,14 +25,9 @@ public interface ResourceService {
 
     ResourceDTO getResourceInfo(Integer resourceId, Integer workspaceId);
 
-//    List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String teamName, String posName,
-//                                    String sortColumn, String type, Integer page, Integer size);
-
     List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String isArchived,
                                     String sortColumn, String type, Integer page, Integer size);
-
-//    Integer getNumberOfResources(Integer idWorkspace, String searchName, String teamName, String posName);
-
     Integer getNumberOfResources(Integer idWorkspace, String searchName, String isArchived);
 
+    List<ResourceDTO> getAll(Integer idWorkspace,String searchName);
 }

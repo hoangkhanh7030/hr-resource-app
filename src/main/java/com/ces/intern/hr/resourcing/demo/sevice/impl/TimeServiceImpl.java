@@ -17,6 +17,7 @@ import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
 import com.ces.intern.hr.resourcing.demo.utils.Utils;
 import org.decimal4j.util.DoubleRounder;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,90 +28,27 @@ import java.util.*;
 
 @Service
 public class TimeServiceImpl implements TimeService {
-    private static final int START_HOUR = 9;
-    private static final int END_HOUR = 17;
     private static final int MILLISECOND = (1000 * 60 * 60 * 24);
-    private static final int DAY_OF_WEEK = 7;
+
     private final TimeConverter timeConverter;
     private final TimeRepository timeRepository;
     private final ProjectRepository projectRepository;
     private final ResourceRepository resourceRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
     private TimeServiceImpl(TimeConverter timeConverter,
                             TimeRepository timeRepository,
                             ProjectRepository projectRepository,
-                            ResourceRepository resourceRepository) {
+                            ResourceRepository resourceRepository,
+                            ModelMapper modelMapper) {
         this.timeConverter = timeConverter;
         this.timeRepository = timeRepository;
         this.projectRepository = projectRepository;
         this.resourceRepository = resourceRepository;
+        this.modelMapper=modelMapper;
     }
 
-
-    @Override
-    public MessageResponse addNewBooking(TimeRequest timeRequest) {
-        TimeEntity timeEntity = new TimeEntity();
-        int start = timeRequest.getStartHour();
-        int end = timeRequest.getEndHour();
-        timeEntity.setTask(timeRequest.getTaskName());
-        timeEntity.setProjectEntity(projectRepository.findById(timeRequest.getProjectId()).orElse(null));
-        timeEntity.setResourceEntity(resourceRepository.findById(timeRequest.getResourceId()).orElse(null));
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(timeRequest.getDate());
-        if (start >= START_HOUR && end <= END_HOUR && start < end) {
-            if (!timeRepository.findShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                    calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId()).isPresent()) {
-                setShift(timeEntity, start, end, calendar);
-                timeRepository.save(timeEntity);
-                return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
-            } else {
-                if (TimeCheck(timeRequest, start, end, calendar)) {
-                    setShift(timeEntity, start, end, calendar);
-                    timeRepository.save(timeEntity);
-                    return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
-                } else {
-                    return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
-                }
-            }
-        }
-
-        return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
-    }
-
-    @Override
-    public MessageResponse updateBooking(TimeRequest timeRequest, Integer timeId) {
-        TimeEntity timeEntity = new TimeEntity();
-        if (timeRepository.findById(timeId).isPresent()
-                && projectRepository.findById(timeRequest.getProjectId()).isPresent()
-                && resourceRepository.findById(timeRequest.getResourceId()).isPresent()) {
-            timeEntity.setTask(timeRequest.getTaskName());
-            timeEntity.setResourceEntity(resourceRepository.findById(timeRequest.getResourceId()).get());
-            timeEntity.setProjectEntity(projectRepository.findById(timeRequest.getProjectId()).get());
-            timeEntity.setId(timeId);
-        } else {
-            return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
-        }
-        int start = timeRequest.getStartHour();
-        int end = timeRequest.getEndHour();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(timeRequest.getDate());
-        if (start >= START_HOUR && end <= END_HOUR && start < end) {
-            if (timeRepository.findAllDifferentShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                    calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId(), timeId).isPresent()) {
-                if (TimeCheck(timeRequest, start, end, calendar)) {
-                    setShift(timeEntity, start, end, calendar);
-                    timeRepository.save(timeEntity);
-                    return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
-                } else {
-                    return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
-                }
-            } else {
-                return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
-            }
-        }
-        return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
-    }
 
     private boolean TimeCheck(TimeRequest timeRequest, int start, int end, Calendar calendar) {
         List<TimeEntity> listTime = timeRepository.findShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
@@ -176,7 +114,7 @@ public class TimeServiceImpl implements TimeService {
         Date endDay = simpleDateFormat.parse(bookingRequest.getEndDate());
         ProjectEntity projectEntity = projectRepository.findByIdAndWorkspaceEntityProject_Id(bookingRequest.getIdProject(),idWorkspace).orElse(null);
         ResourceEntity resourceEntity = resourceRepository.findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(bookingRequest.getIdResource(),idWorkspace).orElse(null);
-
+        boolean checkNull = bookingRequest.getDuration() == null;
 
         if ((startDay.equals(Utils.toSaturDayOfWeek(startDay)) || startDay.equals(Utils.toSunDayOfWeek(startDay)))
                 && (endDay.equals(Utils.toSaturDayOfWeek(startDay)) || endDay.equals(Utils.toSunDayOfWeek(startDay)))) {
@@ -186,11 +124,11 @@ public class TimeServiceImpl implements TimeService {
             timeEntity.setEndTime(endDay);
             timeEntity.setProjectEntity(projectEntity);
             timeEntity.setResourceEntity(resourceEntity);
-            if (bookingRequest.getDuration() == null) {
+            if (checkNull) {
                 Double totalHour = (hourTotal * bookingRequest.getPercentage()) / 100;
                 timeEntity.setTotalHour(DoubleRounder.round(totalHour, 1));
             } else {
-                timeEntity.setTotalHour(bookingRequest.getDuration());
+                timeEntity.setTotalHour((bookingRequest.getDuration()*hourTotal)/8);
             }
             timeRepository.save(timeEntity);
 
@@ -198,9 +136,11 @@ public class TimeServiceImpl implements TimeService {
             List<BookingResponse> bookingResponses = new ArrayList<>();
             Date currentDate = new Date(startDay.getTime());
             while (true) {
-                if (startDay.equals(Utils.toSaturDayOfWeek(currentDate)) ||
-                        startDay.equals(Utils.toSunDayOfWeek(currentDate))) {
-                    currentDate.setDate(currentDate.getDate() + 7);
+                if (startDay.equals(Utils.toSaturDayOfWeek(currentDate))) {
+                    currentDate.setDate(currentDate.getDate() + 2);
+                }
+                if (startDay.equals(Utils.toSunDayOfWeek(currentDate))){
+                    currentDate.setDate(currentDate.getDate()+1);
                 }
 
                 Date first = Utils.toMonDayOfWeek(currentDate);
@@ -215,17 +155,9 @@ public class TimeServiceImpl implements TimeService {
                 BookingResponse bookingResponse = new BookingResponse(first, end);
                 bookingResponses.add(bookingResponse);
 
-
                 currentDate.setDate(currentDate.getDate() + 7);
-                Long endTime;
-                if (endDay.equals(Utils.toSunDayOfWeek(endDay))
-                        || endDay.equals(Utils.toSaturDayOfWeek(endDay))
-                        || ((endDay.getTime() - startDay.getTime()) / MILLISECOND) < 7) {
-                    endTime = endDay.getTime();
-                } else {
-                    endTime = endDay.getTime() + (MILLISECOND * 7);
-                }
-                if (currentDate.getTime() > endTime) {
+                currentDate=Utils.toMonDayOfWeek(currentDate);
+                if (currentDate.getTime() > endDay.getTime()) {
                     break;
                 }
             }
@@ -236,11 +168,11 @@ public class TimeServiceImpl implements TimeService {
                 timeEntity.setProjectEntity(projectEntity);
                 timeEntity.setResourceEntity(resourceEntity);
                 Long hourTotal = (((bookingResponse.getEndDay().getTime() - bookingResponse.getStartDay().getTime()) / MILLISECOND) + 1) * 8;
-                if (bookingRequest.getDuration() == null) {
+                if (checkNull) {
                     Double totalHour = (hourTotal * bookingRequest.getPercentage()) / 100;
                     timeEntity.setTotalHour(DoubleRounder.round(totalHour, 1));
                 } else {
-                    timeEntity.setTotalHour(bookingRequest.getDuration());
+                    timeEntity.setTotalHour((bookingRequest.getDuration()*hourTotal)/8);
                 }
                 timeRepository.save(timeEntity);
 
@@ -249,24 +181,55 @@ public class TimeServiceImpl implements TimeService {
 
 
     }
+    private void update(TimeEntity timeEntity,BookingRequest bookingRequest,Date currentStart,Date currentEnd){
+        timeEntity.setResourceEntity(resourceRepository.findById(bookingRequest.getIdResource()).get());
+        timeEntity.setProjectEntity(projectRepository.findById(bookingRequest.getIdProject()).get());
+        timeEntity.setStartTime(currentStart);
+        timeEntity.setEndTime(currentEnd);
+        Long hourTotal = (((currentEnd.getTime() - currentStart.getTime()) / MILLISECOND) + 1) * 8;
+        if (bookingRequest.getDuration() == null) {
+            Double totalHour = (hourTotal * bookingRequest.getPercentage()) / 100;
+            timeEntity.setTotalHour(DoubleRounder.round(totalHour, 1));
+        } else {
+            timeEntity.setTotalHour((bookingRequest.getDuration()*hourTotal)/8);
+        }
+        timeRepository.save(timeEntity);
+
+    }
 
     @Override
-    public void update(BookingRequest bookingRequest, Integer idWorkspace) {
+    public void updateBooking(BookingRequest bookingRequest, Integer idWorkspace) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDay = simpleDateFormat.parse(bookingRequest.getStartDate());
+        Date endDay = simpleDateFormat.parse(bookingRequest.getEndDate());
+        Date currentStart;
+        Date currentEnd;
+        if (timeRepository.findById(bookingRequest.getId()).isPresent()){
+            TimeEntity timeEntity = timeRepository.findById(bookingRequest.getId()).get();
+            Date mon = Utils.toMonDayOfWeek(timeEntity.getEndTime());
+            Date fri = Utils.toFriDayOfWeek(timeEntity.getEndTime());
+            Date sat=Utils.toSaturDayOfWeek(timeEntity.getEndTime());
+            Date sun=Utils.toSunDayOfWeek(timeEntity.getEndTime());
+            boolean checkEquals = endDay.equals(sat) || endDay.equals(sun);
+            if (startDay.getTime()>= mon.getTime()&&endDay.getTime()<=sun.getTime()){
+                if (checkEquals){
+                    currentEnd=fri;
+                }else {
+                    currentEnd=endDay;
+                }
+                currentStart=startDay;
+                update(timeEntity,bookingRequest,currentStart,currentEnd);
+            }else{
+                timeRepository.delete(timeEntity);
+                newBooking(bookingRequest, idWorkspace);
+            }
+
+        }
+
 
     }
 
 
-    private void setShift(TimeEntity timeEntity, Integer start, Integer end, Calendar calendar) {
-        calendar.set(Calendar.HOUR_OF_DAY, start);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        timeEntity.setStartTime(calendar.getTime());
-        calendar.set(Calendar.HOUR_OF_DAY, end);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        timeEntity.setEndTime(calendar.getTime());
-    }
+
 
 }

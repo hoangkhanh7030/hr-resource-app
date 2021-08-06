@@ -119,7 +119,9 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
                                             @Param("searchName") String searchName,
                                             @Param("isArchived") Boolean isArchived,
                                             Pageable pageable);
-
+    @Query("select r from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId AND r.isArchived =true AND lower(r.name) like lower(concat('%',:searchName,'%'))")
+    List<ResourceEntity> findAll(@Param("workspaceId") Integer workspaceId,
+                                @Param("searchName") String searchName);
 
 
 //    @Query("select count(r) from ResourceEntity r where r.positionEntity.teamEntity.workspaceEntityTeam.id = :workspaceId AND" +

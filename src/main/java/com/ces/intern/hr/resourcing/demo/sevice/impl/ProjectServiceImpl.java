@@ -35,12 +35,13 @@ public class ProjectServiceImpl implements ProjectService {
         this.modelMapper = modelMapper;
         this.workspaceRepository = workspaceRepository;
     }
+
     public static final String IS_ACTIVATE = "isActivate";
-    public static final String CREATED_DATE="createdDate";
+    public static final String CREATED_DATE = "createdDate";
 
     @Override
-    public List<ProjectDTO> getAllProjects(Integer idWorkspace, int page,int size) {
-        Pageable pageable = PageRequest.of(page, size,Sort.by(CREATED_DATE).descending());
+    public List<ProjectDTO> getAllProjects(Integer idWorkspace, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(CREATED_DATE).descending());
         Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, pageable);
         List<ProjectEntity> projectEntities = projectEntityPage.getContent();
         return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
@@ -78,49 +79,70 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Override
-    public List<ProjectDTO> searchParameter(String name, Boolean isActivate, Integer idWorkspace,int page,int size) {
-        Pageable pageable = PageRequest.of(page,size);
+    public List<ProjectDTO> searchParameter(String name, Boolean isActivate, Integer idWorkspace, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
         Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientNameAndIsActivate(idWorkspace, name, isActivate, pageable);
         List<ProjectEntity> projectEntities = projectEntityPage.getContent();
-        return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+        return projectEntities.stream().map(
+                projectEntity -> modelMapper.map(projectEntity, ProjectDTO.class))
+                .collect(Collectors.toList());
     }
+
     @Override
     public List<ProjectDTO> searchParameterNotIsActivate(String name, Integer idWorkspace, int page, int size) {
-        Pageable pageable = PageRequest.of(page,size);
-        Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientName(idWorkspace,name,pageable);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientName(idWorkspace, name, pageable);
         List<ProjectEntity> projectEntities = projectEntityPage.getContent();
-        return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+        return projectEntities.stream().map(
+                projectEntity -> modelMapper.map(projectEntity, ProjectDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProjectDTO> getAll(Integer idWorkspace, String searchName) {
+        List<ProjectEntity> projectEntities = projectRepository.findAll(idWorkspace, searchName);
+        return projectEntities.stream().map(
+                projectEntity -> modelMapper.map(projectEntity, ProjectDTO.class))
+                .collect(Collectors.toList());
     }
 
 
     @Override
-    public List<ProjectDTO> sortProject(int page, int size, Integer idWorkspace,String sortColumn, String type) {
+    public List<ProjectDTO> sortProject(int page, int size, Integer idWorkspace, String sortColumn, String type) {
 
         if (type.equals(SortPara.ASC.getName())) {
             if (sortColumn.equals(IS_ACTIVATE)) {
                 Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, sortDESC(page, size, sortColumn));
                 List<ProjectEntity> projectEntities = projectEntityPage.getContent();
-                return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+                return projectEntities.stream().map(
+                        projectEntity -> modelMapper.map(projectEntity, ProjectDTO.class))
+                        .collect(Collectors.toList());
             } else {
                 Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, sortASC(page, size, sortColumn));
                 List<ProjectEntity> projectEntities = projectEntityPage.getContent();
-                return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+                return projectEntities.stream().map(
+                        projectEntity -> modelMapper.map(projectEntity, ProjectDTO.class))
+                        .collect(Collectors.toList());
             }
         } else {
             if (sortColumn.equals(IS_ACTIVATE)) {
                 Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, sortASC(page, size, sortColumn));
                 List<ProjectEntity> projectEntities = projectEntityPage.getContent();
-                return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+                return projectEntities.stream().map(
+                        projectEntity -> modelMapper.map(projectEntity, ProjectDTO.class))
+                        .collect(Collectors.toList());
             } else {
                 Page<ProjectEntity> projectEntityPage = projectRepository.findAllById(idWorkspace, sortDESC(page, size, sortColumn));
                 List<ProjectEntity> projectEntities = projectEntityPage.getContent();
-                return projectEntities.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+                return projectEntities.stream().map(
+                        projectEntity -> modelMapper.map(projectEntity, ProjectDTO.class))
+                        .collect(Collectors.toList());
             }
         }
 
 
-
     }
+
     private Pageable sortDESC(int page, int size, String name) {
         return PageRequest.of(page, size, Sort.by(name).descending());
     }
@@ -132,26 +154,26 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDTO> listSortAndSearchAndIsActivate(Integer idWorkspace, int page, int size,
-                                              Boolean isActivate, String nameSearch,
-                                              String sortColumn, String type) {
+                                                           Boolean isActivate, String nameSearch,
+                                                           String sortColumn, String type) {
         Page<ProjectEntity> projectEntityPage;
         Pageable pageable;
         if (type.equals(SortPara.ASC.getName())) {
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortColumn));
-        }else {
+        } else {
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
         }
-        projectEntityPage=projectRepository.findAllByNameAndClientNameAndIsActivate(idWorkspace,nameSearch,isActivate,pageable);
-        List<ProjectEntity> projectEntities =projectEntityPage.getContent();
-        return projectEntities.stream().map(projectEntity -> modelMapper.map(projectEntity,ProjectDTO.class)).collect(Collectors.toList());
+        projectEntityPage = projectRepository.findAllByNameAndClientNameAndIsActivate(idWorkspace, nameSearch, isActivate, pageable);
+        List<ProjectEntity> projectEntities = projectEntityPage.getContent();
+        return projectEntities.stream().map(projectEntity -> modelMapper.map(projectEntity, ProjectDTO.class)).collect(Collectors.toList());
 
     }
 
 
     @Override
     public void isActivate(Integer idProject) {
-       ProjectEntity projectEntity = projectRepository.findById(idProject).
-                orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        ProjectEntity projectEntity = projectRepository.findById(idProject).
+                orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         projectEntity.setIsActivate(!projectEntity.getIsActivate());
         projectRepository.save(projectEntity);
     }
@@ -161,13 +183,13 @@ public class ProjectServiceImpl implements ProjectService {
         Pageable pageable;
         if (type.equals(SortPara.ASC.getName())) {
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortColumn));
-        }else {
+        } else {
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
         }
-        Page<ProjectEntity> projectEntityPage=projectRepository.findAllByNameAndClientName(idWorkspace,nameSearch,pageable);
+        Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientName(idWorkspace, nameSearch, pageable);
         List<ProjectEntity> projectEntities = projectEntityPage.getContent();
         return projectEntities.stream().map(projectEntity -> modelMapper.map(
-                projectEntity,ProjectDTO.class
+                projectEntity, ProjectDTO.class
         )).collect(Collectors.toList());
     }
 
@@ -178,9 +200,6 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         projectRepository.delete(projectEntity);
     }
-
-
-
 
 
 }
