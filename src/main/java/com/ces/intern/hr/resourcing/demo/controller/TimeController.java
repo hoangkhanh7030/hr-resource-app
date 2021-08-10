@@ -6,9 +6,9 @@ import com.ces.intern.hr.resourcing.demo.dto.TimeDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.BookingRequest;
-import com.ces.intern.hr.resourcing.demo.http.request.TimeRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.BookingResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.DashboardResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.DashboardListResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
 
 import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;
@@ -50,12 +50,7 @@ public class TimeController {
     }
 
 
-    @GetMapping("/{workspaceId}/bookings")
-    public Map<Date, List<TimeDTO>> showBookingForRangeOfDays(@PathVariable Integer workspaceId,
-                                                              @RequestParam Integer month,
-                                                              @RequestParam Integer year) {
-        return timeService.getBookingByMonth(month, year, workspaceId);
-    }
+
 
 
 
@@ -107,5 +102,17 @@ public class TimeController {
     public List<ResourceDTO> getAllResource(@PathVariable Integer idWorkspace,
                                             @RequestParam String searchName){
         return resourceService.getAll(idWorkspace,searchName);
+    }
+    @GetMapping("/{idWorkspace}/booking/{idBooking}")
+    public DashboardResponse getBooking(@PathVariable Integer idWorkspace,
+                                        @PathVariable Integer idBooking)
+    {
+        return timeService.getBooking(idWorkspace,idBooking);
+    }
+    @GetMapping("/{idWorkspace}/bookings")
+    public DashboardListResponse getAll(@PathVariable Integer idWorkspace,
+                                              @RequestParam String startDate,
+                                              @RequestParam String endDate) throws ParseException {
+        return timeService.getAllBooking(idWorkspace,startDate,endDate);
     }
 }

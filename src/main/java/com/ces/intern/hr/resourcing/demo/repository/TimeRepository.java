@@ -38,5 +38,9 @@ public interface TimeRepository extends JpaRepository<TimeEntity,Integer> {
 //            "and r.workspace_id = :workspaceId", nativeQuery = true)
 //    Optional<List<TimeEntity>> findAllShiftOfMonth(@Param("year") Integer year, @Param("month") Integer month,
 //                                                   @Param("day") Integer day, @Param("workspaceId") Integer workspaceId);
+    @Query(value = "select t from TimeEntity t where t.resourceEntity.workspaceEntityResource.id=:idWorkspace")
+    List<TimeEntity> findAllByIdWorkspace(@Param("idWorkspace") Integer idWorkspace);
 
+    @Query(value = "select  t from  TimeEntity  t where t.resourceEntity.id=:idResource")
+    List<TimeEntity> findAllByIdResource(@Param("idResource") Integer idResource);
 }

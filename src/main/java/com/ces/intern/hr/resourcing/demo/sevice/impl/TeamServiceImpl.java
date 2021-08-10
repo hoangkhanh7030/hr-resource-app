@@ -4,6 +4,7 @@ import com.ces.intern.hr.resourcing.demo.dto.TeamDTO;
 import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
+import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.PositionRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.TeamRequest;
@@ -121,10 +122,12 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public void created(List<TeamRequest> teamRequests, Integer idWorkspace) {
+        WorkspaceEntity workspaceEntity=workspaceRepository.findById(idWorkspace).get();
         for (TeamRequest teamRequest : teamRequests) {
             if (!teamRepository.findByNameAndidWorkspace(teamRequest.getName(), idWorkspace).isPresent()) {
                 TeamEntity teamEntity = new TeamEntity();
                 teamEntity.setName(teamRequest.getName());
+                teamEntity.setWorkspaceEntityTeam(workspaceEntity);
                 teamRepository.save(teamEntity);
                 for (PositionRequest positionRequest : teamRequest.getPositions()) {
                     if (!positionRepository.findByNameAndTeamEntity_Id(positionRequest.getName(),
