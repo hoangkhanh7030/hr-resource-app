@@ -18,5 +18,15 @@ public class BookingRequest {
     private Integer projectId;
     private Integer resourceId;
 
+    public boolean validate() {
+        if (startDate == null || startDate.isEmpty() || endDate == null || endDate.isEmpty() ||
+                projectId == null || duration == null ||
+                resourceId == null || percentage==null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
 }

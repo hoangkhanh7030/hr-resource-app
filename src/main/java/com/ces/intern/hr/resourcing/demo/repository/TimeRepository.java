@@ -43,4 +43,6 @@ public interface TimeRepository extends JpaRepository<TimeEntity,Integer> {
 
     @Query(value = "select  t from  TimeEntity  t where t.resourceEntity.id=:idResource")
     List<TimeEntity> findAllByIdResource(@Param("idResource") Integer idResource);
+
+
 }

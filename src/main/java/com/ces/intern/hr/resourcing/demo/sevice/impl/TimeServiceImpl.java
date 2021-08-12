@@ -2,6 +2,7 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
 import com.ces.intern.hr.resourcing.demo.converter.TimeConverter;
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
+import com.ces.intern.hr.resourcing.demo.dto.TeamDTO;
 import com.ces.intern.hr.resourcing.demo.dto.TimeDTO;
 import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
@@ -34,7 +35,13 @@ import java.util.stream.Collectors;
 @Service
 public class TimeServiceImpl implements TimeService {
     private static final int MILLISECOND = (1000 * 60 * 60 * 24);
-
+    private static final int ONE_WEEK =7;
+    private static final int TWO_WEEK =14;
+    private static final int FOUR_WEEK =28;
+    private static final int ONE_WEEK_WORK_HOUR =40;
+    private static final int TWO_WEEK_WORK_HOUR =80;
+    private static final int FOUR_WEEK_WORK_HOUR =160;
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private final TimeConverter timeConverter;
     private final TimeRepository timeRepository;
     private final ProjectRepository projectRepository;
@@ -117,9 +124,8 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     public void newBooking(BookingRequest bookingRequest, Integer idWorkspace) throws ParseException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date startDay = simpleDateFormat.parse(bookingRequest.getStartDate());
-        Date endDay = simpleDateFormat.parse(bookingRequest.getEndDate());
+        Date startDay =SIMPLE_DATE_FORMAT.parse(bookingRequest.getStartDate());
+        Date endDay = SIMPLE_DATE_FORMAT.parse(bookingRequest.getEndDate());
         ProjectEntity projectEntity = projectRepository.findByIdAndWorkspaceEntityProject_Id(bookingRequest.getProjectId(), idWorkspace).orElse(null);
         ResourceEntity resourceEntity = resourceRepository.findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(bookingRequest.getResourceId(), idWorkspace).orElse(null);
         boolean checkNull = bookingRequest.getDuration() == null;
@@ -208,9 +214,8 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     public void updateBooking(BookingRequest bookingRequest, Integer idWorkspace) throws ParseException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date startDay = simpleDateFormat.parse(bookingRequest.getStartDate());
-        Date endDay = simpleDateFormat.parse(bookingRequest.getEndDate());
+        Date startDay = SIMPLE_DATE_FORMAT.parse(bookingRequest.getStartDate());
+        Date endDay = SIMPLE_DATE_FORMAT.parse(bookingRequest.getEndDate());
         Date currentStart;
         Date currentEnd;
         if (timeRepository.findById(bookingRequest.getId()).isPresent()) {
@@ -237,37 +242,48 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     public DashboardResponse getBooking(Integer idWorkspace, Integer idBooking) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
         TimeEntity timeEntity = timeRepository.findById(idBooking).orElseThrow(
                 () -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         Long totalHour = (((timeEntity.getEndTime().getTime() - timeEntity.getStartTime().getTime()) / MILLISECOND) + 1) * 8;
         DashboardResponse dashboardResponse = new DashboardResponse();
         dashboardResponse.setId(timeEntity.getId());
-        dashboardResponse.setStartDate(simpleDateFormat.format(timeEntity.getStartTime()));
-        dashboardResponse.setEndDate(simpleDateFormat.format(timeEntity.getEndTime()));
-        dashboardResponse.setPercentage((timeEntity.getTotalHour() / totalHour) * 100);
-        dashboardResponse.setDuration((timeEntity.getTotalHour() / totalHour) * 8);
+        dashboardResponse.setStartDate(SIMPLE_DATE_FORMAT.format(timeEntity.getStartTime()));
+        dashboardResponse.setEndDate(SIMPLE_DATE_FORMAT.format(timeEntity.getEndTime()));
+        dashboardResponse.setPercentage(DoubleRounder.round((timeEntity.getTotalHour() / totalHour) * 100,1));
+        dashboardResponse.setDuration(DoubleRounder.round((timeEntity.getTotalHour() / totalHour) * 8,1));
 
         return dashboardResponse;
     }
 
     @Override
     public DashboardListResponse searchBooking(Integer idWorkspace, String startDate, String endDate, String searchName) throws ParseException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date startDay = simpleDateFormat.parse(startDate);
-        Date endDay = simpleDateFormat.parse(endDate);
+        Date startDay = SIMPLE_DATE_FORMAT.parse(startDate);
+        Date endDay = SIMPLE_DATE_FORMAT.parse(endDate);
+        long viewType = ((endDay.getTime()-startDay.getTime())/MILLISECOND)+1;
+        Double percent;
         DashboardListResponse dashboardListResponse = new DashboardListResponse();
-        List<ResourceEntity> resourceEntities = resourceRepository.findAllByWorkspaceEntityResource_Id(idWorkspace);
+        List<ResourceEntity> resourceEntities = resourceRepository.findAllBySearchName(idWorkspace,searchName);
+        List<Integer> result =resourceEntities.stream().map(resourceEntity -> resourceEntity.getId()).distinct().collect(Collectors.toList());
         List<ResourceResponse> resourceResponses = new ArrayList<>();
-        for (ResourceEntity resourceEntity : resourceEntities) {
+        for (Integer integer : result) {
+            ResourceEntity resourceEntity =resourceRepository.findById(integer).get();
             ResourceResponse resourceResponse = new ResourceResponse();
             resourceResponse.setId(resourceEntity.getId());
             resourceResponse.setName(resourceEntity.getName());
             resourceResponse.setAvatar(resourceEntity.getAvatar());
-            resourceResponse.setTeam(resourceEntity.getTeamEntityResource().getName());
+            resourceResponse.setTeamId(resourceEntity.getTeamEntityResource().getId());
             resourceResponse.setPosition(resourceEntity.getPositionEntity().getName());
-            resourceResponse.setDashboardResponses(getDashboard(resourceEntity, startDay, endDay));
+            resourceResponse.setDashboardResponses(sort(resourceEntity, startDay, endDay));
+            List<TimeEntity> timeEntities=timeRepository.findAllByIdResource(resourceEntity.getId());
+            Double sumHour=sumHour(timeEntities);
+            if (viewType==ONE_WEEK){
+                percent=(sumHour/ONE_WEEK_WORK_HOUR)*100;
+            }else if (viewType==TWO_WEEK){
+                percent=(sumHour/TWO_WEEK_WORK_HOUR)*100;
+            }else {
+                percent=(sumHour/FOUR_WEEK_WORK_HOUR)*100;
+            }
+            resourceResponse.setPercent(DoubleRounder.round(percent,1));
             resourceResponses.add(resourceResponse);
         }
         dashboardListResponse.setResourceResponses(resourceResponses);
@@ -281,9 +297,8 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     public DashboardListResponse getAllBooking(Integer idWorkspace, String startDate, String endDate) throws ParseException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date startDay = simpleDateFormat.parse(startDate);
-        Date endDay = simpleDateFormat.parse(endDate);
+        Date startDay = SIMPLE_DATE_FORMAT.parse(startDate);
+        Date endDay = SIMPLE_DATE_FORMAT.parse(endDate);
         DashboardListResponse dashboardListResponse = new DashboardListResponse();
         List<ResourceEntity> resourceEntities = resourceRepository.findAllByWorkspaceEntityResource_Id(idWorkspace);
         List<ResourceResponse> resourceResponses = new ArrayList<>();
@@ -292,9 +307,9 @@ public class TimeServiceImpl implements TimeService {
             resourceResponse.setId(resourceEntity.getId());
             resourceResponse.setName(resourceEntity.getName());
             resourceResponse.setAvatar(resourceEntity.getAvatar());
-            resourceResponse.setTeam(resourceEntity.getTeamEntityResource().getName());
+            resourceResponse.setTeamId(resourceEntity.getTeamEntityResource().getId());
             resourceResponse.setPosition(resourceEntity.getPositionEntity().getName());
-            resourceResponse.setDashboardResponses(getDashboard(resourceEntity, startDay, endDay));
+            resourceResponse.setDashboardResponses(sort(resourceEntity, startDay, endDay));
             resourceResponses.add(resourceResponse);
         }
         dashboardListResponse.setResourceResponses(resourceResponses);
@@ -306,33 +321,88 @@ public class TimeServiceImpl implements TimeService {
         return dashboardListResponse;
     }
 
-    private List<DashboardResponse> getDashboard(ResourceEntity resourceEntity, Date startDay, Date endDay) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        List<DashboardResponse> dashboardResponses = new ArrayList<>();
-        List<TimeEntity> timeEntities = timeRepository.findAllByIdResource(resourceEntity.getId());
-        for (TimeEntity timeEntity : timeEntities) {
-            if (timeEntity.getStartTime().getTime() >= startDay.getTime() && timeEntity.getEndTime().getTime() <= endDay.getTime()) {
-                DashboardResponse dashboardResponse = new DashboardResponse();
-                dashboardResponse.setId(timeEntity.getId());
-                dashboardResponse.setStartDate(simpleDateFormat.format(timeEntity.getStartTime()));
-                dashboardResponse.setEndDate(simpleDateFormat.format(timeEntity.getEndTime()));
-                ProjectEntity projectEntity = projectRepository.findById(timeEntity.getProjectEntity().getId()).get();
-                dashboardResponse.setProjectDTO(toDTO(projectEntity));
-                Long totalHour = (((timeEntity.getEndTime().getTime() - timeEntity.getStartTime().getTime()) / MILLISECOND) + 1) * 8;
-                dashboardResponse.setPercentage((timeEntity.getTotalHour() / totalHour) * 100);
-                dashboardResponse.setDuration((timeEntity.getTotalHour() / totalHour) * 8);
-                dashboardResponse.setHourTotal(timeEntity.getTotalHour());
-                dashboardResponses.add(dashboardResponse);
-            }
+    private Double sumHour(List<TimeEntity> timeEntities){
+        Double sum = 0.0;
+        for (TimeEntity timeEntity:timeEntities){
+            sum+=timeEntity.getTotalHour();
         }
-        return dashboardResponses;
+        return sum;
     }
 
     private ProjectDTO toDTO(ProjectEntity projectEntity) {
         ProjectDTO projectDTO = modelMapper.map(projectEntity, ProjectDTO.class);
         return projectDTO;
     }
+    private List<List<DashboardResponse>> sort(ResourceEntity resourceEntity, Date startDay, Date endDay){
+        List<TimeDTO> timeDTOS = new ArrayList<>();
+
+        List<TimeEntity> timeEntities = timeRepository.findAllByIdResource(resourceEntity.getId());
+        for (TimeEntity timeEntity : timeEntities) {
+            if (timeEntity.getStartTime().getTime() >= startDay.getTime() && timeEntity.getEndTime().getTime() <= endDay.getTime()) {
+                TimeDTO timeDTO= new TimeDTO();
+                timeDTO.setId(timeEntity.getId());
+                timeDTO.setStartDate(timeEntity.getStartTime());
+                timeDTO.setEndDate(timeEntity.getEndTime());
+                ProjectEntity projectEntity = projectRepository.findById(timeEntity.getProjectEntity().getId()).get();
+                timeDTO.setProjectDTO(toDTO(projectEntity));
+                Long totalHour = (((timeEntity.getEndTime().getTime() - timeEntity.getStartTime().getTime()) / MILLISECOND) + 1) * 8;
+                timeDTO.setPercentage(DoubleRounder.round((timeEntity.getTotalHour() / totalHour) * 100,1));
+                timeDTO.setDuration(DoubleRounder.round((timeEntity.getTotalHour() / totalHour) * 8,1));
+                timeDTO.setHourTotal(timeEntity.getTotalHour());
+                timeDTOS.add(timeDTO);
+            }
+        }
+        Collections.sort(timeDTOS,(o1, o2) -> (int) (o1.getStartDate().getTime()-o2.getStartDate().getTime()));
+        List<List<TimeDTO>> list=new ArrayList<>();
+        findArr(timeDTOS,list);
+        List<List<DashboardResponse>> result=new ArrayList<>();
+        for (List<TimeDTO> dtos:list){
+            result.add(convert(dtos));
+        }
+        return result;
+    }
+    private List<DashboardResponse> convert(List<TimeDTO> timeDTOS){
+        List<DashboardResponse> dashboardResponses=new ArrayList<>();
+        for (TimeDTO timeDTO:timeDTOS){
+            DashboardResponse dashboardResponse = modelMapper.map(timeDTO,DashboardResponse.class);
+            dashboardResponse.setStartDate(SIMPLE_DATE_FORMAT.format(timeDTO.getStartDate()));
+            dashboardResponse.setEndDate(SIMPLE_DATE_FORMAT.format(timeDTO.getEndDate()));
+            dashboardResponses.add(dashboardResponse);
+        }
+        return dashboardResponses;
+    }
 
 
+
+
+
+
+
+
+
+
+    // warn : input need to sort
+    private void findArr(List<TimeDTO> input, List<List<TimeDTO>> result){
+        if (input.isEmpty()){
+            result.isEmpty();
+        }else {
+            List<TimeDTO> tempList = new ArrayList<>();
+            tempList.add(input.get(0));
+            for(int i =1 ; i < input.size(); i++){
+                TimeDTO tempTime = input.get(i);
+                if(tempTime.getStartDate().getTime() > tempList.get(tempList.size() - 1).getEndDate().getTime()) {
+                    tempList.add(tempTime);
+                }
+            }
+            result.add(tempList);
+            List<TimeDTO> remainingTime =  input.stream()
+                    .filter(ele -> !tempList.contains(ele))
+                    .collect(Collectors.toList());
+            if(!remainingTime.isEmpty()){
+                findArr(remainingTime, result);
+            }
+        }
+
+    }
 
 }

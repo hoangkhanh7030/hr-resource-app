@@ -16,7 +16,8 @@ public class ResourceResponse extends BaseResponse{
     private String name;
     private String avatar;
     private String position;
-    private String team;
-    private List<DashboardResponse> dashboardResponses;
+    private Integer teamId;
+    private Double percent;
+    private List<List<DashboardResponse>> dashboardResponses;
 
 }

@@ -45,14 +45,9 @@ public class TimeController {
             ResourceService resourceService) {
         this.timeService = timeService;
         this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
-        this.projectService=projectService;
-        this.resourceService=resourceService;
+        this.projectService = projectService;
+        this.resourceService = resourceService;
     }
-
-
-
-
-
 
 
     @DeleteMapping("/{workspaceId}/bookings/{timeId}")
@@ -66,53 +61,71 @@ public class TimeController {
         }
         return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
+
     @PostMapping("/{idWorkspace}/bookings")
     public MessageResponse addBooking(@RequestBody BookingRequest bookingRequest,
-                               @PathVariable Integer idWorkspace) throws ParseException {
+                                      @PathVariable Integer idWorkspace) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date startDay = simpleDateFormat.parse(bookingRequest.getStartDate());
         Date endDay = simpleDateFormat.parse(bookingRequest.getEndDate());
-        if (startDay.getTime()>endDay.getTime()){
-            return new MessageResponse(ResponseMessage.WRONG_TIME,Status.FAIL.getCode());
-        }else {
-            timeService.newBooking(bookingRequest,idWorkspace);
-            return new MessageResponse(ResponseMessage.CREATE_SUCCESS,Status.SUCCESS.getCode());
-        }
-    }
-    @PutMapping("/{idWorkspace}/bookings")
-    public MessageResponse updateBookings(@RequestBody BookingRequest bookingRequest,
-                               @PathVariable Integer idWorkspace) throws ParseException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date startDay = simpleDateFormat.parse(bookingRequest.getStartDate());
-        Date endDay = simpleDateFormat.parse(bookingRequest.getEndDate());
-        if (startDay.getTime()>endDay.getTime()){
-            return new MessageResponse(ResponseMessage.WRONG_TIME,Status.FAIL.getCode());
-        }else {
-            timeService.updateBooking(bookingRequest,idWorkspace);
-            return new MessageResponse(ResponseMessage.CREATE_SUCCESS,Status.SUCCESS.getCode());
+        if (bookingRequest.validate()) {
+            return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
+        } else {
+            if (startDay.getTime() > endDay.getTime()) {
+                return new MessageResponse(ResponseMessage.WRONG_TIME, Status.FAIL.getCode());
+            } else {
+                timeService.newBooking(bookingRequest, idWorkspace);
+                return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
+            }
         }
 
     }
+
+    @PutMapping("/{idWorkspace}/bookings")
+    public MessageResponse updateBookings(@RequestBody BookingRequest bookingRequest,
+                                          @PathVariable Integer idWorkspace) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDay = simpleDateFormat.parse(bookingRequest.getStartDate());
+        Date endDay = simpleDateFormat.parse(bookingRequest.getEndDate());
+        if (bookingRequest.validate()) {
+            return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
+        } else {
+            if (startDay.getTime() > endDay.getTime()) {
+                return new MessageResponse(ResponseMessage.WRONG_TIME, Status.FAIL.getCode());
+            } else {
+                timeService.updateBooking(bookingRequest, idWorkspace);
+                return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+            }
+        }
+
+
+    }
+
     @GetMapping("/{idWorkspace}/bookings/projects")
     public List<ProjectDTO> getAllProject(@PathVariable Integer idWorkspace,
-                                   @RequestParam String searchName){
-        return projectService.getAll(idWorkspace,searchName);
+                                          @RequestParam String searchName) {
+        return projectService.getAll(idWorkspace, searchName);
     }
+
     @GetMapping("/{idWorkspace}/bookings/resources")
     public List<ResourceDTO> getAllResource(@PathVariable Integer idWorkspace,
-                                            @RequestParam String searchName){
-        return resourceService.getAll(idWorkspace,searchName);
+                                            @RequestParam String searchName) {
+        return resourceService.getAll(idWorkspace, searchName);
     }
+
     @GetMapping("/{idWorkspace}/booking/{idBooking}")
     public DashboardResponse getBooking(@PathVariable Integer idWorkspace,
-                                        @PathVariable Integer idBooking)
-    {
-        return timeService.getBooking(idWorkspace,idBooking);
+                                        @PathVariable Integer idBooking) {
+        return timeService.getBooking(idWorkspace, idBooking);
     }
+
+
+
     @GetMapping("/{idWorkspace}/bookings")
-    public DashboardListResponse getAll(@PathVariable Integer idWorkspace,
-                                              @RequestParam String startDate,
-                                              @RequestParam String endDate) throws ParseException {
-        return timeService.getAllBooking(idWorkspace,startDate,endDate);
+    public DashboardListResponse search(@PathVariable Integer idWorkspace,
+                                        @RequestParam String searchName,
+                                        @RequestParam String startDate,
+                                        @RequestParam String endDate) throws ParseException {
+        return timeService.searchBooking(idWorkspace, startDate, endDate, searchName);
     }
 }
