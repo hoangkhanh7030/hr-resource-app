@@ -20,8 +20,8 @@ public class BookingRequest {
 
     public boolean validate() {
         if (startDate == null || startDate.isEmpty() || endDate == null || endDate.isEmpty() ||
-                projectId == null || duration == null ||
-                resourceId == null || percentage==null) {
+                projectId == null ||
+                resourceId == null ) {
             return true;
         } else {
             return false;

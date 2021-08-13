@@ -13,6 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 public class DashboardListResponse {
 
-   private List<ResourceResponse> resourceResponses;
-   private List<TeamResponse> teamResponses;
+   private List<ResourceResponse> resources;
+   private List<TeamResponse> teams;
 }

@@ -65,32 +65,6 @@ public class TimeServiceImpl implements TimeService {
     }
 
 
-    private boolean TimeCheck(TimeRequest timeRequest, int start, int end, Calendar calendar) {
-        List<TimeEntity> listTime = timeRepository.findShiftOfResource(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-                calendar.get(Calendar.DAY_OF_MONTH), timeRequest.getResourceId()).orElse(new ArrayList<>());
-        boolean check = true;
-        Calendar shiftStart = Calendar.getInstance();
-        Calendar shiftEnd = Calendar.getInstance();
-        for (TimeEntity t : listTime) {
-            shiftStart.setTime(t.getStartTime());
-            shiftEnd.setTime(t.getEndTime());
-            if (shiftStart.get(Calendar.HOUR_OF_DAY) > start && shiftStart.get(Calendar.HOUR_OF_DAY) < end) {
-                check = false;
-                break;
-            } else if (shiftEnd.get(Calendar.HOUR_OF_DAY) > start && shiftEnd.get(Calendar.HOUR_OF_DAY) < end) {
-                check = false;
-                break;
-            } else if (start > shiftStart.get(Calendar.HOUR_OF_DAY) && start < shiftEnd.get(Calendar.HOUR_OF_DAY)) {
-                check = false;
-                break;
-            } else if (end > shiftStart.get(Calendar.HOUR_OF_DAY) && end < shiftEnd.get(Calendar.HOUR_OF_DAY)) {
-                check = false;
-                break;
-            }
-        }
-        return check;
-    }
-
     @Override
     public MessageResponse deleteBooking(Integer id) {
         if (timeRepository.findById(id).isPresent()) {
@@ -98,28 +72,6 @@ public class TimeServiceImpl implements TimeService {
             return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
         }
         return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
-    }
-
-
-    @Override
-    public Map<Date, List<TimeDTO>> getBookingByMonth(Integer month, Integer year, Integer workspaceId) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, year);
-        calendar.set(Calendar.MONTH, month - 1);
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        Map<Date, List<TimeDTO>> bookingMonth = new LinkedHashMap<>();
-        while (calendar.get(Calendar.MONTH) + 1 == month) {
-            List<TimeDTO> list = new ArrayList<>();
-            Date date = calendar.getTime();
-//            List<TimeEntity> timeEntities = timeRepository.findAllShiftOfMonth(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1,
-//                    calendar.get(Calendar.DAY_OF_MONTH), workspaceId).orElse(new ArrayList<>());
-//            for (TimeEntity t : timeEntities) {
-//                list.add(timeConverter.convertToDto(t));
-//            }
-//            bookingMonth.put(date, list);
-//            calendar.add(Calendar.DATE, 1);
-        }
-        return bookingMonth;
     }
 
     @Override
@@ -273,7 +225,7 @@ public class TimeServiceImpl implements TimeService {
             resourceResponse.setAvatar(resourceEntity.getAvatar());
             resourceResponse.setTeamId(resourceEntity.getTeamEntityResource().getId());
             resourceResponse.setPosition(resourceEntity.getPositionEntity().getName());
-            resourceResponse.setDashboardResponses(sort(resourceEntity, startDay, endDay));
+            resourceResponse.setBookings(sort(resourceEntity, startDay, endDay));
             List<TimeEntity> timeEntities=timeRepository.findAllByIdResource(resourceEntity.getId());
             Double sumHour=sumHour(timeEntities);
             if (viewType==ONE_WEEK){
@@ -286,12 +238,12 @@ public class TimeServiceImpl implements TimeService {
             resourceResponse.setPercent(DoubleRounder.round(percent,1));
             resourceResponses.add(resourceResponse);
         }
-        dashboardListResponse.setResourceResponses(resourceResponses);
+        dashboardListResponse.setResources(resourceResponses);
         List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
         List<TeamResponse> teamResponses = teamEntities.stream().map(
                 teamEntity -> modelMapper.map(teamEntity, TeamResponse.class))
                 .collect(Collectors.toList());
-        dashboardListResponse.setTeamResponses(teamResponses);
+        dashboardListResponse.setTeams(teamResponses);
         return dashboardListResponse;
     }
 
@@ -309,15 +261,15 @@ public class TimeServiceImpl implements TimeService {
             resourceResponse.setAvatar(resourceEntity.getAvatar());
             resourceResponse.setTeamId(resourceEntity.getTeamEntityResource().getId());
             resourceResponse.setPosition(resourceEntity.getPositionEntity().getName());
-            resourceResponse.setDashboardResponses(sort(resourceEntity, startDay, endDay));
+            resourceResponse.setBookings(sort(resourceEntity, startDay, endDay));
             resourceResponses.add(resourceResponse);
         }
-        dashboardListResponse.setResourceResponses(resourceResponses);
+        dashboardListResponse.setResources(resourceResponses);
         List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
         List<TeamResponse> teamResponses = teamEntities.stream().map(
                 teamEntity -> modelMapper.map(teamEntity, TeamResponse.class))
                 .collect(Collectors.toList());
-        dashboardListResponse.setTeamResponses(teamResponses);
+        dashboardListResponse.setTeams(teamResponses);
         return dashboardListResponse;
     }
 
@@ -372,16 +324,6 @@ public class TimeServiceImpl implements TimeService {
         return dashboardResponses;
     }
 
-
-
-
-
-
-
-
-
-
-    // warn : input need to sort
     private void findArr(List<TimeDTO> input, List<List<TimeDTO>> result){
         if (input.isEmpty()){
             result.isEmpty();

@@ -18,6 +18,6 @@ public class ResourceResponse extends BaseResponse{
     private String position;
     private Integer teamId;
     private Double percent;
-    private List<List<DashboardResponse>> dashboardResponses;
+    private List<List<DashboardResponse>> bookings;
 
 }
