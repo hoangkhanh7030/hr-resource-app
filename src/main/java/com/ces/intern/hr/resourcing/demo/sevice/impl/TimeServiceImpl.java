@@ -227,7 +227,8 @@ public class TimeServiceImpl implements TimeService {
             resourceResponse.setPosition(resourceEntity.getPositionEntity().getName());
             resourceResponse.setBookings(sort(resourceEntity, startDay, endDay));
             List<TimeEntity> timeEntities=timeRepository.findAllByIdResource(resourceEntity.getId());
-            Double sumHour=sumHour(timeEntities);
+            List<TimeDTO> timeDTOS=entityToDTO(timeEntities,startDay,endDay);
+            Double sumHour=sumHour(timeDTOS);
             if (viewType==ONE_WEEK){
                 percent=(sumHour/ONE_WEEK_WORK_HOUR)*100;
             }else if (viewType==TWO_WEEK){
@@ -272,23 +273,8 @@ public class TimeServiceImpl implements TimeService {
         dashboardListResponse.setTeams(teamResponses);
         return dashboardListResponse;
     }
-
-    private Double sumHour(List<TimeEntity> timeEntities){
-        Double sum = 0.0;
-        for (TimeEntity timeEntity:timeEntities){
-            sum+=timeEntity.getTotalHour();
-        }
-        return sum;
-    }
-
-    private ProjectDTO toDTO(ProjectEntity projectEntity) {
-        ProjectDTO projectDTO = modelMapper.map(projectEntity, ProjectDTO.class);
-        return projectDTO;
-    }
-    private List<List<DashboardResponse>> sort(ResourceEntity resourceEntity, Date startDay, Date endDay){
+    private List<TimeDTO> entityToDTO(List<TimeEntity> timeEntities,Date startDay,Date endDay){
         List<TimeDTO> timeDTOS = new ArrayList<>();
-
-        List<TimeEntity> timeEntities = timeRepository.findAllByIdResource(resourceEntity.getId());
         for (TimeEntity timeEntity : timeEntities) {
             if (timeEntity.getStartTime().getTime() >= startDay.getTime() && timeEntity.getEndTime().getTime() <= endDay.getTime()) {
                 TimeDTO timeDTO= new TimeDTO();
@@ -304,6 +290,24 @@ public class TimeServiceImpl implements TimeService {
                 timeDTOS.add(timeDTO);
             }
         }
+        return timeDTOS;
+    }
+
+    private Double sumHour(List<TimeDTO> timeDTOS){
+        Double sum = 0.0;
+        for (TimeDTO timeDTO:timeDTOS){
+            sum+=timeDTO.getHourTotal();
+        }
+        return sum;
+    }
+
+    private ProjectDTO toDTO(ProjectEntity projectEntity) {
+        ProjectDTO projectDTO = modelMapper.map(projectEntity, ProjectDTO.class);
+        return projectDTO;
+    }
+    private List<List<DashboardResponse>> sort(ResourceEntity resourceEntity, Date startDay, Date endDay){
+        List<TimeEntity> timeEntities = timeRepository.findAllByIdResource(resourceEntity.getId());
+        List<TimeDTO> timeDTOS = entityToDTO(timeEntities,startDay,endDay);
         Collections.sort(timeDTOS,(o1, o2) -> (int) (o1.getStartDate().getTime()-o2.getStartDate().getTime()));
         List<List<TimeDTO>> list=new ArrayList<>();
         findArr(timeDTOS,list);
