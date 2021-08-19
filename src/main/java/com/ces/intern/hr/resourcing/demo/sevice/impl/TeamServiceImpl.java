@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,16 +52,7 @@ public class TeamServiceImpl implements TeamService {
         return teamEntityList.stream().map(s -> modelMapper.map(s, TeamDTO.class)).collect(Collectors.toList());
     }
 
-    @Override
-    public void addResourceToTeam(Integer idTeam, Integer idResource) {
-        ResourceEntity resourceEntity = resourceRepository.findById(idResource)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        TeamEntity teamEntity = teamRepository.findById(idTeam)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        resourceEntity.getPositionEntity().setTeamEntity(teamEntity);
-        resourceRepository.save(resourceEntity);
 
-    }
 
     @Override
     public void deleteTeam(Integer idTeam) {
@@ -70,12 +62,11 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public void renameTeam(Integer idTeam, String name) {
-        TeamEntity teamEntity = teamRepository.findById(idTeam)
+    public void renameTeam(Integer idWorkspace,Integer idTeam, String name) {
+        TeamEntity teamEntity = teamRepository.findByidWorkspaceAndIdTeam(idWorkspace,idTeam)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         teamEntity.setName(name);
         teamRepository.save(teamEntity);
-
     }
 
 
@@ -101,6 +92,7 @@ public class TeamServiceImpl implements TeamService {
         TeamEntity teamEntity = teamRepository.findById(teamRequest.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         teamEntity.setName(teamRequest.getName());
+        teamEntity.setModifiedDate(new Date());
         teamRepository.save(teamEntity);
         for (PositionRequest positionRequest : teamRequest.getPositions()) {
             if (positionRequest.getId() == null) {
@@ -126,6 +118,7 @@ public class TeamServiceImpl implements TeamService {
         for (TeamRequest teamRequest : teamRequests) {
             if (!teamRepository.findByNameAndidWorkspace(teamRequest.getName(), idWorkspace).isPresent()) {
                 TeamEntity teamEntity = new TeamEntity();
+                teamEntity.setCreatedDate(new Date());
                 teamEntity.setName(teamRequest.getName());
                 teamEntity.setWorkspaceEntityTeam(workspaceEntity);
                 teamRepository.save(teamEntity);
@@ -165,6 +158,7 @@ public class TeamServiceImpl implements TeamService {
     private void createWithIdTeam(TeamRequest teamRequest, Integer idWorkspace) {
         if (!teamRepository.findByNameAndidWorkspaceAndIdTeam(teamRequest.getId(), teamRequest.getName(), idWorkspace).isPresent()) {
             TeamEntity teamEntity = new TeamEntity();
+            teamEntity.setCreatedDate(new Date());
             teamEntity.setName(teamRequest.getName());
             teamRepository.save(teamEntity);
             for (PositionRequest positionRequest : teamRequest.getPositions()) {

@@ -4,6 +4,9 @@ public class ResponseMessage {
     public static final String DELETE_SUCCESS = "Delete successfully";
     public static final String CREATE_SUCCESS = "Create successfully";
     public static final String UPDATE_SUCCESS = "Update successfully";
+    public static final String EMAIL_SENDT = "Email Sent!";
+    public static final String EMAIL_ERROR = "Error in sending email";
+    public static final String EMAIL_INVITE = "Email has been invited";
     public static final String ADD_SUCCESS = "Add successfully";
     public static final String DELETE_FAIL = "Delete Fail";
     public static final String CREATE_FAIL = "Created Fail";

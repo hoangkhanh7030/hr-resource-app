@@ -17,5 +17,4 @@ public interface TimeService {
 
     DashboardResponse getBooking(Integer idWorkspace,Integer idBooking);
     DashboardListResponse searchBooking(Integer idWorkspace,String startDate,String endDate,String searchName) throws ParseException;
-    DashboardListResponse getAllBooking(Integer idWorkspace, String startDate, String endDate) throws ParseException;
 }

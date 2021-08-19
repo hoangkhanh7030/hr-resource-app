@@ -35,12 +35,12 @@ import java.util.stream.Collectors;
 @Service
 public class TimeServiceImpl implements TimeService {
     private static final int MILLISECOND = (1000 * 60 * 60 * 24);
-    private static final int ONE_WEEK =7;
-    private static final int TWO_WEEK =14;
-    private static final int FOUR_WEEK =28;
-    private static final int ONE_WEEK_WORK_HOUR =40;
-    private static final int TWO_WEEK_WORK_HOUR =80;
-    private static final int FOUR_WEEK_WORK_HOUR =160;
+    private static final int ONE_WEEK = 7;
+    private static final int TWO_WEEK = 14;
+    private static final int FOUR_WEEK = 28;
+    private static final int ONE_WEEK_WORK_HOUR = 40;
+    private static final int TWO_WEEK_WORK_HOUR = 80;
+    private static final int FOUR_WEEK_WORK_HOUR = 160;
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private final TimeConverter timeConverter;
     private final TimeRepository timeRepository;
@@ -76,7 +76,7 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     public void newBooking(BookingRequest bookingRequest, Integer idWorkspace) throws ParseException {
-        Date startDay =SIMPLE_DATE_FORMAT.parse(bookingRequest.getStartDate());
+        Date startDay = SIMPLE_DATE_FORMAT.parse(bookingRequest.getStartDate());
         Date endDay = SIMPLE_DATE_FORMAT.parse(bookingRequest.getEndDate());
         ProjectEntity projectEntity = projectRepository.findByIdAndWorkspaceEntityProject_Id(bookingRequest.getProjectId(), idWorkspace).orElse(null);
         ResourceEntity resourceEntity = resourceRepository.findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(bookingRequest.getResourceId(), idWorkspace).orElse(null);
@@ -201,8 +201,8 @@ public class TimeServiceImpl implements TimeService {
         dashboardResponse.setId(timeEntity.getId());
         dashboardResponse.setStartDate(SIMPLE_DATE_FORMAT.format(timeEntity.getStartTime()));
         dashboardResponse.setEndDate(SIMPLE_DATE_FORMAT.format(timeEntity.getEndTime()));
-        dashboardResponse.setPercentage(DoubleRounder.round((timeEntity.getTotalHour() / totalHour) * 100,1));
-        dashboardResponse.setDuration(DoubleRounder.round((timeEntity.getTotalHour() / totalHour) * 8,1));
+        dashboardResponse.setPercentage(DoubleRounder.round((timeEntity.getTotalHour() / totalHour) * 100, 1));
+        dashboardResponse.setDuration(DoubleRounder.round((timeEntity.getTotalHour() / totalHour) * 8, 1));
 
         return dashboardResponse;
     }
@@ -211,14 +211,15 @@ public class TimeServiceImpl implements TimeService {
     public DashboardListResponse searchBooking(Integer idWorkspace, String startDate, String endDate, String searchName) throws ParseException {
         Date startDay = SIMPLE_DATE_FORMAT.parse(startDate);
         Date endDay = SIMPLE_DATE_FORMAT.parse(endDate);
-        long viewType = ((endDay.getTime()-startDay.getTime())/MILLISECOND)+1;
+        long viewType = ((endDay.getTime() - startDay.getTime()) / MILLISECOND) + 1;
         Double percent;
         DashboardListResponse dashboardListResponse = new DashboardListResponse();
-        List<ResourceEntity> resourceEntities = resourceRepository.findAllBySearchName(idWorkspace,searchName);
-        List<Integer> result =resourceEntities.stream().map(resourceEntity -> resourceEntity.getId()).distinct().collect(Collectors.toList());
+        List<ResourceEntity> resourceEntities = resourceRepository.findAllBySearchName(idWorkspace, searchName);
+        Collections.sort(resourceEntities,(o1, o2) -> (int) (o1.getCreatedDate().getTime()-o2.getCreatedDate().getTime()));
+        List<Integer> result = resourceEntities.stream().map(resourceEntity -> resourceEntity.getId()).distinct().collect(Collectors.toList());
         List<ResourceResponse> resourceResponses = new ArrayList<>();
         for (Integer integer : result) {
-            ResourceEntity resourceEntity =resourceRepository.findById(integer).get();
+            ResourceEntity resourceEntity = resourceRepository.findById(integer).get();
             ResourceResponse resourceResponse = new ResourceResponse();
             resourceResponse.setId(resourceEntity.getId());
             resourceResponse.setName(resourceEntity.getName());
@@ -226,66 +227,45 @@ public class TimeServiceImpl implements TimeService {
             resourceResponse.setTeamId(resourceEntity.getTeamEntityResource().getId());
             resourceResponse.setPosition(resourceEntity.getPositionEntity().getName());
             resourceResponse.setBookings(sort(resourceEntity, startDay, endDay));
-            List<TimeEntity> timeEntities=timeRepository.findAllByIdResource(resourceEntity.getId());
-            List<TimeDTO> timeDTOS=entityToDTO(timeEntities,startDay,endDay);
-            Double sumHour=sumHour(timeDTOS);
-            if (viewType==ONE_WEEK){
-                percent=(sumHour/ONE_WEEK_WORK_HOUR)*100;
-            }else if (viewType==TWO_WEEK){
-                percent=(sumHour/TWO_WEEK_WORK_HOUR)*100;
-            }else {
-                percent=(sumHour/FOUR_WEEK_WORK_HOUR)*100;
+            List<TimeEntity> timeEntities = timeRepository.findAllByIdResource(resourceEntity.getId());
+            List<TimeDTO> timeDTOS = entityToDTO(timeEntities, startDay, endDay);
+            Double sumHour = sumHour(timeDTOS);
+            if (viewType == ONE_WEEK) {
+                percent = (sumHour / ONE_WEEK_WORK_HOUR) * 100;
+            } else if (viewType == TWO_WEEK) {
+                percent = (sumHour / TWO_WEEK_WORK_HOUR) * 100;
+            } else {
+                percent = (sumHour / FOUR_WEEK_WORK_HOUR) * 100;
             }
-            resourceResponse.setPercent(DoubleRounder.round(percent,1));
+            resourceResponse.setPercent(DoubleRounder.round(percent, 1));
             resourceResponses.add(resourceResponse);
         }
         dashboardListResponse.setResources(resourceResponses);
         List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
+        Collections.sort(teamEntities,(o1, o2) ->(int) (o1.getCreatedDate().getTime()-o2.getCreatedDate().getTime()));
         List<TeamResponse> teamResponses = teamEntities.stream().map(
                 teamEntity -> modelMapper.map(teamEntity, TeamResponse.class))
                 .collect(Collectors.toList());
+
         dashboardListResponse.setTeams(teamResponses);
+        dashboardListResponse.setStatus(Status.SUCCESS.getCode());
         return dashboardListResponse;
     }
 
-    @Override
-    public DashboardListResponse getAllBooking(Integer idWorkspace, String startDate, String endDate) throws ParseException {
-        Date startDay = SIMPLE_DATE_FORMAT.parse(startDate);
-        Date endDay = SIMPLE_DATE_FORMAT.parse(endDate);
-        DashboardListResponse dashboardListResponse = new DashboardListResponse();
-        List<ResourceEntity> resourceEntities = resourceRepository.findAllByWorkspaceEntityResource_Id(idWorkspace);
-        List<ResourceResponse> resourceResponses = new ArrayList<>();
-        for (ResourceEntity resourceEntity : resourceEntities) {
-            ResourceResponse resourceResponse = new ResourceResponse();
-            resourceResponse.setId(resourceEntity.getId());
-            resourceResponse.setName(resourceEntity.getName());
-            resourceResponse.setAvatar(resourceEntity.getAvatar());
-            resourceResponse.setTeamId(resourceEntity.getTeamEntityResource().getId());
-            resourceResponse.setPosition(resourceEntity.getPositionEntity().getName());
-            resourceResponse.setBookings(sort(resourceEntity, startDay, endDay));
-            resourceResponses.add(resourceResponse);
-        }
-        dashboardListResponse.setResources(resourceResponses);
-        List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
-        List<TeamResponse> teamResponses = teamEntities.stream().map(
-                teamEntity -> modelMapper.map(teamEntity, TeamResponse.class))
-                .collect(Collectors.toList());
-        dashboardListResponse.setTeams(teamResponses);
-        return dashboardListResponse;
-    }
-    private List<TimeDTO> entityToDTO(List<TimeEntity> timeEntities,Date startDay,Date endDay){
+
+    private List<TimeDTO> entityToDTO(List<TimeEntity> timeEntities, Date startDay, Date endDay) {
         List<TimeDTO> timeDTOS = new ArrayList<>();
         for (TimeEntity timeEntity : timeEntities) {
             if (timeEntity.getStartTime().getTime() >= startDay.getTime() && timeEntity.getEndTime().getTime() <= endDay.getTime()) {
-                TimeDTO timeDTO= new TimeDTO();
+                TimeDTO timeDTO = new TimeDTO();
                 timeDTO.setId(timeEntity.getId());
                 timeDTO.setStartDate(timeEntity.getStartTime());
                 timeDTO.setEndDate(timeEntity.getEndTime());
                 ProjectEntity projectEntity = projectRepository.findById(timeEntity.getProjectEntity().getId()).get();
                 timeDTO.setProjectDTO(toDTO(projectEntity));
                 Long totalHour = (((timeEntity.getEndTime().getTime() - timeEntity.getStartTime().getTime()) / MILLISECOND) + 1) * 8;
-                timeDTO.setPercentage(DoubleRounder.round((timeEntity.getTotalHour() / totalHour) * 100,1));
-                timeDTO.setDuration(DoubleRounder.round((timeEntity.getTotalHour() / totalHour) * 8,1));
+                timeDTO.setPercentage(DoubleRounder.round((timeEntity.getTotalHour() / totalHour) * 100, 1));
+                timeDTO.setDuration(DoubleRounder.round((timeEntity.getTotalHour() / totalHour) * 8, 1));
                 timeDTO.setHourTotal(timeEntity.getTotalHour());
                 timeDTOS.add(timeDTO);
             }
@@ -293,10 +273,10 @@ public class TimeServiceImpl implements TimeService {
         return timeDTOS;
     }
 
-    private Double sumHour(List<TimeDTO> timeDTOS){
+    private Double sumHour(List<TimeDTO> timeDTOS) {
         Double sum = 0.0;
-        for (TimeDTO timeDTO:timeDTOS){
-            sum+=timeDTO.getHourTotal();
+        for (TimeDTO timeDTO : timeDTOS) {
+            sum += timeDTO.getHourTotal();
         }
         return sum;
     }
@@ -305,22 +285,24 @@ public class TimeServiceImpl implements TimeService {
         ProjectDTO projectDTO = modelMapper.map(projectEntity, ProjectDTO.class);
         return projectDTO;
     }
-    private List<List<DashboardResponse>> sort(ResourceEntity resourceEntity, Date startDay, Date endDay){
+
+    private List<List<DashboardResponse>> sort(ResourceEntity resourceEntity, Date startDay, Date endDay) {
         List<TimeEntity> timeEntities = timeRepository.findAllByIdResource(resourceEntity.getId());
-        List<TimeDTO> timeDTOS = entityToDTO(timeEntities,startDay,endDay);
-        Collections.sort(timeDTOS,(o1, o2) -> (int) (o1.getStartDate().getTime()-o2.getStartDate().getTime()));
-        List<List<TimeDTO>> list=new ArrayList<>();
-        findArr(timeDTOS,list);
-        List<List<DashboardResponse>> result=new ArrayList<>();
-        for (List<TimeDTO> dtos:list){
+        List<TimeDTO> timeDTOS = entityToDTO(timeEntities, startDay, endDay);
+        Collections.sort(timeDTOS, (o1, o2) -> (int) (o1.getStartDate().getTime() - o2.getStartDate().getTime()));
+        List<List<TimeDTO>> list = new ArrayList<>();
+        findArr(timeDTOS, list);
+        List<List<DashboardResponse>> result = new ArrayList<>();
+        for (List<TimeDTO> dtos : list) {
             result.add(convert(dtos));
         }
         return result;
     }
-    private List<DashboardResponse> convert(List<TimeDTO> timeDTOS){
-        List<DashboardResponse> dashboardResponses=new ArrayList<>();
-        for (TimeDTO timeDTO:timeDTOS){
-            DashboardResponse dashboardResponse = modelMapper.map(timeDTO,DashboardResponse.class);
+
+    private List<DashboardResponse> convert(List<TimeDTO> timeDTOS) {
+        List<DashboardResponse> dashboardResponses = new ArrayList<>();
+        for (TimeDTO timeDTO : timeDTOS) {
+            DashboardResponse dashboardResponse = modelMapper.map(timeDTO, DashboardResponse.class);
             dashboardResponse.setStartDate(SIMPLE_DATE_FORMAT.format(timeDTO.getStartDate()));
             dashboardResponse.setEndDate(SIMPLE_DATE_FORMAT.format(timeDTO.getEndDate()));
             dashboardResponses.add(dashboardResponse);
@@ -328,23 +310,23 @@ public class TimeServiceImpl implements TimeService {
         return dashboardResponses;
     }
 
-    private void findArr(List<TimeDTO> input, List<List<TimeDTO>> result){
-        if (input.isEmpty()){
+    private void findArr(List<TimeDTO> input, List<List<TimeDTO>> result) {
+        if (input.isEmpty()) {
             result.isEmpty();
-        }else {
+        } else {
             List<TimeDTO> tempList = new ArrayList<>();
             tempList.add(input.get(0));
-            for(int i =1 ; i < input.size(); i++){
+            for (int i = 1; i < input.size(); i++) {
                 TimeDTO tempTime = input.get(i);
-                if(tempTime.getStartDate().getTime() > tempList.get(tempList.size() - 1).getEndDate().getTime()) {
+                if (tempTime.getStartDate().getTime() > tempList.get(tempList.size() - 1).getEndDate().getTime()) {
                     tempList.add(tempTime);
                 }
             }
             result.add(tempList);
-            List<TimeDTO> remainingTime =  input.stream()
+            List<TimeDTO> remainingTime = input.stream()
                     .filter(ele -> !tempList.contains(ele))
                     .collect(Collectors.toList());
-            if(!remainingTime.isEmpty()){
+            if (!remainingTime.isEmpty()) {
                 findArr(remainingTime, result);
             }
         }

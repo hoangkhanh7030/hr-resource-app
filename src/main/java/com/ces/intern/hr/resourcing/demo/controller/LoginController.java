@@ -69,7 +69,19 @@ public class LoginController {
 
     @PostMapping(value = "/auth/google")
     public LoginResponse authGoogle(@RequestBody GoogleRequest googleRequest){
-        if (accoutRepository.findByEmail(googleRequest.getEmail()).isPresent()){
+        if (accoutRepository.findByEmailAndProvider(googleRequest.getEmail()).isPresent()){
+            AccountEntity accountEntity=accoutRepository.findByEmail(googleRequest.getEmail()).get();
+            accountEntity.setEmail(googleRequest.getEmail());
+            accountEntity.setFullname(googleRequest.getName());
+            accountEntity.setAvatar(googleRequest.getImageUrl());
+            accountEntity.setAuthenticationProvider(AuthenticationProvider.GOOGLE);
+            accountEntity.setCreatedDate(new Date());
+            accoutRepository.save(accountEntity);
+            AccountDTO  accountDTO =modelMapper.map(accountEntity,AccountDTO.class);
+            String jwt = tokenProvider.generateToken(accountDTO);
+            return new LoginResponse(jwt,accountDTO,Status.SUCCESS.getCode());
+        }
+        else if (accoutRepository.findByEmail(googleRequest.getEmail()).isPresent()){
             AccountEntity accountEntity = accoutRepository.findByEmail(googleRequest.getEmail())
                     .orElseThrow(()-> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
             AccountDTO accountDTO = modelMapper.map(accountEntity,AccountDTO.class);
