@@ -21,6 +21,8 @@ public class PositionEntity {
     private Integer id;
     @Column(name = "name")
     private String name;
+    @Column(name = "is_archived")
+    private Boolean isArchived = false;
     @ManyToOne
     @JoinColumn(name = "team_id")
     private TeamEntity teamEntity;

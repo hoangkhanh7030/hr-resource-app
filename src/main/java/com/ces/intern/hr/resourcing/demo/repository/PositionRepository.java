@@ -25,7 +25,15 @@ public interface PositionRepository extends JpaRepository<PositionEntity, Intege
     @Query(value = "select p from PositionEntity p where p.teamEntity.workspaceEntityTeam.id=:idWorkspace and " +
             "p.teamEntity.id=:idTeam and p.name=:name")
     Optional<PositionEntity> findByidWorkspaceAndidTeam(@Param("idWorkspace") Integer idWorkspace,
-                                                       @Param("idTeam") Integer idTeam,
+                                                        @Param("idTeam") Integer idTeam,
                                                         @Param("name") String name);
+
+    @Query(value = "select p from PositionEntity p where p.teamEntity.workspaceEntityTeam.id=:idWorkspace and p.isArchived = false")
+    List<PositionEntity> findAllActiveByIdWorkspace(@Param("idWorkspace") Integer idWorkspace);
+
+    @Query(value = "select p from PositionEntity p where p.teamEntity.workspaceEntityTeam.id=:idWorkspace and " +
+            "p.teamEntity.id=:idTeam AND p.teamEntity.isArchived = false")
+    List<PositionEntity> findAllActiveByIdWorkspaceAndIdTeam(@Param("idWorkspace") Integer idWorkspace,
+                                                             @Param("idTeam") Integer idTeam);
 
 }

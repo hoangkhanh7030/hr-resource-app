@@ -2,18 +2,23 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
 import com.ces.intern.hr.resourcing.demo.converter.ResourceConverter;
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
+import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
 import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.BadRequestException;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
+import com.ces.intern.hr.resourcing.demo.http.request.PositionRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
+import com.ces.intern.hr.resourcing.demo.http.request.TeamRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.PositionRepository;
 import com.ces.intern.hr.resourcing.demo.repository.ResourceRepository;
 import com.ces.intern.hr.resourcing.demo.repository.TeamRepository;
 import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
+import com.ces.intern.hr.resourcing.demo.sevice.PositionService;
 import com.ces.intern.hr.resourcing.demo.sevice.ResourceService;
+import com.ces.intern.hr.resourcing.demo.sevice.TeamService;
 import com.ces.intern.hr.resourcing.demo.utils.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +40,11 @@ public class ResourceServiceImpl implements ResourceService {
     private final PositionRepository positionRepository;
     private final WorkspaceRepository workspaceRepository;
     private final TeamRepository teamRepository;
+    private final PositionService positionService;
+    private final TeamService teamService;
     private final ModelMapper modelMapper;
+
+
 
     private static final String TEAM_PARAMETER = "positionEntity.teamEntity.name";
     private static final String POSITION_PARAMETER = "positionEntity.name";
@@ -50,13 +59,16 @@ public class ResourceServiceImpl implements ResourceService {
                                PositionRepository positionRepository,
                                WorkspaceRepository workspaceRepository,
                                TeamRepository teamRepository,
-                               ModelMapper modelMapper
-    ) {
+                               PositionService positionService,
+                               TeamService teamService,
+                               ModelMapper modelMapper) {
         this.resourceRepository = resourceRepository;
         this.resourceConverter = resourceConverter;
         this.positionRepository = positionRepository;
         this.workspaceRepository = workspaceRepository;
         this.teamRepository = teamRepository;
+        this.positionService = positionService;
+        this.teamService = teamService;
         this.modelMapper = modelMapper;
     }
 
@@ -99,6 +111,8 @@ public class ResourceServiceImpl implements ResourceService {
     public MessageResponse updateResource(ResourceRequest resourceRequest, Integer resourceId, Integer workspaceId, Integer accountId) {
         if (resourceRepository.findByWorkspaceEntityResource_IdAndId(workspaceId, resourceId).isPresent()) {
             ResourceEntity resourceEntityTarget = resourceRepository.findByWorkspaceEntityResource_IdAndId(workspaceId, resourceId).get();
+            PositionEntity positionEntity = resourceEntityTarget.getPositionEntity();
+            TeamEntity teamEntity = resourceEntityTarget.getTeamEntityResource();
             resourceEntityTarget.setId(resourceRequest.getId());
             resourceEntityTarget.setModifiedBy(accountId);
             Date currentDate = new Date();
@@ -113,6 +127,20 @@ public class ResourceServiceImpl implements ResourceService {
             resourceEntityTarget.setName(resourceRequest.getName());
             resourceEntityTarget.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElseThrow(()
                     -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
+            resourceEntityTarget.setTeamEntityResource(teamRepository.findById(resourceRequest.getTeamId()).orElseThrow(()
+                    -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage())));
+            if (teamEntity.getIsArchived()){
+                TeamRequest teamRequest = new TeamRequest();
+                teamRequest.setId(teamEntity.getId());
+                teamRequest.setName(teamEntity.getName());
+                teamService.deleteOneTeam(teamRequest);
+            }
+            if (positionEntity.getIsArchived()){
+                PositionRequest positionRequest = new PositionRequest();
+                positionRequest.setId(positionEntity.getId());
+                positionRequest.setName(positionEntity.getName());
+                positionService.deleteOne(positionRequest);
+            }
             resourceRepository.save(resourceEntityTarget);
             return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
         }
@@ -168,9 +196,9 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public ResourceDTO getResourceInfo(Integer resourceId, Integer workspaceId) {
-        if (resourceRepository.findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(resourceId, workspaceId).isPresent()) {
+        if (resourceRepository.findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).isPresent()) {
             return resourceConverter.convertToDto(resourceRepository
-                    .findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(resourceId, workspaceId).get());
+                    .findByIdAndWorkspaceEntityResource_Id(resourceId, workspaceId).get());
         } else {
             return null;
         }
@@ -213,41 +241,60 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String isArchived,
-                                           String sortColumn, String type, Integer page, Integer size) {
-        if (sortColumn.equals(ColumnPara.TEAM.getName())) {
+                                           String sortColumn, String type, Integer page, Integer size){
+        if (sortColumn.equals(ColumnPara.TEAM.getName())){
             sortColumn = TEAM_PARAMETER;
-        } else if (sortColumn.equals(ColumnPara.POSITION.getName())) {
+        }
+        else if (sortColumn.equals(ColumnPara.POSITION.getName())){
             sortColumn = POSITION_PARAMETER;
-        } else if (sortColumn.equals(ColumnPara.NAME.getName())) {
+        }
+        else if (sortColumn.equals(ColumnPara.NAME.getName())){
             sortColumn = RESOURCE_NAME_PARAMETER;
-        } else if (sortColumn.equals(ColumnPara.STATUS.getName())) {
+        }
+        else if (sortColumn.equals(ColumnPara.STATUS.getName())){
             sortColumn = STATUS_PARAMETER;
-            if (type.equals(SortPara.ASC.getName())) {
+            if (type.equals(SortPara.ASC.getName())){
                 type = SortPara.DESC.getName();
-            } else {
+            }
+            else {
                 type = SortPara.ASC.getName();
             }
-        } else {
+        }
+        else {
             sortColumn = CREATED_DATE_PARAMETER;
         }
         Page<ResourceEntity> resourceEntityPage;
         Pageable pageable;
         if (type.equals(SortPara.ASC.getName())) {
+//            Sort.NullHandling.NULLS_LAST;
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortColumn));
-        } else {
+        }else {
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
         }
-        if (isArchived.equals(StatusPara.ARCHIVED.getName())) {
+        if (isArchived.equals(StatusPara.ARCHIVED.getName())){
             resourceEntityPage = resourceRepository
                     .filterListByStatus(idWorkspace, searchName, true, pageable);
-        } else if (isArchived.equals(StatusPara.ACTIVE.getName())) {
+        }
+        else if (isArchived.equals(StatusPara.ACTIVE.getName())){
             resourceEntityPage = resourceRepository
                     .filterListByStatus(idWorkspace, searchName, false, pageable);
-        } else {
+        }
+        else {
             resourceEntityPage = resourceRepository
                     .filterList(idWorkspace, searchName, pageable);
         }
         List<ResourceEntity> resourceEntityList = resourceEntityPage.getContent();
+        for (ResourceEntity r : resourceEntityList){
+            System.out.println(r.getId());
+            if (r.getPositionEntity() == null){
+                System.out.println("Position null");
+            }
+            if (r.getTeamEntityResource() == null){
+                System.out.println("Team null");
+            }
+            System.out.println(r.getTeamEntityResource().getName());
+            System.out.println(r.getPositionEntity().getName());
+        }
         List<ResourceDTO> result = new ArrayList<>();
         for (ResourceEntity resourceEntity : resourceEntityList) {
             result.add(resourceConverter.convertToDto(resourceEntity));
@@ -257,12 +304,14 @@ public class ResourceServiceImpl implements ResourceService {
 
 
     @Override
-    public Integer getNumberOfResources(Integer idWorkspace, String searchName, String isArchived) {
-        if (isArchived.equals("true")) {
+    public Integer getNumberOfResources(Integer idWorkspace, String searchName, String isArchived){
+        if (isArchived.equals(StatusPara.ARCHIVED.getName())){
             return resourceRepository.getNumberOfResourcesOfWorkspaceWithStatus(idWorkspace, true, searchName);
-        } else if (isArchived.equals("false")) {
+        }
+        else if (isArchived.equals(StatusPara.ACTIVE.getName())){
             return resourceRepository.getNumberOfResourcesOfWorkspaceWithStatus(idWorkspace, false, searchName);
-        } else {
+        }
+        else {
             return resourceRepository.getNumberOfResourcesOfWorkspace(idWorkspace, searchName);
         }
     }
@@ -274,7 +323,6 @@ public class ResourceServiceImpl implements ResourceService {
                 resourceEntity -> modelMapper.map(resourceEntity, ResourceDTO.class))
                 .collect(Collectors.toList());
     }
-
 
 }
 

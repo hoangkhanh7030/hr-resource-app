@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -16,10 +15,14 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "team")
-public class TeamEntity extends BaseEnity{
-
+public class TeamEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     @Column(name = "name")
     private String name;
+    @Column(name = "is_archived")
+    private Boolean isArchived = false;
     @ManyToOne
     @JoinColumn(name = "workspace_id")
     private WorkspaceEntity workspaceEntityTeam;

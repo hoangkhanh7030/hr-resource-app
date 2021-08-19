@@ -4,10 +4,12 @@ import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,12 +31,13 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
 
     //Optional<ResourceEntity> findByIdAndPositionEntityTeamEntityWorkspaceEntityId(Integer resourceId, Integer workspaceId);
 
+    Optional<ResourceEntity> findByIdAndWorkspaceEntityResource_Id(Integer resourceId, Integer workspaceId);
 
     Optional<ResourceEntity> findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(Integer resourceId, Integer workspaceId);
 
 
     @Query("select r from ResourceEntity r where lower(r.name) LIKE lower(concat('%',:searchName,'%')) AND lower(r.positionEntity.name) LIKE lower(concat('%',:posName,'%')) " +
-            "AND lower(r.positionEntity.teamEntity.name) LIKE lower(concat('%',:teamName,'%')) AND r.workspaceEntityResource.id = :workspaceId")
+            "AND lower(r.teamEntityResource.name) LIKE lower(concat('%',:teamName,'%')) AND r.workspaceEntityResource.id = :workspaceId")
     Page<ResourceEntity> filterResultByParameter(@Param("searchName") String name,
                                                  @Param("posName") String posName,
                                                  @Param("teamName") String teamName,
@@ -66,7 +69,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
 
 
     @Query("select r from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId" +
-            " AND r.positionEntity.teamEntity.name = :teamName")
+            " AND r.teamEntityResource.name = :teamName")
     Page<ResourceEntity> filterByTeam(@Param("workspaceId") Integer workspaceId,
                                       @Param("teamName") String teamName,
                                       Pageable pageable);
@@ -78,7 +81,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
                                           Pageable pageable);
 
     @Query("select r from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId" +
-            " AND r.positionEntity.teamEntity.name = :teamName AND r.positionEntity.name = :posName")
+            " AND r.teamEntityResource.name = :teamName AND r.positionEntity.name = :posName")
     Page<ResourceEntity> filterByTeamAndPosition(@Param("workspaceId") Integer workspaceId,
                                                  @Param("teamName") String teamName,
                                                  @Param("posName") String posName,
@@ -102,8 +105,8 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
 
     @Query("select r from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId AND " +
             "(lower(r.name) like lower(concat('%',:searchName,'%')) " +
-            "OR lower(r.positionEntity.teamEntity.name) like lower(concat('%',:searchName,'%')) OR lower(r.positionEntity.name) " +
-            "like lower(concat('%',:searchName,'%')))")
+            "OR (lower(r.teamEntityResource.name) like lower(concat('%',:searchName,'%')) OR (r.teamEntityResource is null)) " +
+            "OR (lower(r.positionEntity.name ) like lower(concat('%',:searchName,'%')) OR (r.positionEntity is null)))")
     Page<ResourceEntity> filterList(@Param("workspaceId") Integer workspaceId,
                                     @Param("searchName") String searchName,
                                     Pageable pageable);
@@ -113,15 +116,16 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
 
     @Query("select r from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId AND r.isArchived = :isArchived AND " +
             " (lower(r.name) like lower(concat('%',:searchName,'%')) " +
-            "OR lower(r.teamEntityResource.name) like lower(concat('%',:searchName,'%')) OR lower(r.positionEntity.name) " +
-            "like lower(concat('%',:searchName,'%'))) ")
+            "OR (lower(r.teamEntityResource.name) like lower(concat('%',:searchName,'%')) OR (r.teamEntityResource is null)) " +
+            "OR (lower(r.positionEntity.name) like lower(concat('%',:searchName,'%')) OR (r.positionEntity is null)))")
     Page<ResourceEntity> filterListByStatus(@Param("workspaceId") Integer workspaceId,
                                             @Param("searchName") String searchName,
                                             @Param("isArchived") Boolean isArchived,
                                             Pageable pageable);
     @Query("select r from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId AND r.isArchived =false AND lower(r.name) like lower(concat('%',:searchName,'%'))")
     List<ResourceEntity> findAll(@Param("workspaceId") Integer workspaceId,
-                                @Param("searchName") String searchName);
+                                 @Param("searchName") String searchName);
+
 
 
 //    @Query("select count(r) from ResourceEntity r where r.positionEntity.teamEntity.workspaceEntityTeam.id = :workspaceId AND" +
@@ -136,14 +140,14 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
 
     @Query("select count(r) from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId AND" +
             " (lower(r.name) like lower(concat('%',:searchName,'%')) " +
-            "OR lower(r.positionEntity.teamEntity.name) like lower(concat('%',:searchName,'%')) OR lower(r.positionEntity.name) " +
+            "OR lower(r.teamEntityResource.name) like lower(concat('%',:searchName,'%')) OR lower(r.positionEntity.name) " +
             "like lower(concat('%',:searchName,'%')))")
     Integer getNumberOfResourcesOfWorkspace(@Param("workspaceId") Integer workspaceId,
                                             @Param("searchName") String searchName);
 
     @Query("select count(r) from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId AND" +
             " (lower(r.name) like lower(concat('%',:searchName,'%')) " +
-            "OR lower(r.positionEntity.teamEntity.name) like lower(concat('%',:searchName,'%')) OR lower(r.positionEntity.name) " +
+            "OR lower(r.teamEntityResource.name) like lower(concat('%',:searchName,'%')) OR lower(r.positionEntity.name) " +
             "like lower(concat('%',:searchName,'%'))) AND r.isArchived = :isArchived")
     Integer getNumberOfResourcesOfWorkspaceWithStatus(@Param("workspaceId") Integer workspaceId,
                                                       @Param("isArchived") Boolean isArchived,
@@ -158,15 +162,40 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity,Integer
     @Query(value = "select r from  ResourceEntity r where r.workspaceEntityResource.id=:idWorkspace")
     Page<ResourceEntity> findAllid(@Param("idWorkspace") Integer idWorkspace,Pageable pageable);
 
-    @Query(value = "select * from resource r left join booking b on r.id = b.resource_id " +
-            "left join project p on b.project_id = p.id left join team t on r.team_id = t.id " +
-            "left join position po on r.position_id=po.id where r.workspace_id =:idWorkspace and" +
-            " (lower(r.name) like lower(concat('%',:searchName,'%')) " +
-            "OR lower(t.name) like lower(concat('%',:searchName,'%')) " +
-            "OR lower(p.name) like lower(concat('%',:searchName,'%'))" +
-            "OR lower(p.client_name) like lower(concat('%',:searchName,'%')) " +
-            "OR lower(po.name) like lower(concat('%',:searchName,'%')))",nativeQuery = true)
-    List<ResourceEntity> findAllBySearchName(@Param("idWorkspace") Integer idWorkspace,
-                                             @Param("searchName") String searchName);
+//    @Query(value = "select r from resource r left join position p on r.position_id = p.id left join team t on p.team_id = t.id\n" +
+//            "where r.workspace_id = :workspaceId and (lower (r.name) like lower(concat('%',:searchName,'%'))" +
+//            " or lower (p.name) like lower(concat('%',:searchName,'%'))" +
+//            " or lower (t.name) like lower(concat('%',:searchName,'%')))",
+//            countQuery = "select count(r) from resource r left join position p on r.position_id = p.id left join team t on p.team_id = t.id\\n\" +\n" +
+//                    "            \"where r.workspace_id = :workspaceId and (lower (r.name) like lower(concat('%',:searchName,'%'))\" +\n" +
+//                    "            \" or lower (p.name) like lower(concat('%',:searchName,'%'))\" +\n" +
+//                    "            \" or lower (t.name) like lower(concat('%',:searchName,'%')))"
+//            , nativeQuery = true)
+//    Page<ResourceEntity> filterList(@Param("workspaceId") Integer workspaceId,
+//                                    @Param("searchName") String searchName,
+//                                    Pageable pageable);
 
+
+    //    @Query("select r from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId" +
+//            " AND lower(r.name) like lower(concat('%',:searchName,'%')) order by r.positionEntity.name nulls last ")
+//    Page<ResourceEntity> filterList(@Param("workspaceId") Integer workspaceId,
+//                                    @Param("searchName") String searchName,
+//                                    Pageable pageable);
+//
+//    @Query("select r from ResourceEntity r where r.workspaceEntityResource.id = :workspaceId AND r.isArchived = :isArchived AND " +
+//            " (lower(r.name) like lower(concat('%',:searchName,'%')) " +
+//            "OR lower(r.teamEntityResource.name) like lower(concat('%',:searchName,'%')) " +
+//            "OR lower(r.positionEntity.name) like lower(concat('%',:searchName,'%'))) OR " +
+//            "(r.positionEntity is null or r.teamEntityResource is null) order by r.positionEntity.name nulls last ")
+//    Page<ResourceEntity> filterListByStatus(@Param("workspaceId") Integer workspaceId,
+//                                            @Param("searchName") String searchName,
+//                                            @Param("isArchived") Boolean isArchived,
+//                                            Pageable pageable);
+//    @Query("select count (r) from ResourceEntity r where r.teamEntityResource.id = :teamId AND r.positionEntity.id = :positionId")
+    Integer countAllByWorkspaceEntityResource_IdAndTeamEntityResource_Id(Integer workspaceId, Integer teamId);
+
+    @Query("select count (r) from ResourceEntity r where r.positionEntity.id = :positionId" +
+            " AND r.workspaceEntityResource.id = :workspaceId")
+    Integer countResourcesOfPosition(@Param("positionId") Integer positionId,
+                                     @Param("workspaceId") Integer workspaceId);
 }

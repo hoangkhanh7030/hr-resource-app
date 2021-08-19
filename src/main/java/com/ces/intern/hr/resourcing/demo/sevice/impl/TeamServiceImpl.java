@@ -14,6 +14,7 @@ import com.ces.intern.hr.resourcing.demo.repository.PositionRepository;
 import com.ces.intern.hr.resourcing.demo.repository.ResourceRepository;
 import com.ces.intern.hr.resourcing.demo.repository.TeamRepository;
 import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
+import com.ces.intern.hr.resourcing.demo.sevice.PositionService;
 import com.ces.intern.hr.resourcing.demo.sevice.TeamService;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import org.modelmapper.ModelMapper;
@@ -21,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,27 +32,44 @@ public class TeamServiceImpl implements TeamService {
     private final ResourceRepository resourceRepository;
     private final WorkspaceRepository workspaceRepository;
     private final PositionRepository positionRepository;
+    private final TeamService teamService;
+    private final PositionService positionService;
 
     @Autowired
     public TeamServiceImpl(TeamRepository teamRepository,
                            ModelMapper modelMapper,
                            ResourceRepository resourceRepository,
                            WorkspaceRepository workspaceRepository,
-                           PositionRepository positionRepository) {
+                           PositionRepository positionRepository,
+                           TeamService teamService,
+                           PositionService positionService) {
         this.teamRepository = teamRepository;
         this.modelMapper = modelMapper;
         this.resourceRepository = resourceRepository;
         this.workspaceRepository = workspaceRepository;
         this.positionRepository = positionRepository;
+        this.teamService = teamService;
+        this.positionService = positionService;
     }
 
     @Override
     public List<TeamDTO> getAll(Integer idWorkspace) {
-        List<TeamEntity> teamEntityList = teamRepository.findAllByidWorkspace(idWorkspace);
+//        List<TeamEntity> teamEntityList = teamRepository.findAllByidWorkspace(idWorkspace);
+//        return teamEntityList.stream().map(s -> modelMapper.map(s, TeamDTO.class)).collect(Collectors.toList());
+        List<TeamEntity> teamEntityList = teamRepository.findAllActiveByWorkspaceId(idWorkspace);
         return teamEntityList.stream().map(s -> modelMapper.map(s, TeamDTO.class)).collect(Collectors.toList());
     }
 
+    @Override
+    public void addResourceToTeam(Integer idTeam, Integer idResource) {
+        ResourceEntity resourceEntity = resourceRepository.findById(idResource)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        TeamEntity teamEntity = teamRepository.findById(idTeam)
+                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        resourceEntity.getPositionEntity().setTeamEntity(teamEntity);
+        resourceRepository.save(resourceEntity);
 
+    }
 
     @Override
     public void deleteTeam(Integer idTeam) {
@@ -62,11 +79,12 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public void renameTeam(Integer idWorkspace,Integer idTeam, String name) {
-        TeamEntity teamEntity = teamRepository.findByidWorkspaceAndIdTeam(idWorkspace,idTeam)
+    public void renameTeam(Integer idTeam, String name) {
+        TeamEntity teamEntity = teamRepository.findById(idTeam)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         teamEntity.setName(name);
         teamRepository.save(teamEntity);
+
     }
 
 
@@ -92,7 +110,6 @@ public class TeamServiceImpl implements TeamService {
         TeamEntity teamEntity = teamRepository.findById(teamRequest.getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         teamEntity.setName(teamRequest.getName());
-        teamEntity.setModifiedDate(new Date());
         teamRepository.save(teamEntity);
         for (PositionRequest positionRequest : teamRequest.getPositions()) {
             if (positionRequest.getId() == null) {
@@ -118,7 +135,6 @@ public class TeamServiceImpl implements TeamService {
         for (TeamRequest teamRequest : teamRequests) {
             if (!teamRepository.findByNameAndidWorkspace(teamRequest.getName(), idWorkspace).isPresent()) {
                 TeamEntity teamEntity = new TeamEntity();
-                teamEntity.setCreatedDate(new Date());
                 teamEntity.setName(teamRequest.getName());
                 teamEntity.setWorkspaceEntityTeam(workspaceEntity);
                 teamRepository.save(teamEntity);
@@ -146,7 +162,7 @@ public class TeamServiceImpl implements TeamService {
             if (teamRequest.getId() == null) {
                 createWithIdTeam(teamRequest, idWorkspace);
             } else {
-               updateTeam(teamRequest, idWorkspace);
+                updateTeam(teamRequest, idWorkspace);
             }
             deletePosition(teamRequest.getPositions(), positionEntities);
         }
@@ -155,10 +171,10 @@ public class TeamServiceImpl implements TeamService {
 
     }
 
+
     private void createWithIdTeam(TeamRequest teamRequest, Integer idWorkspace) {
         if (!teamRepository.findByNameAndidWorkspaceAndIdTeam(teamRequest.getId(), teamRequest.getName(), idWorkspace).isPresent()) {
             TeamEntity teamEntity = new TeamEntity();
-            teamEntity.setCreatedDate(new Date());
             teamEntity.setName(teamRequest.getName());
             teamRepository.save(teamEntity);
             for (PositionRequest positionRequest : teamRequest.getPositions()) {
@@ -195,4 +211,55 @@ public class TeamServiceImpl implements TeamService {
     }
 
 
+    @Override
+    public void deleteOneTeam(TeamRequest teamRequest) {
+        TeamEntity teamEntity = teamRepository.findById(teamRequest.getId()).orElse(null);
+        if (teamEntity != null){
+            if (resourceRepository
+                    .countAllByWorkspaceEntityResource_IdAndTeamEntityResource_Id
+                            (teamEntity.getWorkspaceEntityTeam().getId(), teamEntity.getId()) == 0){
+                for (PositionEntity positionEntity : teamEntity.getPositionEntities()){
+                    positionRepository.deleteById(positionEntity.getId());
+                }
+                teamRepository.deleteById(teamEntity.getId());
+            }
+            else {
+                teamEntity.setIsArchived(true);
+                for (PositionEntity positionEntity : teamEntity.getPositionEntities()){
+                    positionEntity.setIsArchived(true);
+                    positionRepository.save(positionEntity);
+                }
+                teamRepository.save(teamEntity);
+            }
+        }
+    }
+
+    @Override
+    public void deleteMultipleTeam(List<TeamRequest> teamRequests) {
+        List<TeamEntity> teamEntities = new ArrayList<>();
+        for (TeamRequest teamRequest : teamRequests){
+            TeamEntity teamEntity = teamRepository.findById(teamRequest.getId()).orElse(null);
+            if (teamEntity != null){
+                teamEntities.add(teamEntity);
+            }
+        }
+        for (TeamEntity teamEntity : teamEntities){
+            if (resourceRepository
+                    .countAllByWorkspaceEntityResource_IdAndTeamEntityResource_Id
+                            (teamEntity.getWorkspaceEntityTeam().getId(), teamEntity.getId()) == 0){
+                for (PositionEntity positionEntity : teamEntity.getPositionEntities()){
+                    positionRepository.deleteById(positionEntity.getId());
+                }
+                teamRepository.deleteById(teamEntity.getId());
+            }
+            else {
+                teamEntity.setIsArchived(true);
+                for (PositionEntity positionEntity : teamEntity.getPositionEntities()){
+                    positionEntity.setIsArchived(true);
+                    positionRepository.save(positionEntity);
+                }
+                teamRepository.save(teamEntity);
+            }
+        }
+    }
 }

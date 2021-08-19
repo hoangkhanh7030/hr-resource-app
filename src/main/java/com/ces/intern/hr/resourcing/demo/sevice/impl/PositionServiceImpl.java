@@ -7,6 +7,7 @@ import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.PositionRequest;
 import com.ces.intern.hr.resourcing.demo.repository.PositionRepository;
+import com.ces.intern.hr.resourcing.demo.repository.ResourceRepository;
 import com.ces.intern.hr.resourcing.demo.repository.TeamRepository;
 import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.PositionService;
@@ -15,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,22 +26,24 @@ public class PositionServiceImpl implements PositionService {
     private final ModelMapper modelMapper;
     private final WorkspaceRepository workspaceRepository;
     private final TeamRepository teamRepository;
-
+    private final ResourceRepository resourceRepository;
     @Autowired
     public PositionServiceImpl(PositionRepository positionRepository,
                                ModelMapper modelMapper,
                                WorkspaceRepository workspaceRepository,
-                               TeamRepository teamRepository
-                               ) {
+                               TeamRepository teamRepository,
+                               ResourceRepository resourceRepository) {
         this.positionRepository = positionRepository;
         this.modelMapper = modelMapper;
         this.teamRepository=teamRepository;
         this.workspaceRepository=workspaceRepository;
+        this.resourceRepository = resourceRepository;
     }
 
     @Override
     public List<PositionDTO> getAll(Integer idWorkspace) {
-        List<PositionEntity> positionEntities = positionRepository.findAllByidWorkspace(idWorkspace);
+        //List<PositionEntity> positionEntities = positionRepository.findAllByidWorkspace(idWorkspace);
+        List<PositionEntity> positionEntities = positionRepository.findAllActiveByIdWorkspace(idWorkspace);
         return positionEntities.stream().map(s -> modelMapper.map(s, PositionDTO.class)).collect(Collectors.toList());
     }
 
@@ -53,18 +57,56 @@ public class PositionServiceImpl implements PositionService {
     public void updatePosition(List<PositionRequest> positionRequests,Integer idWorkspace,Integer idTeam) {
         List<PositionEntity> positionEntities = positionRepository.findAllByidWorkspaceAndidTeam(idWorkspace,idTeam);
         deletePosition(positionRequests,positionEntities);
-            for (PositionRequest positionRequest : positionRequests){
-                if (!positionRepository.findByidWorkspaceAndidTeam(idWorkspace,idTeam,positionRequest.getName()).isPresent()){
-                    PositionEntity positionEntity = new PositionEntity();
-                    TeamEntity teamEntity = teamRepository.findById(idTeam)
-                            .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-                    positionEntity.setName(positionRequest.getName());
-                    positionEntity.setTeamEntity(teamEntity);
+        for (PositionRequest positionRequest : positionRequests){
+            if (!positionRepository.findByidWorkspaceAndidTeam(idWorkspace,idTeam,positionRequest.getName()).isPresent()){
+                PositionEntity positionEntity = new PositionEntity();
+                TeamEntity teamEntity = teamRepository.findById(idTeam)
+                        .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+                positionEntity.setName(positionRequest.getName());
+                positionEntity.setTeamEntity(teamEntity);
 
-                    positionRepository.save(positionEntity);
-                }
+                positionRepository.save(positionEntity);
             }
+        }
 
+    }
+
+    @Override
+    public void deleteOne(PositionRequest positionRequest) {
+        PositionEntity positionEntity = positionRepository.findById(positionRequest.getId()).orElse(null);
+        if (positionEntity != null){
+            if (resourceRepository
+                    .countResourcesOfPosition
+                            (positionEntity.getId(), positionEntity.getTeamEntity().getWorkspaceEntityTeam().getId()) == 0){
+                resourceRepository.deleteById(positionEntity.getId());
+            }
+            else {
+                positionEntity.setIsArchived(true);
+                positionRepository.save(positionEntity);
+            }
+        }
+    }
+
+    @Override
+    public void deleteMultiple(List<PositionRequest> positionRequests) {
+        List<PositionEntity> positionEntities = new ArrayList<>();
+        for (PositionRequest positionRequest : positionRequests){
+            PositionEntity positionEntity = positionRepository.findById(positionRequest.getId()).orElse(null);
+            if (positionEntity != null){
+                positionEntities.add(positionEntity);
+            }
+        }
+        for (PositionEntity positionEntity : positionEntities){
+            if (resourceRepository
+                    .countResourcesOfPosition
+                            (positionEntity.getId(), positionEntity.getTeamEntity().getWorkspaceEntityTeam().getId()) == 0){
+                resourceRepository.deleteById(positionEntity.getId());
+            }
+            else {
+                positionEntity.setIsArchived(true);
+                positionRepository.save(positionEntity);
+            }
+        }
     }
 
     private void deletePosition(List<PositionRequest> positionRequests,List<PositionEntity> positionEntities){
