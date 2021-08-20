@@ -161,9 +161,11 @@ public class TeamServiceImpl implements TeamService {
 
 
     private void createWithIdTeam(TeamRequest teamRequest, Integer idWorkspace) {
+        WorkspaceEntity workspaceEntity=workspaceRepository.findById(idWorkspace).get();
         if (!teamRepository.findByNameAndidWorkspaceAndIdTeam(teamRequest.getId(), teamRequest.getName(), idWorkspace).isPresent()) {
             TeamEntity teamEntity = new TeamEntity();
             teamEntity.setName(teamRequest.getName());
+            teamEntity.setWorkspaceEntityTeam(workspaceEntity);
             teamRepository.save(teamEntity);
             for (PositionRequest positionRequest : teamRequest.getPositions()) {
                 if (!positionRepository.findByNameAndTeamEntity_Id(positionRequest.getName(),

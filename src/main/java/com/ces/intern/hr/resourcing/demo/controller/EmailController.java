@@ -13,6 +13,7 @@ import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Role;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.util.ResourceUtils;
@@ -23,6 +24,7 @@ import javax.mail.internet.MimeMessage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 
 @RestController
 @RequestMapping(value = "/api/v1/workspaces")
@@ -54,9 +56,7 @@ public class EmailController {
         MimeMessageHelper helper = new MimeMessageHelper(msg, true);
         helper.setTo(arr);
         helper.setSubject(TITLE);
-        File file = ResourceUtils.getFile("classpath:file/Invite.txt");
-
-        BufferedReader reader = new BufferedReader(new FileReader(file));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/file/Invite.txt")));
         StringBuilder stringBuilder = new StringBuilder();
         String line;
         String ls = System.getProperty("line.separator");
