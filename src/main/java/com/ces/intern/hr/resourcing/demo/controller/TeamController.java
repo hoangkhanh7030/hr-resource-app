@@ -109,17 +109,15 @@ public class TeamController {
                                    @RequestBody List<TeamRequest> teamRequests) {
         List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
 
-        if (teamRequests.isEmpty()) {
-            teamRepository.deleteAll();
-            return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
-        } else {
+
+
             teamService.update(teamRequests, idWorkspace);
             if (listEquals(toDTO(teamRequests), EntitytoDTO(teamEntities))) {
                 return new MessageResponse(ResponseMessage.SETTING_SUCCESS, Status.SUCCESS.getCode());
             } else {
                 return new MessageResponse(ResponseMessage.SETTING_FAIL, Status.FAIL.getCode());
             }
-        }
+
     }
 
     private List<TeamDTO> toDTO(List<TeamRequest> teamRequests) {

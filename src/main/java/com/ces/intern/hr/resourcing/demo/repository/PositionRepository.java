@@ -36,4 +36,5 @@ public interface PositionRepository extends JpaRepository<PositionEntity, Intege
     List<PositionEntity> findAllActiveByIdWorkspaceAndIdTeam(@Param("idWorkspace") Integer idWorkspace,
                                                              @Param("idTeam") Integer idTeam);
 
+
 }

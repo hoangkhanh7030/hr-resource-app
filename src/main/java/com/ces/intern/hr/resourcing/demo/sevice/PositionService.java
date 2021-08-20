@@ -9,7 +9,6 @@ import java.util.List;
 public interface PositionService {
     List<PositionDTO> getAll(Integer idWorkspace);
     List<PositionDTO> getAllByIdTeam(Integer idWorkspace,Integer idTeam);
-    void updatePosition(List<PositionRequest> positionRequests,Integer idWorkspace,Integer idTeam);
-    void deleteOne(PositionRequest positionRequest);
+
     void deleteMultiple(List<PositionRequest> positionRequests);
 }

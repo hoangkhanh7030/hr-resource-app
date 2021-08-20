@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "team")
-public class TeamEntity {
+public class TeamEntity extends BaseEnity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -34,8 +34,5 @@ public class TeamEntity {
             CascadeType.PERSIST,CascadeType.REFRESH
     },mappedBy = "teamEntityResource")
     private List<ResourceEntity> resourceEntities = new ArrayList<>();
-    @PreRemove
-    private void preRemove() {
-        resourceEntities.forEach( child -> child.setTimeEntities(null));
-    }
+
 }

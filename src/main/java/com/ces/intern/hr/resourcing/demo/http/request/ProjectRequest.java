@@ -19,8 +19,8 @@ public class ProjectRequest {
 
     public boolean validate() {
         if (name == null||name.isEmpty()|| clientName == null || clientName.isEmpty() ||
-                color == null  || color.isEmpty() || textColor == null || textColor.isEmpty() ||
-                colorPattern == null  || colorPattern.isEmpty()  ) {
+                color == null  || color.isEmpty() || textColor == null || textColor.isEmpty()
+                  ) {
             return true;
         } else {
             return false;

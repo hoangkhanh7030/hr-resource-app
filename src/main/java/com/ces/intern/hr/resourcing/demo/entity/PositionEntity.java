@@ -32,8 +32,5 @@ public class PositionEntity {
             CascadeType.PERSIST,CascadeType.REFRESH
     },mappedBy = "positionEntity")
     private List<ResourceEntity> resourceEntities = new ArrayList<>();
-    @PreRemove
-    private void preRemove() {
-        resourceEntities.forEach( child -> child.setPositionEntity(null));
-    }
+
 }

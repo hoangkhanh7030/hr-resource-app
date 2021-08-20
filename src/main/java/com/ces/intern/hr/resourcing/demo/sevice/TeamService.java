@@ -9,15 +9,15 @@ import java.util.List;
 
 public interface TeamService {
     List<TeamDTO> getAll(Integer idWorkspace);
-    void addResourceToTeam(Integer idTeam,Integer idResource);
+
 
     void deleteTeam(Integer idTeam);
-    void renameTeam(Integer idTeam,String name);
+    void renameTeam(Integer idWorkspace,Integer idTeam,String name);
 
     List<TeamResponse> getTeams(Integer idWorkspace);
     void created(List<TeamRequest> teamRequests, Integer idWorkspace);
     void update(List<TeamRequest> teamRequests, Integer idWorkspace);
 
-    void deleteOneTeam(TeamRequest teamRequest);
+
     void deleteMultipleTeam(List<TeamRequest> teamRequests);
 }

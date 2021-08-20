@@ -47,43 +47,7 @@ public class ResourceController {
     }
 
 
-//    @GetMapping("/{workspaceId}/resources")
-//    public ResourceListResponse showResourceList(@PathVariable Integer workspaceId,
-//                                                 @RequestParam Integer page,
-//                                                 @RequestParam Integer size,
-//                                                 @RequestParam String keyword,
-//                                                 @RequestParam String teamName,
-//                                                 @RequestParam String posName,
-//                                                 @RequestParam String sortColumn,
-//                                                 @RequestParam String type) {
-//        teamName = teamName == null ? "" : teamName;
-//        posName = posName == null ? "" : posName;
-//        keyword = keyword == null ? "" : keyword;
-//        sortColumn = sortColumn == null ? "" : sortColumn;
-//        //type = type == null ? SortPara.DESC.getName() : type;
-//        if (type == null || type.isEmpty()){
-//            type = SortPara.DESC.getName();
-//        }
-//        else{
-//            if (!type.equals(SortPara.DESC.getName()) && !type.equals(SortPara.ASC.getName())){
-//                type = SortPara.DESC.getName();
-//            }
-//        }
-//        List<ResourceDTO> resourceDTOList = resourceService
-//                .sortResources(workspaceId, keyword, teamName, posName, sortColumn, type, page, size);
-//        int listSize = resourceService.getNumberOfResources(workspaceId, keyword, teamName, posName);
-//        int numberOfPages;
-//        if (listSize == 0) {
-//            numberOfPages = 0;
-//        } else {
-//            if (listSize % size == 0) {
-//                numberOfPages = listSize / size;
-//            } else {
-//                numberOfPages = (listSize / size) + 1;
-//            }
-//        }
-//        return new ResourceListResponse(resourceDTOList, numberOfPages);
-//    }
+
 
     @GetMapping("/{workspaceId}/resources")
     public ResourceListResponse showResourceList(@PathVariable Integer workspaceId,

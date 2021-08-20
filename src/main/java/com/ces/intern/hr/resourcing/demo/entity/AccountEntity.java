@@ -23,6 +23,8 @@ public class AccountEntity extends BaseEnity{
     private String password;
     @Column(name = "fullname")
     private String fullname;
+    @Column(name = "status")
+    private boolean status =true;
     @Column(name = "avatar")
     private String avatar;
     @Enumerated(EnumType.STRING)

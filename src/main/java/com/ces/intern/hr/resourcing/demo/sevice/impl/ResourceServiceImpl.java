@@ -40,8 +40,6 @@ public class ResourceServiceImpl implements ResourceService {
     private final PositionRepository positionRepository;
     private final WorkspaceRepository workspaceRepository;
     private final TeamRepository teamRepository;
-    private final PositionService positionService;
-    private final TeamService teamService;
     private final ModelMapper modelMapper;
 
 
@@ -59,16 +57,12 @@ public class ResourceServiceImpl implements ResourceService {
                                PositionRepository positionRepository,
                                WorkspaceRepository workspaceRepository,
                                TeamRepository teamRepository,
-                               PositionService positionService,
-                               TeamService teamService,
                                ModelMapper modelMapper) {
         this.resourceRepository = resourceRepository;
         this.resourceConverter = resourceConverter;
         this.positionRepository = positionRepository;
         this.workspaceRepository = workspaceRepository;
         this.teamRepository = teamRepository;
-        this.positionService = positionService;
-        this.teamService = teamService;
         this.modelMapper = modelMapper;
     }
 
@@ -133,18 +127,53 @@ public class ResourceServiceImpl implements ResourceService {
                 TeamRequest teamRequest = new TeamRequest();
                 teamRequest.setId(teamEntity.getId());
                 teamRequest.setName(teamEntity.getName());
-                teamService.deleteOneTeam(teamRequest);
+                deleteOneTeam(teamRequest);
             }
             if (positionEntity.getIsArchived()){
                 PositionRequest positionRequest = new PositionRequest();
                 positionRequest.setId(positionEntity.getId());
                 positionRequest.setName(positionEntity.getName());
-                positionService.deleteOne(positionRequest);
+                deleteOne(positionRequest);
             }
             resourceRepository.save(resourceEntityTarget);
             return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
         }
         return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+    }
+    private void deleteOneTeam(TeamRequest teamRequest) {
+        TeamEntity teamEntity = teamRepository.findById(teamRequest.getId()).orElse(null);
+        if (teamEntity != null){
+            if (resourceRepository
+                    .countAllByWorkspaceEntityResource_IdAndTeamEntityResource_Id
+                            (teamEntity.getWorkspaceEntityTeam().getId(), teamEntity.getId()) == 0){
+                for (PositionEntity positionEntity : teamEntity.getPositionEntities()){
+                    positionRepository.deleteById(positionEntity.getId());
+                }
+                teamRepository.deleteById(teamEntity.getId());
+            }
+            else {
+                teamEntity.setIsArchived(true);
+                for (PositionEntity positionEntity : teamEntity.getPositionEntities()){
+                    positionEntity.setIsArchived(true);
+                    positionRepository.save(positionEntity);
+                }
+                teamRepository.save(teamEntity);
+            }
+        }
+    }
+    private void deleteOne(PositionRequest positionRequest) {
+        PositionEntity positionEntity = positionRepository.findById(positionRequest.getId()).orElse(null);
+        if (positionEntity != null){
+            if (resourceRepository
+                    .countResourcesOfPosition
+                            (positionEntity.getId(), positionEntity.getTeamEntity().getWorkspaceEntityTeam().getId()) == 0){
+                resourceRepository.deleteById(positionEntity.getId());
+            }
+            else {
+                positionEntity.setIsArchived(true);
+                positionRepository.save(positionEntity);
+            }
+        }
     }
 
     @Override
@@ -205,39 +234,6 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
 
-//    @Override
-//    public List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String teamName, String posName,
-//                                           String sortColumn, String type, Integer page, Integer size){
-//        switch (sortColumn) {
-//            case "team":
-//                sortColumn = TEAM_PARAMETER;
-//                break;
-//            case "position":
-//                sortColumn = POSITION_PARAMETER;
-//                break;
-//            case "name":
-//                sortColumn = RESOURCE_NAME_PARAMETER;
-//                break;
-//            default:
-//                sortColumn = CREATED_DATE_PARAMETER;
-//                break;
-//        }
-//        Page<ResourceEntity> resourceEntityPage;
-//        Pageable pageable;
-//        if (type.equals(SortPara.ASC.getName())) {
-//            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortColumn));
-//        }else {
-//            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
-//        }
-//        resourceEntityPage = resourceRepository
-//                .filterList(idWorkspace, searchName, teamName, posName, pageable);
-//        List<ResourceEntity> resourceEntityList = resourceEntityPage.getContent();
-//        List<ResourceDTO> result = new ArrayList<>();
-//        for (ResourceEntity resourceEntity : resourceEntityList) {
-//            result.add(resourceConverter.convertToDto(resourceEntity));
-//        }
-//        return result;
-//    }
 
     @Override
     public List<ResourceDTO> sortResources(Integer idWorkspace, String searchName, String isArchived,

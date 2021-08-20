@@ -18,21 +18,15 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.BodyPart;
-import javax.mail.Multipart;
-import javax.mail.internet.MimeBodyPart;
+
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/v1/workspaces")
 public class EmailController {
-    private static final String HOME = "https://hr-resourcing-management.netlify.app/";
     private static final String TITLE = "Invited Workspace";
     private final JavaMailSender sender;
     private final AccoutRepository accoutRepository;
@@ -57,7 +51,6 @@ public class EmailController {
         MimeMessage msg = sender.createMimeMessage();
         String[] arr = new String[inviteRequest.getEmail().size()];
         inviteRequest.getEmail().toArray(arr);
-        // true = multipart message
         MimeMessageHelper helper = new MimeMessageHelper(msg, true);
         helper.setTo(arr);
         helper.setSubject(TITLE);
@@ -65,13 +58,12 @@ public class EmailController {
 
         BufferedReader reader = new BufferedReader(new FileReader(file));
         StringBuilder stringBuilder = new StringBuilder();
-        String line = null;
+        String line;
         String ls = System.getProperty("line.separator");
         while ((line = reader.readLine()) != null) {
             stringBuilder.append(line);
             stringBuilder.append(ls);
         }
-// delete the last new line separator
         stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         reader.close();
 
