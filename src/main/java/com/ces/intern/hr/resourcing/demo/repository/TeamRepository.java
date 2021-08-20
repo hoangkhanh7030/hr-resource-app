@@ -30,5 +30,8 @@ public interface TeamRepository extends JpaRepository<TeamEntity,Integer> {
     Optional<TeamEntity> findByidWorkspaceAndIdTeam(@Param("idWorkspace") Integer idWorkspace,
                                                     @Param("idTeam") Integer idTeam);
 
-
+    @Query(value = "select t from TeamEntity t where t.name=:name and t.workspaceEntityTeam.id=:idWorkspace " +
+            "and t.isArchived=true ")
+    Optional<TeamEntity> findByNameAndidWorkspaceAndTrue(@Param("idWorkspace") Integer idWorkspace,
+                                                           @Param("name") String name);
 }

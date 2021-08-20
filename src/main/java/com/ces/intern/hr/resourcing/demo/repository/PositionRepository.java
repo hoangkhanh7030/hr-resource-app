@@ -13,12 +13,13 @@ import java.util.Optional;
 @Repository
 public interface PositionRepository extends JpaRepository<PositionEntity, Integer> {
     Optional<PositionEntity> findByNameAndTeamEntity_Id(String name,Integer idTeam);
+
     List<PositionEntity> findAllByTeamEntity_Id(Integer idTeam);
     @Query(value = "select p from PositionEntity p where p.teamEntity.workspaceEntityTeam.id=:idWorkspace")
     List<PositionEntity> findAllByidWorkspace(@Param("idWorkspace") Integer idWorkspace);
 
     @Query(value = "select p from PositionEntity p where p.teamEntity.workspaceEntityTeam.id=:idWorkspace and " +
-            "p.teamEntity.id=:idTeam")
+            "p.teamEntity.id=:idTeam and p.isArchived=false ")
     List<PositionEntity> findAllByidWorkspaceAndidTeam(@Param("idWorkspace") Integer idWorkspace,
                                                        @Param("idTeam") Integer idTeam);
 
@@ -27,6 +28,10 @@ public interface PositionRepository extends JpaRepository<PositionEntity, Intege
     Optional<PositionEntity> findByidWorkspaceAndidTeam(@Param("idWorkspace") Integer idWorkspace,
                                                         @Param("idTeam") Integer idTeam,
                                                         @Param("name") String name);
+
+    @Query(value = "select p from PositionEntity p where p.teamEntity.id=:idTeam and p.name=:name and p.isArchived=true ")
+    Optional<PositionEntity> findByidTeamAndTrue(@Param("idTeam") Integer idTeam,
+                                                 @Param("name") String name);
 
     @Query(value = "select p from PositionEntity p where p.teamEntity.workspaceEntityTeam.id=:idWorkspace and p.isArchived = false")
     List<PositionEntity> findAllActiveByIdWorkspace(@Param("idWorkspace") Integer idWorkspace);
