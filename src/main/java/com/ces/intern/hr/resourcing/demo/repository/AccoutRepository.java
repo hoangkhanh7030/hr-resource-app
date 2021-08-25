@@ -36,10 +36,9 @@ public interface AccoutRepository extends JpaRepository<AccountEntity, Integer> 
             "or lower(a.fullname) like lower(concat('%',:searchName,'%')))",nativeQuery = true)
     List<AccountEntity> findAllBysearchNameToList(@Param("idWorkspace") Integer idWorkspace,
                                             @Param("searchName") String searchName);
-//    @Query(value = "select * from account a right join account_workspace_role awr on a.id = awr.account_id " +
-//            "where awr.workspace_id=:idWorkspace and a.id=:idAccount",nativeQuery = true)
-//    Optional<AccountEntity> findByWorkspaceIdAndAccountId(@Param("idWorkspace") Integer idWorkspace,
-//                                                          @Param("idAccount") Integer idAccount);
+    @Query(value = "select * from account a right join account_workspace_role awr on a.id = awr.account_id " +
+            "where awr.workspace_id=:idWorkspace ",nativeQuery = true)
+    List<AccountEntity> findAllByWorkspaceId(@Param("idWorkspace") Integer idWorkspace);
 //    @Query("select a from AccountEntity a where a.id=:idAccount and a.authenticationProvider=:provider")
 //    Optional<AccountEntity> findByAuthenticationProvider(@Param("idAccount") Integer idAccount,
 //                                                         @Param("provider") AuthenticationProvider provider);

@@ -3,11 +3,14 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
 import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
+import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
+import com.ces.intern.hr.resourcing.demo.http.response.user.EmailInvitedResponse;
+import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
 import com.ces.intern.hr.resourcing.demo.utils.AuthenticationProvider;
 import com.ces.intern.hr.resourcing.demo.http.exception.LoginException;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.AccountRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.AccountResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.user.AccountResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.AccountService;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
@@ -18,7 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 @Service
@@ -27,14 +32,17 @@ public class AccountServiceImpl implements AccountService {
     private final AccoutRepository accoutRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final WorkspaceRepository workspaceRepository;
 
     @Autowired
     public AccountServiceImpl(AccoutRepository accoutRepository,
                               PasswordEncoder passwordEncoder,
-                              ModelMapper modelMapper) {
+                              ModelMapper modelMapper,
+                              WorkspaceRepository workspaceRepository) {
         this.accoutRepository = accoutRepository;
         this.passwordEncoder = passwordEncoder;
         this.modelMapper = modelMapper;
+        this.workspaceRepository=workspaceRepository;
     }
 
     @Override
@@ -88,6 +96,22 @@ public class AccountServiceImpl implements AccountService {
         AccountEntity accountEntity = accoutRepository.findById(idAccount)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         return modelMapper.map(accountEntity, AccountResponse.class);
+    }
+
+    @Override
+    public EmailInvitedResponse getAll(Integer idWorkspace) {
+        WorkspaceEntity workspaceEntity=workspaceRepository.findById(idWorkspace).orElse(null);
+        List<AccountEntity> accountEntities=accoutRepository.findAllByWorkspaceId(idWorkspace);
+        List<String> emails=new ArrayList<>();
+        for (AccountEntity accountEntity:accountEntities){
+            String email= "";
+            email =accountEntity.getEmail();
+            emails.add(email);
+        }
+        EmailInvitedResponse emailInvitedResponse= new EmailInvitedResponse();
+        emailInvitedResponse.setEmails(emails);
+        emailInvitedResponse.setEmailSuffix(workspaceEntity.getEmailSuffix());
+       return emailInvitedResponse;
     }
 
 

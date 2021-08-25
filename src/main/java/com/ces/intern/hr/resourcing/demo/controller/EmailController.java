@@ -4,7 +4,7 @@ import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import com.ces.intern.hr.resourcing.demo.http.request.InviteRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
 import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
@@ -13,17 +13,13 @@ import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Role;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
 
 import javax.mail.internet.MimeMessage;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 
 @RestController
@@ -69,7 +65,7 @@ public class EmailController {
 
         String content = stringBuilder.toString();
 
-        helper.setText(content+inviteRequest.getUrl(),true);
+        helper.setText(content + inviteRequest.getUrl(), true);
 
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).orElse(null);
 
@@ -79,7 +75,7 @@ public class EmailController {
                 if (accoutRepository.findByEmail(email).isPresent()) {
                     AccountEntity accountEntity = accoutRepository.findByEmail(email).get();
                     if (accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, accountEntity.getId()).isPresent()) {
-                        return new MessageResponse(ResponseMessage.EMAIL_INVITE +":"+ email, Status.FAIL.getCode());
+                        return new MessageResponse(ResponseMessage.EMAIL_INVITE,Status.FAIL.getCode());
                     } else {
                         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = new AccountWorkspaceRoleEntity();
                         accountWorkspaceRoleEntity.setAccountEntity(accountEntity);
@@ -105,6 +101,7 @@ public class EmailController {
         try {
             sender.send(msg);
             return new MessageResponse(ResponseMessage.EMAIL_SENDT, Status.SUCCESS.getCode());
+
         } catch (Exception e) {
             return new MessageResponse(ResponseMessage.EMAIL_ERROR + e, Status.FAIL.getCode());
         }

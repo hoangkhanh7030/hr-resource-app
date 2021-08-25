@@ -7,7 +7,7 @@ import com.ces.intern.hr.resourcing.demo.http.exception.LoginException;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.AccountLoginRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.GoogleRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.ErrorResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.error.ErrorResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.LoginResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.security.jwt.JwtTokenProvider;

@@ -3,7 +3,7 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.http.request.ReInviteRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.ManageUserResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.user.ManageUserResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.ManageUserService;
@@ -25,7 +25,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,10 +52,10 @@ public class ManageUserServiceImpl implements ManageUserService {
     public List<ManageUserResponse> getAll(Integer idWorkspace, Integer page, Integer size, String searchName,
                                            String sortName, String type) {
         Pageable pageable;
-        if (type.equals(SortPara.DESC.getName())) {
-            pageable = PageRequest.of(page, size, Sort.by(sortName).descending());
-        } else {
+        if (type.equals(SortPara.ASC.getName())) {
             pageable = PageRequest.of(page, size, Sort.by(sortName).ascending());
+        } else {
+            pageable = PageRequest.of(page, size, Sort.by(sortName).descending());
         }
 
         Page<AccountEntity> accountPage = accoutRepository.findAllBysearchName(idWorkspace, searchName, pageable);

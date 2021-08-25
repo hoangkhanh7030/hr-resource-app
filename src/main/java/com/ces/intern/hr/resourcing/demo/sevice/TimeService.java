@@ -1,9 +1,9 @@
 package com.ces.intern.hr.resourcing.demo.sevice;
 
 import com.ces.intern.hr.resourcing.demo.http.request.BookingRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.DashboardResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.DashboardListResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.dashboard.DashboardResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.dashboard.DashboardListResponse;
 
 import java.text.ParseException;
 

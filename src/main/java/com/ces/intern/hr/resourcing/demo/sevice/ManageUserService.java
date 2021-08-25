@@ -1,10 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.sevice;
 
-import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
-import com.ces.intern.hr.resourcing.demo.http.request.AccountRequest;
-import com.ces.intern.hr.resourcing.demo.http.request.InviteRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.ReInviteRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.ManageUserResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.user.ManageUserResponse;
 
 import javax.mail.MessagingException;
 import java.io.IOException;

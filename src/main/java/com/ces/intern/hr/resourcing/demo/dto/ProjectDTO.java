@@ -1,13 +1,9 @@
 package com.ces.intern.hr.resourcing.demo.dto;
 
-import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
-import com.ces.intern.hr.resourcing.demo.http.response.ResourceResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter
 @Setter

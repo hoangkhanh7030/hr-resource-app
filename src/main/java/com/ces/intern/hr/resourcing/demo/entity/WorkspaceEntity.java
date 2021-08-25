@@ -18,6 +18,12 @@ import java.util.List;
 public class WorkspaceEntity extends BaseEnity {
     @Column(name = "name")
     private String name;
+    @Column(name = "email_suffix")
+    private String emailSuffix;
+    @Column(name = "extra_saturday")
+    private boolean extraSaturday = false;
+    @Column(name = "extra_sunday")
+    private boolean extraSunday = false;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "workspaceEntity")
     private List<AccountWorkspaceRoleEntity> entityList = new ArrayList<>();
 
@@ -27,6 +33,6 @@ public class WorkspaceEntity extends BaseEnity {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "workspaceEntityResource")
     private List<ResourceEntity> resourceEntities = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "workspaceEntityTeam")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "workspaceEntityTeam")
     private List<TeamEntity> teamEntities = new ArrayList<>();
 }

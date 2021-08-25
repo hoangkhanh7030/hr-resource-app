@@ -1,5 +1,7 @@
-package com.ces.intern.hr.resourcing.demo.http.response;
+package com.ces.intern.hr.resourcing.demo.http.response.dashboard;
 
+import com.ces.intern.hr.resourcing.demo.http.response.resource.ResourceResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.team.TeamResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

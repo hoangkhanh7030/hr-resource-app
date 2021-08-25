@@ -5,9 +5,9 @@ import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.BookingRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.DashboardResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.DashboardListResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.dashboard.DashboardResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.dashboard.DashboardListResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
 
 import com.ces.intern.hr.resourcing.demo.sevice.ProjectService;

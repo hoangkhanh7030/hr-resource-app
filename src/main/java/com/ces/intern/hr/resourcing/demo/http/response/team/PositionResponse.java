@@ -1,4 +1,4 @@
-package com.ces.intern.hr.resourcing.demo.http.response;
+package com.ces.intern.hr.resourcing.demo.http.response.team;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

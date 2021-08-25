@@ -2,8 +2,7 @@ package com.ces.intern.hr.resourcing.demo.sevice;
 
 import com.ces.intern.hr.resourcing.demo.dto.TeamDTO;
 import com.ces.intern.hr.resourcing.demo.http.request.TeamRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.TeamResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.team.TeamResponse;
 
 import java.util.List;
 

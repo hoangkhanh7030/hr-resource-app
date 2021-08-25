@@ -1,16 +1,14 @@
 package com.ces.intern.hr.resourcing.demo.controller;
 
 import com.ces.intern.hr.resourcing.demo.http.request.ReInviteRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.ManageResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.NumberSizeResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.user.ManageResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.ManageUserService;
 import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.Collections;
 
 @RestController
 @RequestMapping("api/v1/workspaces")

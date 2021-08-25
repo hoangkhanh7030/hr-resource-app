@@ -1,7 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.dto;
 
-import com.ces.intern.hr.resourcing.demo.http.response.ProjectResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.ResourceResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.project.ProjectResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.resource.ResourceResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

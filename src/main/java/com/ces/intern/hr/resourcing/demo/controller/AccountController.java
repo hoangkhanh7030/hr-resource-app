@@ -2,8 +2,9 @@ package com.ces.intern.hr.resourcing.demo.controller;
 
 
 import com.ces.intern.hr.resourcing.demo.http.request.AccountRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.AccountResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.user.AccountResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.user.EmailInvitedResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.AccountService;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
@@ -81,9 +82,10 @@ public class AccountController {
         return new MessageResponse(ResponseMessage.INCRECT_EMAIL, Status.FAIL.getCode());
     }
 
-    @GetMapping(value = "")
-    public AccountResponse getAccount(@RequestHeader(value = "AccountId") Integer accountId) {
-        return accountService.getAccount(accountId);
+    @GetMapping(value = "/{idWorkspace}/emails")
+    public EmailInvitedResponse getAccount(@PathVariable Integer idWorkspace) {
+        return accountService.getAll(idWorkspace);
     }
+
 
 }

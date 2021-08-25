@@ -2,8 +2,10 @@ package com.ces.intern.hr.resourcing.demo.sevice;
 
 import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
 import com.ces.intern.hr.resourcing.demo.http.request.AccountRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.AccountResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.user.AccountResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.user.EmailInvitedResponse;
+
+import java.util.List;
 
 
 public interface AccountService {
@@ -15,5 +17,7 @@ public interface AccountService {
     void update(AccountRequest accountRequest, Integer modifiedBy);
 
     AccountResponse getAccount(Integer idAccount);
+
+    EmailInvitedResponse getAll(Integer idWorkspace);
 
 }

@@ -1,8 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.sevice;
 
 import com.ces.intern.hr.resourcing.demo.dto.WorkspaceDTO;
-import com.ces.intern.hr.resourcing.demo.http.response.MessageResponse;
-import com.ces.intern.hr.resourcing.demo.http.response.WorkspaceResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.workspace.WorkspaceResponse;
 
 
 import java.util.List;

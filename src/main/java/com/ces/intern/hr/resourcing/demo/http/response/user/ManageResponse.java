@@ -1,6 +1,5 @@
-package com.ces.intern.hr.resourcing.demo.http.response;
+package com.ces.intern.hr.resourcing.demo.http.response.user;
 
-import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class NumberSizeResponse {
-    private List<ProjectDTO> projectDTOList;
+public class ManageResponse {
+    private List<ManageUserResponse> manageUsers;
     private Integer numberSize;
 }

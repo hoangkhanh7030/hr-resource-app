@@ -1,4 +1,4 @@
-package com.ces.intern.hr.resourcing.demo.http.response;
+package com.ces.intern.hr.resourcing.demo.http.response.resource;
 
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import lombok.AllArgsConstructor;
