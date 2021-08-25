@@ -16,8 +16,6 @@ public interface AccountService {
 
     void update(AccountRequest accountRequest, Integer modifiedBy);
 
-    AccountResponse getAccount(Integer idAccount);
-
-    EmailInvitedResponse getAll(Integer idWorkspace);
+    EmailInvitedResponse getAllEmailInvited(Integer idWorkspace);
 
 }

@@ -21,7 +21,7 @@ public interface AccoutRepository extends JpaRepository<AccountEntity, Integer> 
     @Query("select a from AccountEntity a where a.id=:idAccount")
     Optional<AccountEntity> findById(@Param("idAccount") Integer idAccount);
 
-    @Query(value = "select * from account a where a.email=:email and a.auth_provider='NOTHING'", nativeQuery = true)
+    @Query(value = "select * from account a where a.email=:email and a.auth_provider='PENDING'", nativeQuery = true)
     Optional<AccountEntity> findByEmailAndProvider(@Param("email") String email);
 
 
@@ -37,7 +37,7 @@ public interface AccoutRepository extends JpaRepository<AccountEntity, Integer> 
     List<AccountEntity> findAllBysearchNameToList(@Param("idWorkspace") Integer idWorkspace,
                                             @Param("searchName") String searchName);
     @Query(value = "select * from account a right join account_workspace_role awr on a.id = awr.account_id " +
-            "where awr.workspace_id=:idWorkspace ",nativeQuery = true)
+            "where awr.workspace_id=:idWorkspace and awr.role=1 ",nativeQuery = true)
     List<AccountEntity> findAllByWorkspaceId(@Param("idWorkspace") Integer idWorkspace);
 //    @Query("select a from AccountEntity a where a.id=:idAccount and a.authenticationProvider=:provider")
 //    Optional<AccountEntity> findByAuthenticationProvider(@Param("idAccount") Integer idAccount,

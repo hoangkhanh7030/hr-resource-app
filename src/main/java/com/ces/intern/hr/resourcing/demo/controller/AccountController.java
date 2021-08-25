@@ -82,9 +82,9 @@ public class AccountController {
         return new MessageResponse(ResponseMessage.INCRECT_EMAIL, Status.FAIL.getCode());
     }
 
-    @GetMapping(value = "/{idWorkspace}/emails")
+    @GetMapping(value = "/workspaces/{idWorkspace}/emails")
     public EmailInvitedResponse getAccount(@PathVariable Integer idWorkspace) {
-        return accountService.getAll(idWorkspace);
+        return accountService.getAllEmailInvited(idWorkspace);
     }
 
 
