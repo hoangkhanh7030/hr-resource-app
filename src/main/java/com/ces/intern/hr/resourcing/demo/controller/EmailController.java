@@ -79,7 +79,7 @@ public class EmailController {
                 if (accoutRepository.findByEmail(email).isPresent()) {
                     AccountEntity accountEntity = accoutRepository.findByEmail(email).get();
                     if (accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, accountEntity.getId()).isPresent()) {
-                        return new MessageResponse(ResponseMessage.EMAIL_INVITE, Status.FAIL.getCode());
+                        return new MessageResponse(ResponseMessage.EMAIL_INVITE +":"+ email, Status.FAIL.getCode());
                     } else {
                         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = new AccountWorkspaceRoleEntity();
                         accountWorkspaceRoleEntity.setAccountEntity(accountEntity);
@@ -90,7 +90,7 @@ public class EmailController {
                 } else {
                     AccountEntity accountEntity = new AccountEntity();
                     accountEntity.setEmail(email);
-                    accountEntity.setAuthenticationProvider(AuthenticationProvider.NOTHING);
+                    accountEntity.setAuthenticationProvider(AuthenticationProvider.PENDING);
                     accoutRepository.save(accountEntity);
                     AccountEntity account = accoutRepository.findByEmailAndProvider(email).orElse(null);
                     AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = new AccountWorkspaceRoleEntity();

@@ -1,6 +1,8 @@
 package com.ces.intern.hr.resourcing.demo.repository;
 
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,4 +26,6 @@ public interface AccoutWorkspaceRoleRepository extends JpaRepository<AccountWork
     Optional<AccountWorkspaceRoleEntity> findByNameWorkspaceAndIdAccount(@Param("nameWorkspace") String nameWorkspace,@Param("idAccount") Integer idAccount);
 
     List<AccountWorkspaceRoleEntity> findAllByAccountEntity_Id(Integer idAccount);
+    @Query("select ac from AccountWorkspaceRoleEntity ac where ac.workspaceEntity.id=:idWorkspace and ac.codeRole=1")
+    Page<AccountWorkspaceRoleEntity> findAllByWorkspaceEntity_Id(@Param("idWorkspace") Integer idWorkspace, Pageable pageable);
 }

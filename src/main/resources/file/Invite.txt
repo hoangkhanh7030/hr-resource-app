@@ -1,7 +1,7 @@
-Welcome to Juggle Fish,<br/>
+<b>Welcome to Juggle Fish</b>,<br/>
 <br/>
-Please click the link below to workspace<br/>
+<i>Please click the link below to workspace</i><br/>
 <br/>
-Thank you and let me know if you have any question<br/>
+<i>Thank you and let me know if you have any question</i><br/>
 <br/>
 

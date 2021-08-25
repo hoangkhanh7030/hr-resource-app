@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(value = "/api/v1/workspaces")
 public class ProjectController {
-    private static final String ACTIVE="active";
+    private static final String ACTIVE = "active";
     private final ProjectService projectService;
     private final ProjectRepository projectRepository;
     private final ModelMapper modelMapper;
