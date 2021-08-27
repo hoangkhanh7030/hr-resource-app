@@ -20,10 +20,8 @@ public class WorkspaceEntity extends BaseEnity {
     private String name;
     @Column(name = "email_suffix")
     private String emailSuffix;
-    @Column(name = "extra_saturday")
-    private boolean extraSaturday = false;
-    @Column(name = "extra_sunday")
-    private boolean extraSunday = false;
+    @Column(name = "workdays")
+    private String workDays;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "workspaceEntity")
     private List<AccountWorkspaceRoleEntity> entityList = new ArrayList<>();
 

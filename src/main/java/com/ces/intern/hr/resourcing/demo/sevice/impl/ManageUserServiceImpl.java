@@ -3,12 +3,15 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.http.request.ReInviteRequest;
+import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.user.ManageUserResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.ManageUserService;
 import com.ces.intern.hr.resourcing.demo.utils.AuthenticationProvider;
+import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.SortPara;
+import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -93,7 +96,7 @@ public class ManageUserServiceImpl implements ManageUserService {
     }
 
     @Override
-    public void sendEmail(ReInviteRequest reInviteRequest,Integer idWorkspace) throws MessagingException, IOException {
+    public void sendEmail(ReInviteRequest reInviteRequest,Integer idWorkspace) throws Exception {
         AccountEntity accountEntity = accoutRepository.findById(reInviteRequest.getId()).orElse(null);
         assert accountEntity != null;
         if (accountEntity.getAuthenticationProvider().getName().equals(AuthenticationProvider.PENDING.getName())) {
@@ -117,22 +120,8 @@ public class ManageUserServiceImpl implements ManageUserService {
         String content = stringBuilder.toString();
         helper.setText(content + reInviteRequest.getUrl()+MESSAGE, true);
         sender.send(msg);
-        final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        final Runnable runnable = new Runnable() {
-            int countdownStarter = 172800;
-            @Override
-            public void run() {
-                countdownStarter--;
-                if(countdownStarter<0){
-                    if (accountEntity.getAuthenticationProvider().getName().equals(AuthenticationProvider.PENDING.getName())){
-                        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity=accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,accountEntity.getId()).orElse(null);
-                        accoutWorkspaceRoleRepository.delete(accountWorkspaceRoleEntity);
-                    }
-                    scheduler.shutdown();
-                }
-            }
-        };
-        scheduler.scheduleAtFixedRate(runnable, 0, 1, SECONDS);
+
+
     }
 
     @Override

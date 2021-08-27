@@ -1,6 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
 
+import com.ces.intern.hr.resourcing.demo.converter.WorkspaceConverter;
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.dto.ResourceDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
@@ -31,6 +32,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
     private final ModelMapper modelMapper;
     private final ResourceRepository resourceRepository;
+    private final WorkspaceConverter workspaceConverter;
 
 
     @Autowired
@@ -39,7 +41,8 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
                                 AccoutRepository accoutRepository,
                                 AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
                                 ModelMapper modelMapper,
-                                ResourceRepository resourceRepository
+                                ResourceRepository resourceRepository,
+                                WorkspaceConverter workspaceConverter
 
     ) {
         this.workspaceRepository = workspaceRepository;
@@ -48,7 +51,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
         this.modelMapper = modelMapper;
         this.resourceRepository = resourceRepository;
-
+        this.workspaceConverter = workspaceConverter;
 
     }
 
@@ -74,6 +77,13 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
             }
             workspaceResponse.setProjectListLength(projectDTOS.size());
             workspaceResponse.setResourceListLength(resourceDTOS.size());
+            workspaceResponse.setEmailSuffix(workspaceEntity.getEmailSuffix());
+            List<Boolean> workDays = new ArrayList<>();
+            String[] array = workspaceEntity.getWorkDays().split(",");
+            for (String string : array){
+                workDays.add(Boolean.parseBoolean(string));
+            }
+            workspaceResponse.setWorkDays(workDays);
             workspaceResponses.add(workspaceResponse);
         }
 
@@ -86,7 +96,8 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(accountWorkspaceRoleEntity.getWorkspaceEntity().getId())
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        WorkspaceDTO workspaceDTO = modelMapper.map(workspaceEntity, WorkspaceDTO.class);
+        //WorkspaceDTO workspaceDTO = modelMapper.map(workspaceEntity, WorkspaceDTO.class);
+        WorkspaceDTO workspaceDTO = workspaceConverter.convertToDTO(workspaceEntity);
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             workspaceDTO.setRole(Role.EDIT.getName());
         } else {
@@ -98,11 +109,10 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
 
     @Override
     public void createdWorkspaceByIdAccount(WorkspaceDTO workspaceDTO, Integer id) {
-
         AccountEntity accountEntity = accoutRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + "with" + id));
-        WorkspaceEntity workspaceEntity = modelMapper.map(workspaceDTO, WorkspaceEntity.class);
+        WorkspaceEntity workspaceEntity = workspaceConverter.convertToEntity(workspaceDTO);
         Date date = new Date();
         workspaceEntity.setCreatedDate(date);
         workspaceEntity.setCreatedBy(id);
@@ -112,8 +122,6 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         accountWorkspaceRoleEntity.setCodeRole(Role.EDIT.getCode());
         workspaceRepository.save(workspaceEntity);
         accoutWorkspaceRoleRepository.save(accountWorkspaceRoleEntity);
-
-
     }
 
     @Override
@@ -121,12 +129,19 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                         + " with " + idWorkspace));
-        workspaceEntity.setName(workspaceDTO.getName());
+//        if (!workspaceRepository.findById(idWorkspace).isPresent()){
+//            throw new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
+//                    + " with " + idWorkspace);
+//        }
+        WorkspaceEntity workspaceEntityUpdated = workspaceConverter.convertToEntity(workspaceDTO);
+        workspaceEntity.setWorkDays(workspaceEntityUpdated.getWorkDays());
+        workspaceEntity.setName(workspaceEntityUpdated.getName());
+        workspaceEntity.setEmailSuffix(workspaceEntityUpdated.getEmailSuffix());
+        //workspaceEntity.setId(idWorkspace);
         Date date = new Date();
         workspaceEntity.setModifiedDate(date);
         workspaceEntity.setModifiedBy(idAccount);
         workspaceRepository.save(workspaceEntity);
-
 
     }
 
@@ -143,7 +158,11 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
     @Override
     public List<WorkspaceDTO> searchWorkspaceByName(String name) {
         List<WorkspaceEntity> workspaceEntities = workspaceRepository.findAllByNameContainingIgnoreCase(name);
-        return workspaceEntities.stream().map(s -> modelMapper.map(s, WorkspaceDTO.class)).collect(Collectors.toList());
+        List<WorkspaceDTO> workspaceDTOS = new ArrayList<>();
+        for (WorkspaceEntity workspaceEntity : workspaceEntities){
+            workspaceDTOS.add(workspaceConverter.convertToDTO(workspaceEntity));
+        }
+        return workspaceDTOS;
     }
 
 

@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -13,6 +16,8 @@ import lombok.Setter;
 public class WorkspaceResponse extends BaseResponse {
     private String name;
     private String Role;
+    private String emailSuffix;
+    private List<Boolean> workDays = new ArrayList<>();
     private Integer projectListLength;
     private Integer resourceListLength;
 

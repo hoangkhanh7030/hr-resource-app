@@ -1,6 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.sevice;
 
 import com.ces.intern.hr.resourcing.demo.http.request.ReInviteRequest;
+import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.user.ManageUserResponse;
 
 import javax.mail.MessagingException;
@@ -12,6 +13,6 @@ public interface ManageUserService {
                                     Integer size,String searchName,String sortName,
                                     String type);
     void delete(Integer idAccount,Integer idWorkspace);
-    void sendEmail(ReInviteRequest reInviteRequest,Integer idWorkspace) throws MessagingException, IOException;
+    void sendEmail(ReInviteRequest reInviteRequest, Integer idWorkspace) throws MessagingException, IOException, Exception;
     void isActive(Integer idAccount);
 }

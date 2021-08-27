@@ -75,7 +75,10 @@ public class WorkspaceController {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
 
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
-            if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()) {
+            if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()
+                    && !accoutWorkspaceRoleRepository
+                    .findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount)
+                    .get().getWorkspaceEntity().getId().equals(idWorkspace)) {
                 return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
             } else {
                 if (workspaceDTO.getName() == null || workspaceDTO.getName().isEmpty()) {
