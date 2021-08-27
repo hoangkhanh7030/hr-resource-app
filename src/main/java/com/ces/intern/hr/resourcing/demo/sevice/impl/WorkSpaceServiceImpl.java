@@ -87,6 +87,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
             List<Boolean> workDays = new ArrayList<>();
             String[] arrayWorkDay = workspaceEntity.getWorkDays().split(",");
             for (String string : arrayWorkDay) {
+
                 workDays.add(Boolean.parseBoolean(string));
             }
             workspaceResponse.setWorkDays(workDays);
