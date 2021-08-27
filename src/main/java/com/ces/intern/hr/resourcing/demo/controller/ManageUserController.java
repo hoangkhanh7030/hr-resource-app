@@ -49,11 +49,12 @@ public class ManageUserController {
         return new MessageResponse(ResponseMessage.DELETE_SUCCESS,Status.SUCCESS.getCode());
     }
 
-    @PostMapping("/reinvited")
-    private MessageResponse send(@RequestBody ReInviteRequest reInviteRequest
+    @PostMapping("/{idWorkspace}/reinvited")
+    private MessageResponse send(@RequestBody ReInviteRequest reInviteRequest,
+                                 @PathVariable Integer idWorkspace
     )  {
         try {
-            manageUserService.sendEmail(reInviteRequest);
+            manageUserService.sendEmail(reInviteRequest,idWorkspace);
             return new MessageResponse(ResponseMessage.EMAIL_SENDT, Status.SUCCESS.getCode());
         } catch (Exception e) {
             return new MessageResponse(ResponseMessage.EMAIL_ERROR + e, Status.FAIL.getCode());

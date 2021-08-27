@@ -12,6 +12,6 @@ public interface ManageUserService {
                                     Integer size,String searchName,String sortName,
                                     String type);
     void delete(Integer idAccount,Integer idWorkspace);
-    void sendEmail(ReInviteRequest reInviteRequest) throws MessagingException, IOException;
+    void sendEmail(ReInviteRequest reInviteRequest,Integer idWorkspace) throws MessagingException, IOException;
     void isActive(Integer idAccount);
 }

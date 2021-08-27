@@ -21,10 +21,17 @@ import org.springframework.web.bind.annotation.*;
 import javax.mail.internet.MimeMessage;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 @RestController
 @RequestMapping(value = "/api/v1/workspaces")
 public class EmailController {
+    private static final String MESSAGE="<br/><br/><i>The invitation will be expired after 2 days and you cannot join with us.</i><br/><br/>\n" +
+            "\n" +
+            "<i>Thanks from Team Juggle Fish</i>";
     private static final String TITLE = "Invited Workspace";
     private final JavaMailSender sender;
     private final AccoutRepository accoutRepository;
@@ -65,7 +72,7 @@ public class EmailController {
 
         String content = stringBuilder.toString();
 
-        helper.setText(content + inviteRequest.getUrl(), true);
+        helper.setText(content + inviteRequest.getUrl()+MESSAGE, true);
 
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).orElse(null);
 
@@ -100,6 +107,25 @@ public class EmailController {
         } else return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
         try {
             sender.send(msg);
+            final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+            final Runnable runnable = new Runnable() {
+                int countdownStarter = 172800;
+                @Override
+                public void run() {
+                    countdownStarter--;
+                    if(countdownStarter<0){
+                        for (String email : inviteRequest.getEmail()){
+                            AccountEntity accountEntity=accoutRepository.findByEmail(email).orElse(null);
+                            if (accountEntity.getAuthenticationProvider().getName().equals(AuthenticationProvider.PENDING.getName())){
+                                AccountWorkspaceRoleEntity accountWorkspaceRoleEntity=accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,accountEntity.getId()).orElse(null);
+                                accoutWorkspaceRoleRepository.delete(accountWorkspaceRoleEntity);
+                            }
+                        }
+                        scheduler.shutdown();
+                    }
+                }
+            };
+            scheduler.scheduleAtFixedRate(runnable, 0, 1, SECONDS);
             return new MessageResponse(ResponseMessage.EMAIL_SENDT, Status.SUCCESS.getCode());
 
         } catch (Exception e) {

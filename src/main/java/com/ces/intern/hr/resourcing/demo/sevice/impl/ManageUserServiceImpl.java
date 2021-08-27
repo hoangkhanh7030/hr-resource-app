@@ -18,7 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-
+import static java.util.concurrent.TimeUnit.SECONDS;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.BufferedReader;
@@ -27,11 +27,16 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 @Service
 public class ManageUserServiceImpl implements ManageUserService {
     private static final String VIEWER = "VIEWER";
     private static final String TITLE = "Invited Workspace";
+    private static final String MESSAGE="<br/><br/><i>The invitation will be expired after 2 days and you cannot join with us.</i><br/><br/>\n" +
+                "\n" +
+                "<i>Thanks from Team Juggle Fish</i>";
     private final JavaMailSender sender;
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
     private final ModelMapper modelMapper;
@@ -88,7 +93,7 @@ public class ManageUserServiceImpl implements ManageUserService {
     }
 
     @Override
-    public void sendEmail(ReInviteRequest reInviteRequest) throws MessagingException, IOException {
+    public void sendEmail(ReInviteRequest reInviteRequest,Integer idWorkspace) throws MessagingException, IOException {
         AccountEntity accountEntity = accoutRepository.findById(reInviteRequest.getId()).orElse(null);
         assert accountEntity != null;
         if (accountEntity.getAuthenticationProvider().getName().equals(AuthenticationProvider.PENDING.getName())) {
@@ -110,11 +115,24 @@ public class ManageUserServiceImpl implements ManageUserService {
         stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         reader.close();
         String content = stringBuilder.toString();
-        helper.setText(content + reInviteRequest.getUrl(), true);
-
-
+        helper.setText(content + reInviteRequest.getUrl()+MESSAGE, true);
         sender.send(msg);
-
+        final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        final Runnable runnable = new Runnable() {
+            int countdownStarter = 172800;
+            @Override
+            public void run() {
+                countdownStarter--;
+                if(countdownStarter<0){
+                    if (accountEntity.getAuthenticationProvider().getName().equals(AuthenticationProvider.PENDING.getName())){
+                        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity=accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,accountEntity.getId()).orElse(null);
+                        accoutWorkspaceRoleRepository.delete(accountWorkspaceRoleEntity);
+                    }
+                    scheduler.shutdown();
+                }
+            }
+        };
+        scheduler.scheduleAtFixedRate(runnable, 0, 1, SECONDS);
     }
 
     @Override
