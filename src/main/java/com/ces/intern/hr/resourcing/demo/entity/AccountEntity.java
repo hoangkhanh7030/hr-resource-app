@@ -27,6 +27,7 @@ public class AccountEntity extends BaseEnity{
     private boolean status =true;
     @Column(name = "avatar")
     private String avatar;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "auth_provider")
     private AuthenticationProvider authenticationProvider;

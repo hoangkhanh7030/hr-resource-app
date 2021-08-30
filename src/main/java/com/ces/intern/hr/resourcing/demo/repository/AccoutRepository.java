@@ -38,7 +38,7 @@ public interface AccoutRepository extends JpaRepository<AccountEntity, Integer> 
     List<AccountEntity> findAllBysearchNameToList(@Param("idWorkspace") Integer idWorkspace,
                                             @Param("searchName") String searchName);
     @Query(value = "select * from account a right join account_workspace_role awr on a.id = awr.account_id " +
-            "where awr.workspace_id=:idWorkspace and awr.role=1 ",nativeQuery = true)
+            "where awr.workspace_id=:idWorkspace and awr.role=1 and a.auth_provider='GOOGLE'",nativeQuery = true)
     List<AccountEntity> findAllByWorkspaceId(@Param("idWorkspace") Integer idWorkspace);
 //    @Query("select a from AccountEntity a where a.id=:idAccount and a.authenticationProvider=:provider")
 //    Optional<AccountEntity> findByAuthenticationProvider(@Param("idAccount") Integer idAccount,

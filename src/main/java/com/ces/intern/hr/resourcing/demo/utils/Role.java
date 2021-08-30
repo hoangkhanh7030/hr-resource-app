@@ -1,7 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.utils;
 
 public enum Role {
-    VIEW("VIEW",1),EDIT("EDIT",2);
+    VIEW("VIEW",1),EDIT("EDIT",2),INACTIVE("INACTIVE",3);
     private String name;
     private Integer code;
 

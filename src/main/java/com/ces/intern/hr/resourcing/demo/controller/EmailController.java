@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.mail.internet.MimeMessage;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -94,6 +95,7 @@ public class EmailController {
                     AccountEntity accountEntity = new AccountEntity();
                     accountEntity.setEmail(email);
                     accountEntity.setAuthenticationProvider(AuthenticationProvider.PENDING);
+                    accountEntity.setCreatedDate(new Date());
                     accoutRepository.save(accountEntity);
                     AccountEntity account = accoutRepository.findByEmailAndProvider(email).orElse(null);
                     AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = new AccountWorkspaceRoleEntity();

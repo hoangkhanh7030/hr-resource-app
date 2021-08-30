@@ -77,10 +77,16 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
             }
             workspaceResponse.setProjectListLength(projectDTOS.size());
             workspaceResponse.setResourceListLength(resourceDTOS.size());
-            workspaceResponse.setEmailSuffix(workspaceEntity.getEmailSuffix());
+
+            List<String> emailsSuffix = new ArrayList<>();
+            String[] arrayEmails = workspaceEntity.getEmailSuffix().split(",");
+            for (String s : arrayEmails) {
+                emailsSuffix.add(s);
+            }
+            workspaceResponse.setEmailsSuffix(emailsSuffix);
             List<Boolean> workDays = new ArrayList<>();
-            String[] array = workspaceEntity.getWorkDays().split(",");
-            for (String string : array){
+            String[] arrayWorkDay = workspaceEntity.getWorkDays().split(",");
+            for (String string : arrayWorkDay) {
                 workDays.add(Boolean.parseBoolean(string));
             }
             workspaceResponse.setWorkDays(workDays);
@@ -159,7 +165,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
     public List<WorkspaceDTO> searchWorkspaceByName(String name) {
         List<WorkspaceEntity> workspaceEntities = workspaceRepository.findAllByNameContainingIgnoreCase(name);
         List<WorkspaceDTO> workspaceDTOS = new ArrayList<>();
-        for (WorkspaceEntity workspaceEntity : workspaceEntities){
+        for (WorkspaceEntity workspaceEntity : workspaceEntities) {
             workspaceDTOS.add(workspaceConverter.convertToDTO(workspaceEntity));
         }
         return workspaceDTOS;

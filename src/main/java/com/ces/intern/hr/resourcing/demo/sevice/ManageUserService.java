@@ -13,6 +13,6 @@ public interface ManageUserService {
                                     Integer size,String searchName,String sortName,
                                     String type);
     void delete(Integer idAccount,Integer idWorkspace);
-    void sendEmail(ReInviteRequest reInviteRequest, Integer idWorkspace) throws MessagingException, IOException, Exception;
-    void isActive(Integer idAccount);
+    void reSendEmail(ReInviteRequest reInviteRequest, Integer idWorkspace) throws MessagingException, IOException, Exception;
+    void isActive(Integer idAccount,Integer idWorkspace,String url) throws MessagingException, IOException;
 }
