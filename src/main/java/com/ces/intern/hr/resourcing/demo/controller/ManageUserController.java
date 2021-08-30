@@ -69,7 +69,7 @@ public class ManageUserController {
                                  @PathVariable Integer idWorkspace
     ) {
         try {
-            manageUserService.sendEmail(reInviteRequest,idWorkspace);
+            manageUserService.reSendEmail(reInviteRequest,idWorkspace);
             AccountEntity accountEntity = accoutRepository.findById(reInviteRequest.getId()).orElse(null);
             final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
             final Runnable runnable = new Runnable() {

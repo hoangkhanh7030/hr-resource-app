@@ -98,9 +98,6 @@ public class ManageUserServiceImpl implements ManageUserService {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount).orElse(null);
         assert accountWorkspaceRoleEntity != null;
         accoutWorkspaceRoleRepository.delete(accountWorkspaceRoleEntity);
-        AccountEntity accountEntity = accoutRepository.findById(idAccount).orElse(null);
-        assert accountEntity != null;
-        accoutRepository.delete(accountEntity);
     }
 
     @Override

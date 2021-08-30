@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -105,7 +106,9 @@ public class AccountServiceImpl implements AccountService {
         EmailInvitedResponse emailInvitedResponse= new EmailInvitedResponse();
         emailInvitedResponse.setEmails(emails);
         assert workspaceEntity != null;
-        emailInvitedResponse.setEmailSuffix(workspaceEntity.getEmailSuffix());
+        String[] arrayEmailSuffixes = workspaceEntity.getEmailSuffix().split(",");
+        List<String> emailSuffixes = new ArrayList<>(Arrays.asList(arrayEmailSuffixes));
+        emailInvitedResponse.setEmailSuffixes(emailSuffixes);
        return emailInvitedResponse;
     }
 

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -77,20 +78,16 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
             }
             workspaceResponse.setProjectListLength(projectDTOS.size());
             workspaceResponse.setResourceListLength(resourceDTOS.size());
-
-            List<String> emailsSuffix = new ArrayList<>();
-            String[] arrayEmails = workspaceEntity.getEmailSuffix().split(",");
-            for (String s : arrayEmails) {
-                emailsSuffix.add(s);
-            }
-            workspaceResponse.setEmailsSuffix(emailsSuffix);
+            //workspaceResponse.setEmailSuffix(workspaceEntity.getEmailSuffix());
             List<Boolean> workDays = new ArrayList<>();
-            String[] arrayWorkDay = workspaceEntity.getWorkDays().split(",");
-            for (String string : arrayWorkDay) {
-
+            String[] arrayWorkDays = workspaceEntity.getWorkDays().split(",");
+            String[] arrayEmailSuffixes = workspaceEntity.getEmailSuffix().split(",");
+            for (String string : arrayWorkDays){
                 workDays.add(Boolean.parseBoolean(string));
             }
+            List<String> emailSuffixes = new ArrayList<>(Arrays.asList(arrayEmailSuffixes));
             workspaceResponse.setWorkDays(workDays);
+            workspaceResponse.setEmailSuffixes(emailSuffixes);
             workspaceResponses.add(workspaceResponse);
         }
 

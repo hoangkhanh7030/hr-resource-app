@@ -17,7 +17,8 @@ import java.util.List;
 public class WorkspaceDTO extends BaseDTO{
     private String name;
     private String Role;
-    private String emailSuffix;
+    //private String emailSuffix;
+    private List<String> emailSuffixes = new ArrayList<>();
     private List<Boolean> workDays = new ArrayList<>();
     private List<ProjectResponse> projects;
     private List<ResourceResponse> resources;

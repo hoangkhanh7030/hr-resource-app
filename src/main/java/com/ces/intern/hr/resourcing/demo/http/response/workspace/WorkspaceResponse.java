@@ -16,7 +16,7 @@ import java.util.List;
 public class WorkspaceResponse extends BaseResponse {
     private String name;
     private String Role;
-    private List<String> emailsSuffix;
+    private List<String> emailSuffixes = new ArrayList<>();
     private List<Boolean> workDays = new ArrayList<>();
     private Integer projectListLength;
     private Integer resourceListLength;

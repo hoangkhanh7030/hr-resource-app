@@ -11,5 +11,5 @@ import java.util.List;
 @NoArgsConstructor
 public class EmailInvitedResponse {
     private List<String> emails;
-    private String emailSuffix;
+    private List<String> emailSuffixes;
 }

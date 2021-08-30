@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -33,9 +34,22 @@ public class WorkspaceConverter {
             else {
                 workDays.append("false");
             }
-            if (workspaceDTO.getWorkDays().indexOf(day) != workspaceDTO.getWorkDays().size()){
+            if (workspaceDTO.getWorkDays().indexOf(day) != workspaceDTO.getWorkDays().size() - 1){
                 workDays.append(",");
             }
+        }
+        StringBuilder emailSuffixes = new StringBuilder();
+        if (workspaceDTO.getEmailSuffixes().size() != 0) {
+            for (String suffix : workspaceDTO.getEmailSuffixes()) {
+                emailSuffixes.append(suffix);
+                if (workspaceDTO.getEmailSuffixes().indexOf(suffix) != workspaceDTO.getEmailSuffixes().size() - 1) {
+                    emailSuffixes.append(",");
+                }
+            }
+            workspaceEntity.setEmailSuffix(emailSuffixes.toString());
+        }
+        else {
+            workspaceEntity.setEmailSuffix("");
         }
         workspaceEntity.setWorkDays(workDays.toString());
         return workspaceEntity;
@@ -44,9 +58,17 @@ public class WorkspaceConverter {
     public WorkspaceDTO convertToDTO(WorkspaceEntity workspaceEntity){
         WorkspaceDTO workspaceDTO = modelMapper.map(workspaceEntity, WorkspaceDTO.class);
         List<Boolean> workDays = new ArrayList<>();
-        String[] array = workspaceEntity.getWorkDays().split(",");
-        for (String string : array){
+        String[] arrayWorkDays = workspaceEntity.getWorkDays().split(",");
+        String[] arrayEmailSuffixes = workspaceEntity.getEmailSuffix().split(",");
+        for (String string : arrayWorkDays){
             workDays.add(Boolean.parseBoolean(string));
+        }
+        if (!workspaceEntity.getEmailSuffix().equals("")){
+            List<String> emailSuffixes = new ArrayList<>(Arrays.asList(arrayEmailSuffixes));
+            workspaceDTO.setEmailSuffixes(emailSuffixes);
+        }
+        else {
+            workspaceDTO.setEmailSuffixes(new ArrayList<>());
         }
         workspaceDTO.setWorkDays(workDays);
         return workspaceDTO;
