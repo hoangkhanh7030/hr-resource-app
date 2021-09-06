@@ -58,7 +58,7 @@ public class ManageUserController {
     private MessageResponse delete(@PathVariable Integer idWorkspace,
                                    @PathVariable Integer idAccount) {
         manageUserService.delete(idAccount, idWorkspace);
-        if (accoutRepository.findById(idAccount).isPresent()) {
+        if (accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount).isPresent()) {
             return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
         }
         return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());

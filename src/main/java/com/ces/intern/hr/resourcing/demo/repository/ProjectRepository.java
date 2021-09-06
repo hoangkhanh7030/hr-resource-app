@@ -59,4 +59,5 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity,Integer> 
     List<ProjectEntity> findAll(@Param("idWorkspace") Integer idWorkspace,
                                                                 @Param("name") String name);
 
+
 }

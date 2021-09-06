@@ -3,10 +3,7 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.converter.TimeConverter;
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.dto.TimeDTO;
-import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
-import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
-import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
-import com.ces.intern.hr.resourcing.demo.entity.TimeEntity;
+import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.BookingRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.dashboard.BookingResponse;
@@ -215,14 +212,15 @@ public class TimeServiceImpl implements TimeService {
         Date startDay = SIMPLE_DATE_FORMAT.parse(startDate);
         Date endDay = SIMPLE_DATE_FORMAT.parse(endDate);
         long viewType = ((endDay.getTime() - startDay.getTime()) / MILLISECOND) + 1;
-        Double percent;
+        double percent;
         DashboardListResponse dashboardListResponse = new DashboardListResponse();
         List<ResourceEntity> resourceEntities = resourceRepository.findAllBySearchName(idWorkspace, searchName);
-        Collections.sort(resourceEntities,(o1, o2) -> (int) (o1.getCreatedDate().getTime()-o2.getCreatedDate().getTime()));
-        List<Integer> result = resourceEntities.stream().map(resourceEntity -> resourceEntity.getId()).distinct().collect(Collectors.toList());
+        resourceEntities.sort((o1, o2) -> (int) (o1.getCreatedDate().getTime() - o2.getCreatedDate().getTime()));
+        List<Integer> result = resourceEntities.stream().map(BaseEnity::getId).distinct().collect(Collectors.toList());
         List<ResourceResponse> resourceResponses = new ArrayList<>();
         for (Integer integer : result) {
-            ResourceEntity resourceEntity = resourceRepository.findById(integer).get();
+            ResourceEntity resourceEntity = resourceRepository.findById(integer).
+                    orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
             ResourceResponse resourceResponse = new ResourceResponse();
             resourceResponse.setId(resourceEntity.getId());
             resourceResponse.setName(resourceEntity.getName());
@@ -245,7 +243,7 @@ public class TimeServiceImpl implements TimeService {
         }
         dashboardListResponse.setResources(resourceResponses);
         List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
-        Collections.sort(teamEntities,(o1, o2) ->(int) (o1.getCreatedDate().getTime()-o2.getCreatedDate().getTime()));
+        teamEntities.sort((o1, o2) -> (int) (o1.getCreatedDate().getTime() - o2.getCreatedDate().getTime()));
         List<TeamResponse> teamResponses = teamEntities.stream().map(
                 teamEntity -> modelMapper.map(teamEntity, TeamResponse.class))
                 .collect(Collectors.toList());

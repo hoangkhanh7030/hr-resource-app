@@ -45,6 +45,7 @@ public class ManageUserServiceImpl implements ManageUserService {
     private static final String MESSAGE_EXPIRATION = "<br/><br/><i>The invitation will be expired after 2 days and you cannot join with us.</i><br/><br/>\n" +
             "\n" +
             "<i>Thanks from Team Juggle Fish</i>";
+    private static final String CREATE_DATE="create_date";
 
     private final JavaMailSender sender;
     private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;

@@ -107,8 +107,13 @@ public class AccountServiceImpl implements AccountService {
         emailInvitedResponse.setEmails(emails);
         assert workspaceEntity != null;
         String[] arrayEmailSuffixes = workspaceEntity.getEmailSuffix().split(",");
-        List<String> emailSuffixes = new ArrayList<>(Arrays.asList(arrayEmailSuffixes));
-        emailInvitedResponse.setEmailSuffixes(emailSuffixes);
+        if (!workspaceEntity.getEmailSuffix().isEmpty()){
+            List<String> emailSuffixes = new ArrayList<>(Arrays.asList(arrayEmailSuffixes));
+            emailInvitedResponse.setEmailSuffixes(emailSuffixes);
+        }
+        else {
+            emailInvitedResponse.setEmailSuffixes(new ArrayList<>());
+        }
        return emailInvitedResponse;
     }
 

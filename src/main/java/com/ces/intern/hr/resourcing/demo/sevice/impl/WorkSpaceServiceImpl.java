@@ -85,9 +85,14 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
             for (String string : arrayWorkDays){
                 workDays.add(Boolean.parseBoolean(string));
             }
-            List<String> emailSuffixes = new ArrayList<>(Arrays.asList(arrayEmailSuffixes));
+            if (!workspaceEntity.getEmailSuffix().isEmpty()){
+                List<String> emailSuffixes = new ArrayList<>(Arrays.asList(arrayEmailSuffixes));
+                workspaceResponse.setEmailSuffixes(emailSuffixes);
+            }
+            else {
+                workspaceResponse.setEmailSuffixes(new ArrayList<>());
+            }
             workspaceResponse.setWorkDays(workDays);
-            workspaceResponse.setEmailSuffixes(emailSuffixes);
             workspaceResponses.add(workspaceResponse);
         }
 
