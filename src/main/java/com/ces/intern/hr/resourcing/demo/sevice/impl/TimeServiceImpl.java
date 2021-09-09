@@ -1,9 +1,14 @@
 package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
 import com.ces.intern.hr.resourcing.demo.converter.TimeConverter;
+import com.ces.intern.hr.resourcing.demo.converter.WorkspaceConverter;
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.dto.TimeDTO;
-import com.ces.intern.hr.resourcing.demo.entity.*;
+import com.ces.intern.hr.resourcing.demo.dto.WorkspaceDTO;
+import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
+import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
+import com.ces.intern.hr.resourcing.demo.entity.TeamEntity;
+import com.ces.intern.hr.resourcing.demo.entity.TimeEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.BookingRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.dashboard.BookingResponse;
@@ -12,10 +17,7 @@ import com.ces.intern.hr.resourcing.demo.http.response.dashboard.DashboardRespon
 import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.resource.ResourceResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.team.TeamResponse;
-import com.ces.intern.hr.resourcing.demo.repository.ProjectRepository;
-import com.ces.intern.hr.resourcing.demo.repository.ResourceRepository;
-import com.ces.intern.hr.resourcing.demo.repository.TeamRepository;
-import com.ces.intern.hr.resourcing.demo.repository.TimeRepository;
+import com.ces.intern.hr.resourcing.demo.repository.*;
 import com.ces.intern.hr.resourcing.demo.sevice.TimeService;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
@@ -48,6 +50,8 @@ public class TimeServiceImpl implements TimeService {
     private final ResourceRepository resourceRepository;
     private final ModelMapper modelMapper;
     private final TeamRepository teamRepository;
+    private final WorkspaceConverter workspaceConverter;
+    private final WorkspaceRepository workspaceRepository;
 
     @Autowired
     private TimeServiceImpl(TimeConverter timeConverter,
@@ -55,13 +59,17 @@ public class TimeServiceImpl implements TimeService {
                             ProjectRepository projectRepository,
                             ResourceRepository resourceRepository,
                             ModelMapper modelMapper,
-                            TeamRepository teamRepository) {
+                            TeamRepository teamRepository,
+                            WorkspaceConverter workspaceConverter,
+                            WorkspaceRepository workspaceRepository) {
         this.timeConverter = timeConverter;
         this.timeRepository = timeRepository;
         this.projectRepository = projectRepository;
         this.resourceRepository = resourceRepository;
         this.modelMapper = modelMapper;
         this.teamRepository = teamRepository;
+        this.workspaceConverter = workspaceConverter;
+        this.workspaceRepository = workspaceRepository;
     }
 
 
@@ -79,71 +87,161 @@ public class TimeServiceImpl implements TimeService {
         Date startDay = SIMPLE_DATE_FORMAT.parse(bookingRequest.getStartDate());
         Date endDay = SIMPLE_DATE_FORMAT.parse(bookingRequest.getEndDate());
         ProjectEntity projectEntity = projectRepository.findByIdAndWorkspaceEntityProject_Id(bookingRequest.getProjectId(), idWorkspace).orElse(null);
-        ResourceEntity resourceEntity = resourceRepository.findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(bookingRequest.getResourceId(), idWorkspace).orElse(null);
+        ResourceEntity resourceEntity = resourceRepository.findByIdAndWorkspaceEntityResource_Id(bookingRequest.getResourceId(), idWorkspace).orElse(null);
         boolean checkNull = bookingRequest.getDuration() == null;
 
-        if ((startDay.equals(Utils.toSaturDayOfWeek(startDay)) || startDay.equals(Utils.toSunDayOfWeek(startDay)))
-                && (endDay.equals(Utils.toSaturDayOfWeek(startDay)) || endDay.equals(Utils.toSunDayOfWeek(startDay)))) {
-            Long hourTotal = (((endDay.getTime() - startDay.getTime()) / MILLISECOND) + 1) * 8;
-            TimeEntity timeEntity = new TimeEntity();
-            timeEntity.setStartTime(startDay);
-            timeEntity.setEndTime(endDay);
-            timeEntity.setProjectEntity(projectEntity);
-            timeEntity.setResourceEntity(resourceEntity);
-            if (checkNull) {
-                double totalHour = (hourTotal * bookingRequest.getPercentage()) / 100;
-                timeEntity.setTotalHour(DoubleRounder.round(totalHour, 1));
-            } else {
-                timeEntity.setTotalHour((bookingRequest.getDuration() * hourTotal) / 8);
-            }
-            timeRepository.save(timeEntity);
-
-        } else {
-            List<BookingResponse> bookingResponses = new ArrayList<>();
-            Date currentDate = new Date(startDay.getTime());
-            while (true) {
-                if (startDay.equals(Utils.toSaturDayOfWeek(currentDate))) {
-                    currentDate.setDate(currentDate.getDate() + 2);
-                }
-                if (startDay.equals(Utils.toSunDayOfWeek(currentDate))) {
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
-
-                Date first = Utils.toMonDayOfWeek(currentDate);
-                Date end = Utils.toFriDayOfWeek(currentDate);
-                if (startDay.getTime() > first.getTime()) {
-                    first = startDay;
-
-                }
-                if (end.getTime() > endDay.getTime()) {
-                    end = endDay;
-                }
-                BookingResponse bookingResponse = new BookingResponse(first, end);
-                bookingResponses.add(bookingResponse);
-
-                currentDate.setDate(currentDate.getDate() + 7);
-                currentDate = Utils.toMonDayOfWeek(currentDate);
-                if (currentDate.getTime() > endDay.getTime()) {
-                    break;
-                }
-            }
-            for (BookingResponse bookingResponse : bookingResponses) {
+        WorkspaceDTO workspaceDTO = workspaceConverter.convertToDTO(workspaceRepository.getById(idWorkspace));
+        List<Boolean> workingDays = new ArrayList<>(workspaceDTO.getWorkDays());
+        //Boolean[] workDays = workspaceDTO.getWorkDays().toArray(new Boolean[0]);
+        List<BookingResponse> bookingResponseList = new ArrayList<>();
+        //Long hourTotal;
+        if (startDay.equals(endDay)){
+            //hourTotal = (((endDay.getTime() - startDay.getTime()) / MILLISECOND) + 1) * 8;
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(startDay);
+            if (workingDays.get(calendar.get(Calendar.DAY_OF_WEEK) -1)){
                 TimeEntity timeEntity = new TimeEntity();
-                timeEntity.setStartTime(bookingResponse.getStartDay());
-                timeEntity.setEndTime(bookingResponse.getEndDay());
+                timeEntity.setStartTime(startDay);
+                timeEntity.setEndTime(endDay);
                 timeEntity.setProjectEntity(projectEntity);
                 timeEntity.setResourceEntity(resourceEntity);
-                Long hourTotal = (((bookingResponse.getEndDay().getTime() - bookingResponse.getStartDay().getTime()) / MILLISECOND) + 1) * 8;
                 if (checkNull) {
-                    double totalHour = (hourTotal * bookingRequest.getPercentage()) / 100;
+                    double totalHour = (8 * bookingRequest.getPercentage()) / 100;
                     timeEntity.setTotalHour(DoubleRounder.round(totalHour, 1));
                 } else {
-                    timeEntity.setTotalHour((bookingRequest.getDuration() * hourTotal) / 8);
+                    timeEntity.setTotalHour((bookingRequest.getDuration() * 8) / 8);
                 }
                 timeRepository.save(timeEntity);
-
             }
         }
+        else {
+            Calendar calendarStart = Calendar.getInstance();
+            Calendar calendarEnd = Calendar.getInstance();
+            calendarStart.setTime(startDay);
+            calendarStart.set(Calendar.HOUR_OF_DAY, 0);
+            calendarStart.set(Calendar.MINUTE, 0);
+            calendarStart.set(Calendar.SECOND, 0);
+            calendarStart.set(Calendar.MILLISECOND, 0);
+            calendarEnd.setTime(endDay);
+            calendarEnd.set(Calendar.HOUR_OF_DAY, 0);
+            calendarEnd.set(Calendar.MINUTE, 0);
+            calendarEnd.set(Calendar.SECOND, 0);
+            calendarEnd.set(Calendar.MILLISECOND, 0);
+            List<Date> dateList = new ArrayList<>();
+            dateList.add(calendarStart.getTime());
+            //System.out.println(calendar1.getTime());
+            do{
+                calendarStart.add(Calendar.DATE, 1);
+                dateList.add(calendarStart.getTime());
+            }while(!calendarStart.equals(calendarEnd));
+            //
+            List<List<Date>> listOfDateList = new ArrayList<>();
+            List<Date> listToAdd = new ArrayList<>();
+            int totalDays = 0;
+            for (int i = 0; i < dateList.size(); i++){
+                if(!workingDays.get(Utils.getIndexFromDate(dateList.get(i)))){
+                    totalDays += listToAdd.size();
+                    List<Date> copy = new ArrayList<>(listToAdd);
+                    listToAdd.clear();
+                    listOfDateList.add(copy);
+                }
+                else {
+                    if (i != dateList.size() - 1){
+                        listToAdd.add(dateList.get(i));
+                    }
+                    else {
+                        listOfDateList.add(listToAdd);
+                        listToAdd.clear();
+                    }
+                }
+            }
+            int hourTotalStandard = totalDays * 8;
+            double hourForEachDay;
+            double hourTotalActual;
+            if (checkNull) {
+                hourTotalActual = (hourTotalStandard * bookingRequest.getPercentage()) / 100;
+            } else {
+                hourTotalActual = (bookingRequest.getDuration() * hourTotalStandard) / 8;
+            }
+            hourForEachDay = DoubleRounder.round(hourTotalActual/totalDays, 1);
+            for (List<Date> list : listOfDateList){
+                if (list.size() != 0){
+                    TimeEntity timeEntity = new TimeEntity();
+                    timeEntity.setStartTime(list.get(0));
+                    timeEntity.setEndTime(list.get(list.size() - 1));
+                    timeEntity.setTotalHour(hourForEachDay*list.size());
+                    timeEntity.setProjectEntity(projectEntity);
+                    timeEntity.setResourceEntity(resourceEntity);
+                    timeRepository.save(timeEntity);
+                }
+            }
+        }
+
+        //
+
+
+//        if ((startDay.equals(Utils.toSaturDayOfWeek(startDay)) || startDay.equals(Utils.toSunDayOfWeek(startDay)))
+//                && (endDay.equals(Utils.toSaturDayOfWeek(startDay)) || endDay.equals(Utils.toSunDayOfWeek(startDay)))) {
+//            Long hourTotal = (((endDay.getTime() - startDay.getTime()) / MILLISECOND) + 1) * 8;
+//            TimeEntity timeEntity = new TimeEntity();
+//            timeEntity.setStartTime(startDay);
+//            timeEntity.setEndTime(endDay);
+//            timeEntity.setProjectEntity(projectEntity);
+//            timeEntity.setResourceEntity(resourceEntity);
+//            if (checkNull) {
+//                double totalHour = (hourTotal * bookingRequest.getPercentage()) / 100;
+//                timeEntity.setTotalHour(DoubleRounder.round(totalHour, 1));
+//            } else {
+//                timeEntity.setTotalHour((bookingRequest.getDuration() * hourTotal) / 8);
+//            }
+//            timeRepository.save(timeEntity);
+//
+//        } else {
+//            List<BookingResponse> bookingResponses = new ArrayList<>();
+//            Date currentDate = new Date(startDay.getTime());
+//            while (true) {
+//                if (startDay.equals(Utils.toSaturDayOfWeek(currentDate))) {
+//                    currentDate.setDate(currentDate.getDate() + 2);
+//                }
+//                if (startDay.equals(Utils.toSunDayOfWeek(currentDate))) {
+//                    currentDate.setDate(currentDate.getDate() + 1);
+//                }
+//
+//                Date first = Utils.toMonDayOfWeek(currentDate);
+//                Date end = Utils.toFriDayOfWeek(currentDate);
+//                if (startDay.getTime() > first.getTime()) {
+//                    first = startDay;
+//
+//                }
+//                if (end.getTime() > endDay.getTime()) {
+//                    end = endDay;
+//                }
+//                BookingResponse bookingResponse = new BookingResponse(first, end);
+//                bookingResponses.add(bookingResponse);
+//
+//                currentDate.setDate(currentDate.getDate() + 7);
+//                currentDate = Utils.toMonDayOfWeek(currentDate);
+//                if (currentDate.getTime() > endDay.getTime()) {
+//                    break;
+//                }
+//            }
+//            for (BookingResponse bookingResponse : bookingResponses) {
+//                TimeEntity timeEntity = new TimeEntity();
+//                timeEntity.setStartTime(bookingResponse.getStartDay());
+//                timeEntity.setEndTime(bookingResponse.getEndDay());
+//                timeEntity.setProjectEntity(projectEntity);
+//                timeEntity.setResourceEntity(resourceEntity);
+//                Long hourTotal = (((bookingResponse.getEndDay().getTime() - bookingResponse.getStartDay().getTime()) / MILLISECOND) + 1) * 8;
+//                if (checkNull) {
+//                    double totalHour = (hourTotal * bookingRequest.getPercentage()) / 100;
+//                    timeEntity.setTotalHour(DoubleRounder.round(totalHour, 1));
+//                } else {
+//                    timeEntity.setTotalHour((bookingRequest.getDuration() * hourTotal) / 8);
+//                }
+//                timeRepository.save(timeEntity);
+//
+//            }
+//        }
 
 
     }
@@ -154,12 +252,13 @@ public class TimeServiceImpl implements TimeService {
         timeEntity.setStartTime(currentStart);
         timeEntity.setEndTime(currentEnd);
         Long hourTotal = (((currentEnd.getTime() - currentStart.getTime()) / MILLISECOND) + 1) * 8;
+        double totalHour;
         if (bookingRequest.getDuration() == null) {
-            Double totalHour = (hourTotal * bookingRequest.getPercentage()) / 100;
-            timeEntity.setTotalHour(DoubleRounder.round(totalHour, 1));
+            totalHour = (hourTotal * bookingRequest.getPercentage()) / 100;
         } else {
-            timeEntity.setTotalHour((bookingRequest.getDuration() * hourTotal) / 8);
+            totalHour = (bookingRequest.getDuration() * hourTotal) / 8;
         }
+        timeEntity.setTotalHour(DoubleRounder.round(totalHour, 1));
         timeRepository.save(timeEntity);
 
     }
@@ -168,23 +267,12 @@ public class TimeServiceImpl implements TimeService {
     public void updateBooking(BookingRequest bookingRequest, Integer idWorkspace) throws ParseException {
         Date startDay = SIMPLE_DATE_FORMAT.parse(bookingRequest.getStartDate());
         Date endDay = SIMPLE_DATE_FORMAT.parse(bookingRequest.getEndDate());
-        Date currentStart;
-        Date currentEnd;
         if (timeRepository.findById(bookingRequest.getId()).isPresent()) {
             TimeEntity timeEntity = timeRepository.findById(bookingRequest.getId()).get();
-            Date mon = Utils.toMonDayOfWeek(timeEntity.getEndTime());
-            Date fri = Utils.toFriDayOfWeek(timeEntity.getEndTime());
-            Date sat = Utils.toSaturDayOfWeek(timeEntity.getEndTime());
-            Date sun = Utils.toSunDayOfWeek(timeEntity.getEndTime());
-            boolean checkEquals = endDay.equals(sat) || endDay.equals(sun);
-            if (startDay.getTime() >= mon.getTime() && endDay.getTime() <= sun.getTime()) {
-                if (checkEquals) {
-                    currentEnd = fri;
-                } else {
-                    currentEnd = endDay;
-                }
-                currentStart = startDay;
-                update(timeEntity, bookingRequest, currentStart, currentEnd);
+            Boolean checkStartDay = startDay.equals(timeEntity.getStartTime()) || startDay.after(timeEntity.getStartTime());
+            Boolean checkEndDay = endDay.equals(timeEntity.getEndTime()) || endDay.before(timeEntity.getEndTime());
+            if (checkStartDay && checkEndDay) {
+                update(timeEntity, bookingRequest, startDay, endDay);
             } else {
                 timeRepository.delete(timeEntity);
                 newBooking(bookingRequest, idWorkspace);
@@ -212,15 +300,14 @@ public class TimeServiceImpl implements TimeService {
         Date startDay = SIMPLE_DATE_FORMAT.parse(startDate);
         Date endDay = SIMPLE_DATE_FORMAT.parse(endDate);
         long viewType = ((endDay.getTime() - startDay.getTime()) / MILLISECOND) + 1;
-        double percent;
+        Double percent;
         DashboardListResponse dashboardListResponse = new DashboardListResponse();
         List<ResourceEntity> resourceEntities = resourceRepository.findAllBySearchName(idWorkspace, searchName);
-        resourceEntities.sort((o1, o2) -> (int) (o1.getCreatedDate().getTime() - o2.getCreatedDate().getTime()));
-        List<Integer> result = resourceEntities.stream().map(BaseEnity::getId).distinct().collect(Collectors.toList());
+        Collections.sort(resourceEntities,(o1, o2) -> (int) (o1.getCreatedDate().getTime()-o2.getCreatedDate().getTime()));
+        List<Integer> result = resourceEntities.stream().map(resourceEntity -> resourceEntity.getId()).distinct().collect(Collectors.toList());
         List<ResourceResponse> resourceResponses = new ArrayList<>();
         for (Integer integer : result) {
-            ResourceEntity resourceEntity = resourceRepository.findById(integer).
-                    orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            ResourceEntity resourceEntity = resourceRepository.findById(integer).get();
             ResourceResponse resourceResponse = new ResourceResponse();
             resourceResponse.setId(resourceEntity.getId());
             resourceResponse.setName(resourceEntity.getName());
@@ -243,7 +330,7 @@ public class TimeServiceImpl implements TimeService {
         }
         dashboardListResponse.setResources(resourceResponses);
         List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
-        teamEntities.sort((o1, o2) -> (int) (o1.getCreatedDate().getTime() - o2.getCreatedDate().getTime()));
+        Collections.sort(teamEntities,(o1, o2) ->(int) (o1.getCreatedDate().getTime()-o2.getCreatedDate().getTime()));
         List<TeamResponse> teamResponses = teamEntities.stream().map(
                 teamEntity -> modelMapper.map(teamEntity, TeamResponse.class))
                 .collect(Collectors.toList());
