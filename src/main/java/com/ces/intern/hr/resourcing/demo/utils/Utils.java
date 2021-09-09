@@ -10,6 +10,11 @@ import java.util.Date;
 
 public class Utils {
 
+    public static int getIndexFromDate(Date date){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.DAY_OF_WEEK) - 1;
+    }
 
 
 

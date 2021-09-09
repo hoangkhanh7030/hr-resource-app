@@ -140,7 +140,7 @@ public class ProjectController {
             if (projectRequest.validate()) {
                 return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
             }
-            projectService.createProject(projectRequest, idAccount, idWorkspace);
+            projectService.createdProject(projectRequest, idAccount, idWorkspace);
             if (projectRepository.findByNameAndWorkspaceEntityProject_Id(projectRequest.getName(), idWorkspace).isPresent()) {
                 return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
             }

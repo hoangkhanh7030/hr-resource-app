@@ -49,7 +49,7 @@ public class ProjectServiceImpl implements ProjectService {
 
 
     @Override
-    public void createProject(ProjectRequest projectRequest, Integer idAccount, Integer idWorkspace) {
+    public void createdProject(ProjectRequest projectRequest, Integer idAccount, Integer idWorkspace) {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         ProjectEntity projectEntity = modelMapper.map(projectRequest, ProjectEntity.class);

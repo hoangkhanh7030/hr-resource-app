@@ -30,11 +30,11 @@ public class ResourceConverter {
 
         }
         if(resourceEntity.getPositionEntity() != null){
-            resourceDTO.setPositionDTO(ObjectMapperUtils.map(resourceEntity.getPositionEntity(), PositionDTO.class));
-            if(resourceEntity.getPositionEntity().getTeamEntity() != null){
+            PositionEntity positionEntity= resourceEntity.getPositionEntity();
+            resourceDTO.setPositionDTO(ObjectMapperUtils.map(positionEntity, PositionDTO.class));
+            if(positionEntity.getTeamEntity() != null){
                 resourceDTO.getPositionDTO()
-                        .setTeamDTO(ObjectMapperUtils.map(resourceEntity
-                                .getPositionEntity().getTeamEntity(), TeamDTO.class));
+                        .setTeamDTO(ObjectMapperUtils.map(positionEntity.getTeamEntity(), TeamDTO.class));
             }
         }
         if (resourceEntity.getTimeEntities() != null){
@@ -54,11 +54,11 @@ public class ResourceConverter {
         resourceEntity.setName(resourceDTO.getName());
         resourceEntity.setIsArchived(resourceDTO.getIsArchived());
         if(resourceDTO.getPositionDTO() != null){
-            resourceEntity.setPositionEntity(ObjectMapperUtils.map(resourceDTO.getPositionDTO(), PositionEntity.class));
-            if(resourceDTO.getPositionDTO() != null){
+            PositionDTO positionDTO= resourceDTO.getPositionDTO();
+            resourceEntity.setPositionEntity(ObjectMapperUtils.map(positionDTO, PositionEntity.class));
+            if(positionDTO.getTeamDTO() != null){
                 resourceEntity.getPositionEntity()
-                        .setTeamEntity(ObjectMapperUtils.map(resourceDTO
-                                .getPositionDTO().getTeamDTO(), TeamEntity.class));
+                        .setTeamEntity(ObjectMapperUtils.map(positionDTO.getTeamDTO(), TeamEntity.class));
             }
         }
         if (resourceDTO.getListTime() != null){
