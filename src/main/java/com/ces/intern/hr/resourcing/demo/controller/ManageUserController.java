@@ -1,6 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.controller;
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
+import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ReInviteRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.user.ManageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
@@ -8,6 +9,7 @@ import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.ManageUserService;
 import com.ces.intern.hr.resourcing.demo.utils.AuthenticationProvider;
+import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
 import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +51,10 @@ public class ManageUserController {
         }
         searchName = searchName == null ? "" : searchName;
         int sizeList = accoutRepository.findAllBysearchNameToList(idWorkspace, searchName).size();
-
+        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity=accoutWorkspaceRoleRepository.findByIdWorkspaceAndRoleAdmin(idWorkspace).
+                orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         return new ManageResponse(manageUserService.getAll(idWorkspace, page, size, searchName, sortName, type),
-                numberSize(sizeList, size));
+                numberSize(sizeList, size),accountWorkspaceRoleEntity.getAccountEntity().getId());
     }
 
     @DeleteMapping("/{idWorkspace}/account/{idAccount}")

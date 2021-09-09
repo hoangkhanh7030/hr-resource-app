@@ -14,4 +14,5 @@ import java.util.List;
 public class ManageResponse {
     private List<ManageUserResponse> manageUsers;
     private Integer numberSize;
+    private Integer adminId;
 }

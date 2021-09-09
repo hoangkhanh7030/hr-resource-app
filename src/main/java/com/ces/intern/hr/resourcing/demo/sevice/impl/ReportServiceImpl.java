@@ -70,7 +70,7 @@ public class ReportServiceImpl implements ReportService {
             , Integer idWorkspace, String type) {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).
                 orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        int sumDay = (int) (((endDate.getTime() - startDate.getTime()) / MILLISECOND) / ONE_WEEK) * workDays(workspaceEntity).size();
+        int sumDay = (int) ((((endDate.getTime() - startDate.getTime()) / MILLISECOND)+1) / ONE_WEEK) * workDays(workspaceEntity).size();
 
         int time;
         Report report = new Report();
@@ -94,7 +94,7 @@ public class ReportServiceImpl implements ReportService {
                                                Integer idWorkspace, Integer time) {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).
                 orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        int sumDay = (int) (((endDate.getTime() - startDate.getTime()) / MILLISECOND) / ONE_WEEK) * workDays(workspaceEntity).size();
+        int sumDay = (int) ((((endDate.getTime() - startDate.getTime()) / MILLISECOND)+1) / ONE_WEEK) * workDays(workspaceEntity).size();
 
         List<ProjectEntity> projectEntities = projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
         ProjectReportResponse projectReport = new ProjectReportResponse();
@@ -139,7 +139,7 @@ public class ReportServiceImpl implements ReportService {
     public ResourceReportResponse reportResource(Date startDate, Date endDate, Integer idWorkspace, Integer time) {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).
                 orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        int sumDay = (int) (((endDate.getTime() - startDate.getTime()) / MILLISECOND) / ONE_WEEK) * workDays(workspaceEntity).size();
+        int sumDay = (int) ((((endDate.getTime() - startDate.getTime()) / MILLISECOND)+1) / ONE_WEEK) * workDays(workspaceEntity).size();
 
         List<ResourceEntity> resourceEntities = resourceRepository.findAllByidWorkspace(idWorkspace);
         ResourceReportResponse resourceReportResponse = new ResourceReportResponse();

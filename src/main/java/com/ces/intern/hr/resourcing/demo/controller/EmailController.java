@@ -82,14 +82,16 @@ public class EmailController {
             for (String email : inviteRequest.getEmail()) {
                 if (accoutRepository.findByEmail(email).isPresent()) {
                     AccountEntity accountEntity = accoutRepository.findByEmail(email).get();
-                    if (accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, accountEntity.getId()).isPresent()) {
+                    if (accoutWorkspaceRoleRepository.findByIdAndIdAndGOOGLE(idWorkspace, accountEntity.getId()).isPresent()) {
                         return new MessageResponse(ResponseMessage.EMAIL_INVITE,Status.FAIL.getCode());
                     } else {
-                        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = new AccountWorkspaceRoleEntity();
-                        accountWorkspaceRoleEntity.setAccountEntity(accountEntity);
-                        accountWorkspaceRoleEntity.setWorkspaceEntity(workspaceEntity);
-                        accountWorkspaceRoleEntity.setCodeRole(Role.VIEW.getCode());
-                        accoutWorkspaceRoleRepository.save(accountWorkspaceRoleEntity);
+                        if (!accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,accountEntity.getId()).isPresent()){
+                            AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = new AccountWorkspaceRoleEntity();
+                            accountWorkspaceRoleEntity.setAccountEntity(accountEntity);
+                            accountWorkspaceRoleEntity.setWorkspaceEntity(workspaceEntity);
+                            accountWorkspaceRoleEntity.setCodeRole(Role.VIEW.getCode());
+                            accoutWorkspaceRoleRepository.save(accountWorkspaceRoleEntity);
+                        }
                     }
                 } else {
                     AccountEntity accountEntity = new AccountEntity();
