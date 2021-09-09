@@ -2,6 +2,7 @@ package com.ces.intern.hr.resourcing.demo.controller;
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
+import com.ces.intern.hr.resourcing.demo.http.request.IsActiveRequest;
 import com.ces.intern.hr.resourcing.demo.http.request.ReInviteRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.user.ManageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
@@ -15,8 +16,7 @@ import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
-import java.io.IOException;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -81,8 +81,10 @@ public class ManageUserController {
                 public void run() {
                     countdownStarter--;
                     if(countdownStarter<0){
+                        assert accountEntity != null;
                         if (accountEntity.getAuthenticationProvider().getName().equals(AuthenticationProvider.PENDING.getName())){
                             AccountWorkspaceRoleEntity accountWorkspaceRoleEntity=accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,accountEntity.getId()).orElse(null);
+                            assert accountWorkspaceRoleEntity != null;
                             accoutWorkspaceRoleRepository.delete(accountWorkspaceRoleEntity);
                         }
                         scheduler.shutdown();
@@ -101,9 +103,9 @@ public class ManageUserController {
     @PutMapping("/{idWorkspace}/isActive/{idAccount}")
     private MessageResponse isActive(@PathVariable Integer idAccount,
                                      @PathVariable Integer idWorkspace,
-                                     @RequestBody ReInviteRequest reInviteRequest) throws MessagingException, IOException {
+                                     @RequestBody IsActiveRequest isActiveRequest) {
         try {
-            manageUserService.isActive(idAccount, idWorkspace,reInviteRequest);
+            manageUserService.isActive(idAccount, idWorkspace,isActiveRequest.getUrl());
             return new MessageResponse(ResponseMessage.EMAIL_SENDT, Status.SUCCESS.getCode());
         } catch (Exception e) {
             return new MessageResponse(ResponseMessage.EMAIL_ERROR + e, Status.FAIL.getCode());

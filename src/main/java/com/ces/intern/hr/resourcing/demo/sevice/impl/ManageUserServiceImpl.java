@@ -3,6 +3,7 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
+import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ReInviteRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.user.ManageUserResponse;
@@ -37,10 +38,9 @@ import java.util.concurrent.ScheduledExecutorService;
 
 @Service
 public class ManageUserServiceImpl implements ManageUserService {
-    private static final int EXPIRATION_DATE = 60;
+    private static final int EXPIRATION_DATE = 172800;
     private static final String FILE_INVITE = "/file/Invite.txt";
     private static final String LINE = "line.separator";
-    private static final String VIEWER = "VIEWER";
     private static final String TITLE = "Invited Workspace";
     private static final String MESSAGE_EXPIRATION = "<br/><br/><i>The invitation will be expired after 2 days and you cannot join with us.</i><br/><br/>\n" +
             "\n" +
@@ -79,13 +79,20 @@ public class ManageUserServiceImpl implements ManageUserService {
         Page<AccountEntity> accountPage = accoutRepository.findAllBysearchName(idWorkspace, searchName, pageable);
         List<AccountEntity> accounts = accountPage.getContent();
         List<ManageUserResponse> manageUserResponses = new ArrayList<>();
+
         for (AccountEntity account : accounts) {
             ManageUserResponse manageUserResponse = new ManageUserResponse();
+            AccountWorkspaceRoleEntity accountWorkspaceRoleEntity=accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,account.getId())
+                    .orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
             manageUserResponse.setId(account.getId());
             manageUserResponse.setFullName(account.getFullname());
             manageUserResponse.setEmail(account.getEmail());
             manageUserResponse.setCreatedDate(account.getCreatedDate());
-            manageUserResponse.setRole(VIEWER);
+            if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.VIEW.getCode())){
+                manageUserResponse.setRole(Role.VIEW.getName());
+            }else {
+                manageUserResponse.setRole(Role.INACTIVE.getName());
+            }
             manageUserResponse.setStatus(account.getAuthenticationProvider().name());
             manageUserResponses.add(manageUserResponse);
         }
@@ -125,13 +132,19 @@ public class ManageUserServiceImpl implements ManageUserService {
                         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, accountEntity.getId()).orElse(null);
                         assert accountWorkspaceRoleEntity != null;
                         accoutWorkspaceRoleRepository.delete(accountWorkspaceRoleEntity);
+                        assert workspaceEntity != null;
+                        final String MESSAGE="<b>Hi "+accountEntity.getEmail()+"</b>,<br/>\n" +
+                                "<br/>Unfortunately, your invitation has been expired since you haven't log in to confirm yet.<br/><br/>" +
+                                "For further information, please contact the admin of "+workspaceEntity.getName()+".<br/><br/>" +
+                                "Many thanks from Team Juggle Fish!";
+                        MimeMessage msg = sender.createMimeMessage();
+                        MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+                        helper.setTo(accountEntity.getEmail());
+                        helper.setSubject("Expired Workspace");
+                        helper.setText(MESSAGE,true);
+                        sender.send(msg);
                     }
-                    assert workspaceEntity != null;
-                    String MESSAGE="<b>Hi "+accountEntity.getEmail()+"</b>,<br/>\n" +
-                            "<br/>Unfortunately, your invitation has been expired since you haven't log in to confirm yet.<br/><br/>" +
-                            "For further information, please contact the admin of "+workspaceEntity.getName()+".<br/><br/>" +
-                            "Many thanks from Team Juggle Fish!";
-                    sendEmails(reInviteRequest.getEmail(), "", MESSAGE, "");
+
                     scheduler.shutdown();
                 }
             }
@@ -171,31 +184,44 @@ public class ManageUserServiceImpl implements ManageUserService {
 
 
     @Override
-    public void isActive(Integer idAccount, Integer idWorkspace,ReInviteRequest reInviteRequest) throws MessagingException, IOException {
+    public void isActive(Integer idAccount, Integer idWorkspace,String url) throws Exception {
+
         WorkspaceEntity workspaceEntity=workspaceRepository.findById(idWorkspace).orElse(null);
         AccountEntity accountEntity=accoutRepository.findById(idAccount).orElse(null);
-        assert accountEntity != null;
-        assert workspaceEntity != null;
         if (accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount).isPresent()) {
             AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount).get();
             if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.VIEW.getCode())) {
                 accountWorkspaceRoleEntity.setCodeRole(Role.INACTIVE.getCode());
-                String MESSAGE_ARCHIVE="<b>Hi "+accountEntity.getEmail()+"</b>,<br/>\n" +
+
+                 String MESSAGE_INACTIVE="<b>Hi "+accountEntity.getEmail()+"</b>,<br/>\n" +
                         "<br/>Unfortunately, you have been temporarily archived in "+workspaceEntity.getName()+".<br/><br/>" +
                         "We will soon enable so you can join with us later.<br/><br/>" +
-                        "Many thanks from Team Juggle Fish!";
-                sendEmails(accountEntity.getEmail(),"",MESSAGE_ARCHIVE,"" );
+                        "Many thanks from Team Juggle Fish!<br/><br/>";
+                MimeMessage msg = sender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+                helper.setTo(accountEntity.getEmail());
+                helper.setSubject("INACTIVE ACCOUNT");
+                helper.setText(MESSAGE_INACTIVE+url,true);
+                sender.send(msg);
+
             } else if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.INACTIVE.getCode())) {
                 accountWorkspaceRoleEntity.setCodeRole(Role.VIEW.getCode());
-                String MESSAGE_ENABLE="<b>Hi "+accountEntity.getEmail()+"</b>,<br/>\n" +
+                String MESSAGE_ACTIVE="<b>Hi "+accountEntity.getEmail()+"</b>,<br/>\n" +
                         "<br/>We would like to let you know that you have been enabled in "+workspaceEntity.getName()+".<br/><br/>" +
                         "Click the link below to join with us.<br/><br/>" +
                         "Many thanks from Team Juggle Fish!<br/><br/>";
-                sendEmails(accountEntity.getEmail(),reInviteRequest.getUrl(),MESSAGE_ENABLE,"" );
+                MimeMessage msg = sender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+                helper.setTo(accountEntity.getEmail());
+                helper.setSubject("ACTIVE ACCOUNT");
+                helper.setText(MESSAGE_ACTIVE+url,true);
+                sender.send(msg);
+
             } else {
                 accountWorkspaceRoleEntity.setCodeRole(accountWorkspaceRoleEntity.getCodeRole());
             }
             accoutWorkspaceRoleRepository.save(accountWorkspaceRoleEntity);
+
         }
 
     }

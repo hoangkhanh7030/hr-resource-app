@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.List;
 public class ReportServiceImpl implements ReportService {
     private static final int MILLISECOND = (1000 * 60 * 60 * 24);
     private static final int ONE_WEEK = 7;
-    private static final String DAY="DAY";
+    private static final String DAY = "DAY";
 
     private static final String TRUE = "true";
     private final ProjectRepository projectRepository;
@@ -70,7 +71,7 @@ public class ReportServiceImpl implements ReportService {
             , Integer idWorkspace, String type) {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).
                 orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        int sumDay = (int) ((((endDate.getTime() - startDate.getTime()) / MILLISECOND)+1) / ONE_WEEK) * workDays(workspaceEntity).size();
+        int sumDay = (int) ((((endDate.getTime() - startDate.getTime()) / MILLISECOND) + 1) / ONE_WEEK) * workDays(workspaceEntity).size();
 
         int time;
         Report report = new Report();
@@ -84,8 +85,8 @@ public class ReportServiceImpl implements ReportService {
         report.setResourceReports(reportResource(startDate, endDate, idWorkspace, time));
         List<ResourceEntity> resourceEntities = resourceRepository.findAllByidWorkspace(idWorkspace);
         report.setTrafficTime((double) sumDay * time * resourceEntities.size());
-        report.setOverTime(reportResource(startDate,endDate,idWorkspace,time).getOvertimeDays());
-        report.setAllocatedTime(reportResource(startDate,endDate,idWorkspace,time).getWorkingDays());
+        report.setOverTime(reportResource(startDate, endDate, idWorkspace, time).getOvertimeDays());
+        report.setAllocatedTime(reportResource(startDate, endDate, idWorkspace, time).getWorkingDays());
         return report;
     }
 
@@ -94,7 +95,7 @@ public class ReportServiceImpl implements ReportService {
                                                Integer idWorkspace, Integer time) {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).
                 orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        int sumDay = (int) ((((endDate.getTime() - startDate.getTime()) / MILLISECOND)+1) / ONE_WEEK) * workDays(workspaceEntity).size();
+        int sumDay = (int) (((((endDate.getTime() - startDate.getTime()) / MILLISECOND) + 1) / ONE_WEEK) * workDays(workspaceEntity).size()) * time;
 
         List<ProjectEntity> projectEntities = projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
         ProjectReportResponse projectReport = new ProjectReportResponse();
@@ -108,7 +109,7 @@ public class ReportServiceImpl implements ReportService {
                         timeEntity.getEndTime().getTime() <= endDate.getTime()) {
                     if (time == 1) {
                         sumWork += (timeEntity.getTotalHour() / 8);
-                    }else {
+                    } else {
                         sumWork += timeEntity.getTotalHour();
                     }
 
@@ -139,7 +140,7 @@ public class ReportServiceImpl implements ReportService {
     public ResourceReportResponse reportResource(Date startDate, Date endDate, Integer idWorkspace, Integer time) {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).
                 orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        int sumDay = (int) ((((endDate.getTime() - startDate.getTime()) / MILLISECOND)+1) / ONE_WEEK) * workDays(workspaceEntity).size();
+        int sumDay = (int) (((((endDate.getTime() - startDate.getTime()) / MILLISECOND) + 1) / ONE_WEEK) * workDays(workspaceEntity).size()) * time;
 
         List<ResourceEntity> resourceEntities = resourceRepository.findAllByidWorkspace(idWorkspace);
         ResourceReportResponse resourceReportResponse = new ResourceReportResponse();
@@ -159,7 +160,7 @@ public class ReportServiceImpl implements ReportService {
                         timeEntity.getEndTime().getTime() <= endDate.getTime()) {
                     if (time == 1) {
                         sumWork += (timeEntity.getTotalHour() / 8);
-                    }else {
+                    } else {
                         sumWork += timeEntity.getTotalHour();
                     }
 
@@ -196,16 +197,15 @@ public class ReportServiceImpl implements ReportService {
             time = 8;
         }
         writeHeaderLine();
-        writeDataLines(report(startDate, endDate, idWorkspace, type));
+        writeDataLines(report(startDate, endDate, idWorkspace, type), startDate, endDate,type);
 
         writeResourceHeaderLine();
         writeResourceDataLines(reportResource(startDate, endDate, idWorkspace, time));
 
         writeProjectHeaderLine();
         writeProjectDataLines(reportProject(startDate, endDate, idWorkspace, time));
+
         ServletOutputStream outputStream = response.getOutputStream();
-
-
         workbook.write(outputStream);
         workbook.close();
 
@@ -213,11 +213,10 @@ public class ReportServiceImpl implements ReportService {
     }
 
 
-
     private void writeHeaderLine() {
 
 
-        sheet = workbook.createSheet("Home");
+        sheet = workbook.createSheet("Overview");
         Row row = sheet.createRow(0);
 
         CellStyle style = workbook.createCellStyle();
@@ -229,10 +228,15 @@ public class ReportServiceImpl implements ReportService {
         createCell(row, 0, "Traffic Time", style);
         createCell(row, 1, "Allocated Time", style);
         createCell(row, 2, "Over Time", style);
-
+        createCell(row, 3, "Type", style);
+        createCell(row, 4, "StartDate", style);
+        createCell(row, 5, "EndDate", style);
     }
 
-    private void writeDataLines(Report report) {
+    private void writeDataLines(Report report, Date startDate, Date endDate,String type) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String startDay = simpleDateFormat.format(startDate);
+        String endDay = simpleDateFormat.format(endDate);
         int rowCount = 1;
 
         CellStyle style = workbook.createCellStyle();
@@ -246,6 +250,9 @@ public class ReportServiceImpl implements ReportService {
             createCell(row, columnCount++, report.getTrafficTime(), style);
             createCell(row, columnCount++, report.getAllocatedTime(), style);
             createCell(row, columnCount++, report.getOverTime(), style);
+            createCell(row, columnCount++, type, style);
+            createCell(row, columnCount++, startDay, style);
+            createCell(row, columnCount, endDay, style);
 
         } catch (Exception e) {
             throw new RuntimeException(CSVFile.FAIL_MESSAGE + e.getMessage());

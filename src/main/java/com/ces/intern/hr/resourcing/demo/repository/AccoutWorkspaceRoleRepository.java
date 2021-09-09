@@ -22,7 +22,7 @@ public interface AccoutWorkspaceRoleRepository extends JpaRepository<AccountWork
     Optional<AccountWorkspaceRoleEntity> findByIdAndId(@Param("idWorkspace") Integer idWorkspace, @Param("idAccount") Integer idAccount);
 
     @Query(value = "select ac from AccountWorkspaceRoleEntity ac WHERE ac.workspaceEntity.id=:idWorkspace " +
-            "and ac.codeRole='2'")
+            "and ac.codeRole=2")
     Optional<AccountWorkspaceRoleEntity> findByIdWorkspaceAndRoleAdmin(@Param("idWorkspace") Integer idWorkspace);
 
 

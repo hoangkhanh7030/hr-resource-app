@@ -8,7 +8,7 @@ import java.util.List;
 public interface ProjectService {
     List<ProjectDTO> getAllProjects(Integer idWorkspace, int page, int size);
 
-    void createProject(ProjectRequest projectRequest, Integer idAccount, Integer idWorkspace);
+    void createdProject(ProjectRequest projectRequest, Integer idAccount, Integer idWorkspace);
 
     void updateProject(ProjectRequest projectRequest, Integer idAccount, Integer idProject);
 

@@ -73,7 +73,10 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
             List<ResourceDTO> resourceDTOS = resourceEntities.stream().map(s -> modelMapper.map(s, ResourceDTO.class)).collect(Collectors.toList());
             if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
                 workspaceResponse.setRole(Role.EDIT.getName());
-            } else {
+            } else if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.INACTIVE.getCode())){
+                workspaceResponse.setRole(Role.INACTIVE.getName());
+            }
+            else {
                 workspaceResponse.setRole(Role.VIEW.getName());
             }
             workspaceResponse.setProjectListLength(projectDTOS.size());
