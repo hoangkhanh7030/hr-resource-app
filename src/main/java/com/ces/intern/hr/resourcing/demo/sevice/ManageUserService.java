@@ -15,6 +15,6 @@ public interface ManageUserService {
     void delete(Integer idAccount,Integer idWorkspace);
 
     void reSendEmail(ReInviteRequest reInviteRequest, Integer idWorkspace) throws MessagingException, IOException, Exception;
-    void isActive(Integer idAccount,Integer idWorkspace,String url) throws MessagingException, IOException;
+    void isActive(Integer idAccount,Integer idWorkspace,ReInviteRequest reInviteRequest) throws MessagingException, IOException;
 
 }

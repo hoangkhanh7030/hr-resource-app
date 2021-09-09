@@ -4,21 +4,37 @@ import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.response.project.ReportProject;
 import com.ces.intern.hr.resourcing.demo.http.response.report.ProjectReportResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.report.Report;
 import com.ces.intern.hr.resourcing.demo.http.response.report.ResourceReportResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.resource.ReportResource;
+import com.ces.intern.hr.resourcing.demo.importCSV.Style;
 import com.ces.intern.hr.resourcing.demo.repository.*;
 import com.ces.intern.hr.resourcing.demo.sevice.ReportService;
+import com.ces.intern.hr.resourcing.demo.utils.CSVFile;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Service
 public class ReportServiceImpl implements ReportService {
+    private static final int MILLISECOND = (1000 * 60 * 60 * 24);
+    private static final int ONE_WEEK = 7;
+    private static final String DAY="DAY";
+
     private static final String TRUE = "true";
     private final ProjectRepository projectRepository;
     private final TimeRepository timeRepository;
@@ -27,6 +43,8 @@ public class ReportServiceImpl implements ReportService {
     private final ResourceRepository resourceRepository;
     private final TeamRepository teamRepository;
     private final PositionRepository positionRepository;
+    private final XSSFWorkbook workbook;
+    private XSSFSheet sheet;
 
     @Autowired
     public ReportServiceImpl(ProjectRepository projectRepository,
@@ -43,13 +61,40 @@ public class ReportServiceImpl implements ReportService {
         this.resourceRepository = resourceRepository;
         this.teamRepository = teamRepository;
         this.positionRepository = positionRepository;
+        workbook = new XSSFWorkbook();
+    }
+
+
+    @Override
+    public Report report(Date startDate, Date endDate
+            , Integer idWorkspace, String type) {
+        WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).
+                orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        int sumDay = (int) (((endDate.getTime() - startDate.getTime()) / MILLISECOND) / ONE_WEEK) * workDays(workspaceEntity).size();
+
+        int time;
+        Report report = new Report();
+        if (type.equals(DAY)) {
+            time = 1;
+        } else {
+            time = 8;
+        }
+
+        report.setProjectReports(reportProject(startDate, endDate, idWorkspace, time));
+        report.setResourceReports(reportResource(startDate, endDate, idWorkspace, time));
+        List<ResourceEntity> resourceEntities = resourceRepository.findAllByidWorkspace(idWorkspace);
+        report.setTrafficTime((double) sumDay * time * resourceEntities.size());
+        report.setOverTime(reportResource(startDate,endDate,idWorkspace,time).getOvertimeDays());
+        report.setAllocatedTime(reportResource(startDate,endDate,idWorkspace,time).getWorkingDays());
+        return report;
     }
 
     @Override
     public ProjectReportResponse reportProject(Date startDate, Date endDate,
-                                               Integer idWorkspace) {
+                                               Integer idWorkspace, Integer time) {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).
                 orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        int sumDay = (int) (((endDate.getTime() - startDate.getTime()) / MILLISECOND) / ONE_WEEK) * workDays(workspaceEntity).size();
 
         List<ProjectEntity> projectEntities = projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
         ProjectReportResponse projectReport = new ProjectReportResponse();
@@ -61,15 +106,20 @@ public class ReportServiceImpl implements ReportService {
             for (TimeEntity timeEntity : timeEntities) {
                 if (timeEntity.getStartTime().getTime() >= startDate.getTime() &&
                         timeEntity.getEndTime().getTime() <= endDate.getTime()) {
-                    sumWork += timeEntity.getTotalHour();
+                    if (time == 1) {
+                        sumWork += (timeEntity.getTotalHour() / 8);
+                    }else {
+                        sumWork += timeEntity.getTotalHour();
+                    }
+
                 }
             }
-            if (sumWork <= workDays(workspaceEntity).size() * 8) {
+            if (sumWork <= sumDay) {
                 reportProject.setWorkingDays(sumWork);
                 reportProject.setOvertimeDays(0.0);
             } else {
-                reportProject.setWorkingDays((double) workDays(workspaceEntity).size() * 8);
-                reportProject.setOvertimeDays(sumWork - (workDays(workspaceEntity).size() * 8));
+                reportProject.setWorkingDays((double) sumDay);
+                reportProject.setOvertimeDays(sumWork - (double) sumDay);
             }
             reportProjects.add(reportProject);
         }
@@ -86,9 +136,11 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ResourceReportResponse reportResource(Date startDate, Date endDate, Integer idWorkspace) {
+    public ResourceReportResponse reportResource(Date startDate, Date endDate, Integer idWorkspace, Integer time) {
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).
                 orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        int sumDay = (int) (((endDate.getTime() - startDate.getTime()) / MILLISECOND) / ONE_WEEK) * workDays(workspaceEntity).size();
+
         List<ResourceEntity> resourceEntities = resourceRepository.findAllByidWorkspace(idWorkspace);
         ResourceReportResponse resourceReportResponse = new ResourceReportResponse();
         List<ReportResource> resources = new ArrayList<>();
@@ -105,15 +157,20 @@ public class ReportServiceImpl implements ReportService {
             for (TimeEntity timeEntity : timeEntities) {
                 if (timeEntity.getStartTime().getTime() >= startDate.getTime() &&
                         timeEntity.getEndTime().getTime() <= endDate.getTime()) {
-                    sumWork += timeEntity.getTotalHour();
+                    if (time == 1) {
+                        sumWork += (timeEntity.getTotalHour() / 8);
+                    }else {
+                        sumWork += timeEntity.getTotalHour();
+                    }
+
                 }
             }
-            if (sumWork <= workDays(workspaceEntity).size() * 8) {
+            if (sumWork <= sumDay) {
                 reportResource.setWorkingDays(sumWork);
                 reportResource.setOvertimeDays(0.0);
             } else {
-                reportResource.setWorkingDays((double) workDays(workspaceEntity).size() * 8);
-                reportResource.setOvertimeDays(sumWork - (workDays(workspaceEntity).size() * 8));
+                reportResource.setWorkingDays((double) sumDay);
+                reportResource.setOvertimeDays(sumWork - (double) sumDay);
             }
             resources.add(reportResource);
         }
@@ -127,6 +184,173 @@ public class ReportServiceImpl implements ReportService {
         resourceReportResponse.setWorkingDays(workingDays);
         resourceReportResponse.setOvertimeDays(overtimeDays);
         return resourceReportResponse;
+    }
+
+    @Override
+    public void export(HttpServletResponse response, Integer idWorkspace,
+                       Date startDate, Date endDate, String type) throws IOException {
+        int time;
+        if (type.equals("DAY")) {
+            time = 1;
+        } else {
+            time = 8;
+        }
+        writeHeaderLine();
+        writeDataLines(report(startDate, endDate, idWorkspace, type));
+
+        writeResourceHeaderLine();
+        writeResourceDataLines(reportResource(startDate, endDate, idWorkspace, time));
+
+        writeProjectHeaderLine();
+        writeProjectDataLines(reportProject(startDate, endDate, idWorkspace, time));
+        ServletOutputStream outputStream = response.getOutputStream();
+
+
+        workbook.write(outputStream);
+        workbook.close();
+
+        outputStream.close();
+    }
+
+
+
+    private void writeHeaderLine() {
+
+
+        sheet = workbook.createSheet("Home");
+        Row row = sheet.createRow(0);
+
+        CellStyle style = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setBold(true);
+        font.setFontHeight(16);
+        style.setFont(font);
+
+        createCell(row, 0, "Traffic Time", style);
+        createCell(row, 1, "Allocated Time", style);
+        createCell(row, 2, "Over Time", style);
+
+    }
+
+    private void writeDataLines(Report report) {
+        int rowCount = 1;
+
+        CellStyle style = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeight(14);
+        style.setFont(font);
+        try {
+            Row row = sheet.createRow(rowCount);
+            int columnCount = 0;
+
+            createCell(row, columnCount++, report.getTrafficTime(), style);
+            createCell(row, columnCount++, report.getAllocatedTime(), style);
+            createCell(row, columnCount++, report.getOverTime(), style);
+
+        } catch (Exception e) {
+            throw new RuntimeException(CSVFile.FAIL_MESSAGE + e.getMessage());
+        }
+
+    }
+
+    private void writeResourceHeaderLine() {
+        sheet = workbook.createSheet("Resources");
+        Row row = sheet.createRow(0);
+
+        CellStyle style = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setBold(true);
+        font.setFontHeight(16);
+        style.setFont(font);
+        createCell(row, 0, "Name", style);
+        createCell(row, 1, "Team Name", style);
+        createCell(row, 2, "Position Name", style);
+        createCell(row, 3, "Working Days", style);
+        createCell(row, 4, "OverTime Days", style);
+
+    }
+
+    private void writeProjectHeaderLine() {
+        sheet = workbook.createSheet("Project");
+        Row row = sheet.createRow(0);
+
+        CellStyle style = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setBold(true);
+        font.setFontHeight(16);
+        style.setFont(font);
+
+        createCell(row, 0, "Name", style);
+        createCell(row, 1, "Client Name", style);
+        createCell(row, 2, "Color", style);
+        createCell(row, 3, "Working Days", style);
+        createCell(row, 4, "OverTime Days", style);
+
+    }
+
+    private void writeResourceDataLines(ResourceReportResponse resources) {
+        int rowCount = 1;
+
+        CellStyle style = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeight(14);
+        style.setFont(font);
+        try {
+            for (ReportResource reportResource : resources.getResources()) {
+                Row row = sheet.createRow(rowCount++);
+                int columnCount = 0;
+
+                createCell(row, columnCount++, reportResource.getName(), style);
+                createCell(row, columnCount++, reportResource.getTeamName(), style);
+                createCell(row, columnCount++, reportResource.getPositionName(), style);
+                createCell(row, columnCount++, reportResource.getWorkingDays(), style);
+                createCell(row, columnCount, reportResource.getOvertimeDays(), style);
+
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(CSVFile.FAIL_MESSAGE + e.getMessage());
+        }
+
+    }
+
+    private void writeProjectDataLines(ProjectReportResponse projects) {
+        int rowCount = 1;
+
+        CellStyle style = workbook.createCellStyle();
+        XSSFFont font = workbook.createFont();
+        font.setFontHeight(14);
+        style.setFont(font);
+        try {
+            for (ReportProject reportProject : projects.getProjects()) {
+                Row row = sheet.createRow(rowCount++);
+                int columnCount = 0;
+
+                createCell(row, columnCount++, reportProject.getName(), style);
+                createCell(row, columnCount++, reportProject.getClientName(), style);
+                createCell(row, columnCount++, reportProject.getColor(), style);
+                createCell(row, columnCount++, reportProject.getWorkingDays(), style);
+                createCell(row, columnCount, reportProject.getOvertimeDays(), style);
+
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(CSVFile.FAIL_MESSAGE + e.getMessage());
+        }
+
+    }
+
+    public void createCell(Row row, int columnCount, Object value, CellStyle style) {
+        sheet.autoSizeColumn(columnCount);
+        Cell cell = row.createCell(columnCount);
+        if (value instanceof Integer) {
+            cell.setCellValue((Integer) value);
+        } else if (value instanceof Boolean) {
+            cell.setCellValue((Boolean) value);
+        } else if (value instanceof Double) {
+            cell.setCellValue((Double) value);
+        } else {
+            cell.setCellValue((String) value);
+        }
+        cell.setCellStyle(style);
     }
 
     private List<Boolean> workDays(WorkspaceEntity workspaceEntity) {

@@ -171,7 +171,7 @@ public class ManageUserServiceImpl implements ManageUserService {
 
 
     @Override
-    public void isActive(Integer idAccount, Integer idWorkspace,String url) throws MessagingException, IOException {
+    public void isActive(Integer idAccount, Integer idWorkspace,ReInviteRequest reInviteRequest) throws MessagingException, IOException {
         WorkspaceEntity workspaceEntity=workspaceRepository.findById(idWorkspace).orElse(null);
         AccountEntity accountEntity=accoutRepository.findById(idAccount).orElse(null);
         assert accountEntity != null;
@@ -191,7 +191,7 @@ public class ManageUserServiceImpl implements ManageUserService {
                         "<br/>We would like to let you know that you have been enabled in "+workspaceEntity.getName()+".<br/><br/>" +
                         "Click the link below to join with us.<br/><br/>" +
                         "Many thanks from Team Juggle Fish!<br/><br/>";
-                sendEmails(accountEntity.getEmail(),url,MESSAGE_ENABLE,"" );
+                sendEmails(accountEntity.getEmail(),reInviteRequest.getUrl(),MESSAGE_ENABLE,"" );
             } else {
                 accountWorkspaceRoleEntity.setCodeRole(accountWorkspaceRoleEntity.getCodeRole());
             }

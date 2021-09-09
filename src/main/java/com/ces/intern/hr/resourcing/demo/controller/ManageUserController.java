@@ -98,9 +98,9 @@ public class ManageUserController {
     @PutMapping("/{idWorkspace}/isActive/{idAccount}")
     private MessageResponse isActive(@PathVariable Integer idAccount,
                                      @PathVariable Integer idWorkspace,
-                                     @RequestBody String url) throws MessagingException, IOException {
+                                     @RequestBody ReInviteRequest reInviteRequest) throws MessagingException, IOException {
         try {
-            manageUserService.isActive(idAccount, idWorkspace,url);
+            manageUserService.isActive(idAccount, idWorkspace,reInviteRequest);
             return new MessageResponse(ResponseMessage.EMAIL_SENDT, Status.SUCCESS.getCode());
         } catch (Exception e) {
             return new MessageResponse(ResponseMessage.EMAIL_ERROR + e, Status.FAIL.getCode());

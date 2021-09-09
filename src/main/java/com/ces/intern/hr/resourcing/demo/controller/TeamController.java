@@ -72,7 +72,7 @@ public class TeamController {
         if (teamDTO.getName() == null || teamDTO.getName().isEmpty()) {
             return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
         } else {
-            teamService.renameTeam(idWorkspace,idTeam, teamDTO.getName());
+            teamService.renameTeam(idWorkspace, idTeam, teamDTO.getName());
             if (teamRepository.findByNameAndidWorkspace(teamDTO.getName(), idWorkspace).isPresent()) {
                 return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
             }
@@ -106,13 +106,12 @@ public class TeamController {
         List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
 
 
-
-            teamService.update(teamRequests, idWorkspace);
-            if (listEquals(toDTO(teamRequests), EntitytoDTO(teamEntities))) {
-                return new MessageResponse(ResponseMessage.SETTING_SUCCESS, Status.SUCCESS.getCode());
-            } else {
-                return new MessageResponse(ResponseMessage.SETTING_FAIL, Status.FAIL.getCode());
-            }
+        teamService.update(teamRequests, idWorkspace);
+        if (listEquals(toDTO(teamRequests), EntitytoDTO(teamEntities))) {
+            return new MessageResponse(ResponseMessage.SETTING_SUCCESS, Status.SUCCESS.getCode());
+        } else {
+            return new MessageResponse(ResponseMessage.SETTING_FAIL, Status.FAIL.getCode());
+        }
 
     }
 

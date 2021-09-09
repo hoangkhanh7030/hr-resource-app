@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface AccoutWorkspaceRoleRepository extends JpaRepository<AccountWorkspaceRoleEntity, Integer> {
     @Query(value = "select ac from AccountWorkspaceRoleEntity ac WHERE ac.workspaceEntity.id=:idWorkspace " +
-            "and ac.accountEntity.id=:idAccount")
+            "and ac.accountEntity.id=:idAccount and ac.accountEntity.authenticationProvider='GOOGLE'")
     Optional<AccountWorkspaceRoleEntity> findByIdAndId(@Param("idWorkspace") Integer idWorkspace, @Param("idAccount") Integer idAccount);
 
     @Query(value = "select ac from AccountWorkspaceRoleEntity ac WHERE ac.workspaceEntity.id=:idWorkspace")

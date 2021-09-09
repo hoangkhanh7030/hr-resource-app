@@ -6,9 +6,17 @@ import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
+import com.ces.intern.hr.resourcing.demo.http.response.report.ResourceReportResponse;
+import com.ces.intern.hr.resourcing.demo.http.response.resource.ReportResource;
 import com.ces.intern.hr.resourcing.demo.repository.*;
 import com.ces.intern.hr.resourcing.demo.utils.CSVFile;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +34,6 @@ public class CsvFileService {
     private final TeamRepository teamRepository;
     private final PositionRepository positionRepository;
     private final ResourceRepository resourceRepository;
-
     @Autowired
     public CsvFileService(ProjectRepository projectRepository,
                           ModelMapper modelMapper,
@@ -37,12 +44,12 @@ public class CsvFileService {
         this.projectRepository = projectRepository;
         this.modelMapper = modelMapper;
         this.workspaceRepository = workspaceRepository;
-        this.teamRepository= teamRepository;
-        this.resourceRepository=resourceRepository;
-        this.positionRepository=positionRepository;
+        this.teamRepository = teamRepository;
+        this.resourceRepository = resourceRepository;
+        this.positionRepository = positionRepository;
     }
 
-    public void store(InputStream file,Integer idWorkspace,Integer idAccount) {
+    public void store(InputStream file, Integer idWorkspace, Integer idAccount) {
         try {
 
             WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
@@ -50,7 +57,7 @@ public class CsvFileService {
             List<ProjectDTO> projectDTOList = ApacheCommonsCsvUtil.parseCsvFile(file);
 
             for (ProjectDTO projectDTO : projectDTOList) {
-                if (!projectRepository.findByName(projectDTO.getName()).isPresent()){
+                if (!projectRepository.findByName(projectDTO.getName()).isPresent()) {
                     ProjectEntity projectEntity = modelMapper.map(projectDTO, ProjectEntity.class);
                     projectEntity.setWorkspaceEntityProject(workspaceEntity);
                     projectEntity.setIsActivate(projectDTO.getIsActivate());
@@ -66,7 +73,7 @@ public class CsvFileService {
         }
     }
 
-    public void storeResource(InputStream file,Integer idWorkspace,Integer idAccount) {
+    public void storeResource(InputStream file, Integer idWorkspace, Integer idAccount) {
         try {
 
             WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
@@ -91,5 +98,7 @@ public class CsvFileService {
             throw new RuntimeException(CSVFile.FAIL_MESSAGE + e.getMessage());
         }
     }
+
+
 
 }
