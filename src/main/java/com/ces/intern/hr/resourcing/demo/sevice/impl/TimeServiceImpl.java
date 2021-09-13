@@ -126,28 +126,38 @@ public class TimeServiceImpl implements TimeService {
             calendarEnd.set(Calendar.MINUTE, 0);
             calendarEnd.set(Calendar.SECOND, 0);
             calendarEnd.set(Calendar.MILLISECOND, 0);
-            List<Date> dateList = new ArrayList<>();
-            dateList.add(calendarStart.getTime());
+            List<Date> dateRangeList = new ArrayList<>();
+            dateRangeList.add(calendarStart.getTime());
             //System.out.println(calendar1.getTime());
             do {
                 calendarStart.add(Calendar.DATE, 1);
-                dateList.add(calendarStart.getTime());
+                dateRangeList.add(calendarStart.getTime());
             } while (!calendarStart.equals(calendarEnd));
             //
-            List<List<Date>> listOfDateList = new ArrayList<>();
+            List<List<Date>> listOfDateRangeLists = new ArrayList<>();
             List<Date> listToAdd = new ArrayList<>();
             int totalDays = 0;
-            for (int i = 0; i < dateList.size(); i++) {
-                if (!workingDays.get(Utils.getIndexFromDate(dateList.get(i))) || i == dateList.size() - 1) {
+            for (int i = 0; i < dateRangeList.size(); i++) {
+                if (!workingDays.get(Utils.getIndexFromDate(dateRangeList.get(i)))) {
                     totalDays += listToAdd.size();
                     List<Date> copy = new ArrayList<>(listToAdd);
                     listToAdd.clear();
-                    listOfDateList.add(copy);
-                } else {
-                    if (i != dateList.size() - 1) {
-                        listToAdd.add(dateList.get(i));
+                    listOfDateRangeLists.add(copy);
+                }
+                else if(i == dateRangeList.size() - 1){
+                    if (workingDays.get(Utils.getIndexFromDate(dateRangeList.get(i)))){
+                        listToAdd.add(dateRangeList.get(i));
+                    }
+                    totalDays += listToAdd.size();
+                    List<Date> copy = new ArrayList<>(listToAdd);
+                    listToAdd.clear();
+                    listOfDateRangeLists.add(copy);
+                }
+                else {
+                    if (i != dateRangeList.size() - 1) {
+                        listToAdd.add(dateRangeList.get(i));
                     } else {
-                        listOfDateList.add(listToAdd);
+                        listOfDateRangeLists.add(listToAdd);
                         listToAdd.clear();
                     }
                 }
@@ -161,7 +171,7 @@ public class TimeServiceImpl implements TimeService {
                 hourTotalActual = (bookingRequest.getDuration() * hourTotalStandard) / 8;
             }
             hourForEachDay = DoubleRounder.round(hourTotalActual / totalDays, 1);
-            for (List<Date> list : listOfDateList) {
+            for (List<Date> list : listOfDateRangeLists) {
                 if (list.size() != 0) {
                     TimeEntity timeEntity = new TimeEntity();
                     timeEntity.setStartTime(list.get(0));
