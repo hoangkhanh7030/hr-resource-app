@@ -89,7 +89,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDTO> searchParameterNotIsActivate(String name, Integer idWorkspace, int page, int size) {
+    public List<ProjectDTO> searchParameterWithoutStatus(String name, Integer idWorkspace, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientName(idWorkspace, name, pageable);
         List<ProjectEntity> projectEntities = projectEntityPage.getContent();
@@ -153,7 +153,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDTO> listSortAndSearchAndIsActivate(Integer idWorkspace, int page, int size,
+    public List<ProjectDTO> sortAndSearchProjectListWithStatusFilter(Integer idWorkspace, int page, int size,
                                                            Boolean isActivate, String nameSearch,
                                                            String sortColumn, String type) {
         Page<ProjectEntity> projectEntityPage;
@@ -175,7 +175,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDTO> listSortAndSearch(Integer idWorkspace, int page, int size, String nameSearch, String sortColumn, String type) {
+    public List<ProjectDTO> sortAndSearchListProject(Integer idWorkspace, int page, int size, String nameSearch, String sortColumn, String type) {
         Pageable pageable;
         pageable = PageRequest.of(page, size, Sort.by(getSortDirection(type), sortColumn));
         Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientName(idWorkspace, nameSearch, pageable);

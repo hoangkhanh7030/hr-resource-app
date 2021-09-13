@@ -138,7 +138,7 @@ public class TimeServiceImpl implements TimeService {
             List<Date> listToAdd = new ArrayList<>();
             int totalDays = 0;
             for (int i = 0; i < dateList.size(); i++) {
-                if (!workingDays.get(Utils.getIndexFromDate(dateList.get(i)))) {
+                if (!workingDays.get(Utils.getIndexFromDate(dateList.get(i))) || i == dateList.size() - 1) {
                     totalDays += listToAdd.size();
                     List<Date> copy = new ArrayList<>(listToAdd);
                     listToAdd.clear();
@@ -173,74 +173,6 @@ public class TimeServiceImpl implements TimeService {
                 }
             }
         }
-
-        //
-
-
-//        if ((startDay.equals(Utils.toSaturDayOfWeek(startDay)) || startDay.equals(Utils.toSunDayOfWeek(startDay)))
-//                && (endDay.equals(Utils.toSaturDayOfWeek(startDay)) || endDay.equals(Utils.toSunDayOfWeek(startDay)))) {
-//            Long hourTotal = (((endDay.getTime() - startDay.getTime()) / MILLISECOND) + 1) * 8;
-//            TimeEntity timeEntity = new TimeEntity();
-//            timeEntity.setStartTime(startDay);
-//            timeEntity.setEndTime(endDay);
-//            timeEntity.setProjectEntity(projectEntity);
-//            timeEntity.setResourceEntity(resourceEntity);
-//            if (checkNull) {
-//                double totalHour = (hourTotal * bookingRequest.getPercentage()) / 100;
-//                timeEntity.setTotalHour(DoubleRounder.round(totalHour, 1));
-//            } else {
-//                timeEntity.setTotalHour((bookingRequest.getDuration() * hourTotal) / 8);
-//            }
-//            timeRepository.save(timeEntity);
-//
-//        } else {
-//            List<BookingResponse> bookingResponses = new ArrayList<>();
-//            Date currentDate = new Date(startDay.getTime());
-//            while (true) {
-//                if (startDay.equals(Utils.toSaturDayOfWeek(currentDate))) {
-//                    currentDate.setDate(currentDate.getDate() + 2);
-//                }
-//                if (startDay.equals(Utils.toSunDayOfWeek(currentDate))) {
-//                    currentDate.setDate(currentDate.getDate() + 1);
-//                }
-//
-//                Date first = Utils.toMonDayOfWeek(currentDate);
-//                Date end = Utils.toFriDayOfWeek(currentDate);
-//                if (startDay.getTime() > first.getTime()) {
-//                    first = startDay;
-//
-//                }
-//                if (end.getTime() > endDay.getTime()) {
-//                    end = endDay;
-//                }
-//                BookingResponse bookingResponse = new BookingResponse(first, end);
-//                bookingResponses.add(bookingResponse);
-//
-//                currentDate.setDate(currentDate.getDate() + 7);
-//                currentDate = Utils.toMonDayOfWeek(currentDate);
-//                if (currentDate.getTime() > endDay.getTime()) {
-//                    break;
-//                }
-//            }
-//            for (BookingResponse bookingResponse : bookingResponses) {
-//                TimeEntity timeEntity = new TimeEntity();
-//                timeEntity.setStartTime(bookingResponse.getStartDay());
-//                timeEntity.setEndTime(bookingResponse.getEndDay());
-//                timeEntity.setProjectEntity(projectEntity);
-//                timeEntity.setResourceEntity(resourceEntity);
-//                Long hourTotal = (((bookingResponse.getEndDay().getTime() - bookingResponse.getStartDay().getTime()) / MILLISECOND) + 1) * 8;
-//                if (checkNull) {
-//                    double totalHour = (hourTotal * bookingRequest.getPercentage()) / 100;
-//                    timeEntity.setTotalHour(DoubleRounder.round(totalHour, 1));
-//                } else {
-//                    timeEntity.setTotalHour((bookingRequest.getDuration() * hourTotal) / 8);
-//                }
-//                timeRepository.save(timeEntity);
-//
-//            }
-//        }
-
-
     }
 
     private void update(TimeEntity timeEntity, BookingRequest bookingRequest, Date currentStart, Date currentEnd) {
