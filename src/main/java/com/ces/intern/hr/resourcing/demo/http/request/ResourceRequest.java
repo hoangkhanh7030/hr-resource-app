@@ -16,4 +16,6 @@ public class ResourceRequest {
     private String avatar;
     private Integer positionId;
     private Integer teamId;
+    private String positionName;
+    private String teamName;
 }

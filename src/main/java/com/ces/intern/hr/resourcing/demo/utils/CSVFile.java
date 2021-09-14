@@ -10,8 +10,8 @@ public class CSVFile {
     public static final String[] CSV_HEADER = {"Project ID", "Name", "Client Name", "Color", "Text Color", "Color Pattern", "Activate"};
     public static final String[] NAME_MAPPING = {"id", "name", "clientName", "color", "textColor", "colorPattern", "isActivate"};
 
-    public static final String[] CSV_HEADER_RESOURCE = {"Name", "Avatar", "Position"};
-    public static final String[] NAME_MAPPING_RESOURCE = {"name", "avatar", "positionId"};
+    public static final String[] CSV_HEADER_RESOURCE = {"Name", "Avatar", "Position Name","Team Name"};
+    public static final String[] NAME_MAPPING_RESOURCE = {"name", "avatar", "positionName","teamName"};
 
 
 

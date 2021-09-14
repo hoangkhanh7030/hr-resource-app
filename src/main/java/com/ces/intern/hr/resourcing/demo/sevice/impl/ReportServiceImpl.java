@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class ReportServiceImpl implements ReportService {
@@ -44,7 +45,7 @@ public class ReportServiceImpl implements ReportService {
     private final ResourceRepository resourceRepository;
     private final TeamRepository teamRepository;
     private final PositionRepository positionRepository;
-    private final XSSFWorkbook workbook;
+    private XSSFWorkbook workbook;
     private XSSFSheet sheet;
 
     @Autowired
@@ -62,7 +63,7 @@ public class ReportServiceImpl implements ReportService {
         this.resourceRepository = resourceRepository;
         this.teamRepository = teamRepository;
         this.positionRepository = positionRepository;
-        workbook = new XSSFWorkbook();
+
     }
 
 
@@ -199,10 +200,10 @@ public class ReportServiceImpl implements ReportService {
         writeHeaderLine();
         writeDataLines(report(startDate, endDate, idWorkspace, type), startDate, endDate,type);
 
-        writeResourceHeaderLine();
+        writeResourceHeaderLine(type);
         writeResourceDataLines(reportResource(startDate, endDate, idWorkspace, time));
 
-        writeProjectHeaderLine();
+        writeProjectHeaderLine(type);
         writeProjectDataLines(reportProject(startDate, endDate, idWorkspace, time));
 
         ServletOutputStream outputStream = response.getOutputStream();
@@ -214,7 +215,7 @@ public class ReportServiceImpl implements ReportService {
 
 
     private void writeHeaderLine() {
-
+        workbook = new XSSFWorkbook();
 
         sheet = workbook.createSheet("Overview");
         Row row = sheet.createRow(0);
@@ -260,7 +261,7 @@ public class ReportServiceImpl implements ReportService {
 
     }
 
-    private void writeResourceHeaderLine() {
+    private void writeResourceHeaderLine(String type) {
         sheet = workbook.createSheet("Resources");
         Row row = sheet.createRow(0);
 
@@ -272,12 +273,12 @@ public class ReportServiceImpl implements ReportService {
         createCell(row, 0, "Name", style);
         createCell(row, 1, "Team Name", style);
         createCell(row, 2, "Position Name", style);
-        createCell(row, 3, "Working Days", style);
-        createCell(row, 4, "OverTime Days", style);
+        createCell(row, 3, "Working Days"+"("+type.toLowerCase(Locale.ROOT)+")", style);
+        createCell(row, 4, "OverTime Days"+"("+type.toLowerCase(Locale.ROOT)+")", style);
 
     }
 
-    private void writeProjectHeaderLine() {
+    private void writeProjectHeaderLine(String type) {
         sheet = workbook.createSheet("Project");
         Row row = sheet.createRow(0);
 
@@ -290,8 +291,8 @@ public class ReportServiceImpl implements ReportService {
         createCell(row, 0, "Name", style);
         createCell(row, 1, "Client Name", style);
         createCell(row, 2, "Color", style);
-        createCell(row, 3, "Working Days", style);
-        createCell(row, 4, "OverTime Days", style);
+        createCell(row, 3, "Working Days"+"("+type.toLowerCase(Locale.ROOT)+")", style);
+        createCell(row, 4, "OverTime Days"+"("+type.toLowerCase(Locale.ROOT)+")", style);
 
     }
 

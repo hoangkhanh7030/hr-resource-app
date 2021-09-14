@@ -119,7 +119,8 @@ public class ResourceController {
             resourceRequest.setName(resourceDTO.getName());
             resourceRequest.setAvatar(resourceDTO.getAvatar());
             //resourceRequest.setTeamId(resourceDTO.getPositionDTO().getId());
-            resourceRequest.setPositionId(resourceDTO.getPositionDTO().getId());
+            resourceRequest.setPositionName(resourceDTO.getPositionDTO().getName());
+            resourceRequest.setTeamName(resourceDTO.getTeamDTO().getName());
             resourceRequests.add(resourceRequest);
         }
         for (ResourceRequest resourceRequest : resourceRequests) {

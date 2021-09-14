@@ -73,7 +73,8 @@ public class ApacheCommonsCsvUtil {
                 ResourceRequest resourceRequest = new ResourceRequest();
                 resourceRequest.setName(csvRecord.get("name"));
                 resourceRequest.setAvatar(csvRecord.get("avatar"));
-                resourceRequest.setPositionId(Integer.parseInt(csvRecord.get("positionId")));
+                resourceRequest.setPositionName(csvRecord.get("positionName"));
+                resourceRequest.setTeamName(csvRecord.get("teamName"));
                 resourceRequests.add(resourceRequest);
             }
 

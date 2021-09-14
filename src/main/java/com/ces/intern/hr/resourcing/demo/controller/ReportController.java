@@ -51,7 +51,8 @@ public class ReportController {
         String headerKey = CSVFile.HEADER_KEY;
         String headerValue = "attachment; filename=report_" + currentDateTime + ".xlsx";
         response.setHeader(headerKey, headerValue);
-        reportService.export(response, idWorkspace, startDay, endDay,type);
+
+        reportService.export(response,idWorkspace,startDay,endDay,type);
 
     }
 }
