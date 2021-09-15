@@ -17,5 +17,6 @@ public class DashboardListResponse {
 
    private List<ResourceResponse> resources;
    private List<TeamResponse> teams;
+   private List<Boolean> workDays;
    private Integer status;
 }

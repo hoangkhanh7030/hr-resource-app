@@ -20,11 +20,11 @@ public interface ProjectService {
 
     void isActivate(Integer idProject);
 
-    List<ProjectDTO> listSortAndSearch(Integer idWorkspace, int page, int size, String nameSearch, String sortColumn, String type);
+    List<ProjectDTO> sortAndSearchListProject(Integer idWorkspace, int page, int size, String nameSearch, String sortColumn, String type);
 
-    List<ProjectDTO> listSortAndSearchAndIsActivate(Integer idWorkspace, int page, int size, Boolean isActivate, String nameSearch, String sortColumn, String type);
+    List<ProjectDTO> sortAndSearchProjectListWithStatusFilter(Integer idWorkspace, int page, int size, Boolean isActivate, String nameSearch, String sortColumn, String type);
 
-    List<ProjectDTO> searchParameterNotIsActivate(String name, Integer idWorkspace, int page, int size);
+    List<ProjectDTO> searchParameterWithoutStatus(String name, Integer idWorkspace, int page, int size);
 
     List<ProjectDTO> getAll(Integer idWorkspace, String searchName);
 
