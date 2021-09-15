@@ -44,5 +44,14 @@ public interface TimeRepository extends JpaRepository<TimeEntity,Integer> {
     @Query(value = "select  t from  TimeEntity  t where t.resourceEntity.id=:idResource")
     List<TimeEntity> findAllByIdResource(@Param("idResource") Integer idResource);
 
-
+    @Query(value = "select * from resource r left join booking b on r.id = b.resource_id " +
+            "left join project p on b.project_id = p.id left join team t on r.team_id = t.id " +
+            "left join position po on r.position_id=po.id where r.workspace_id =:idWorkspace and" +
+            " (lower(r.name) like lower(concat('%',:searchName,'%')) " +
+            "OR lower(t.name) like lower(concat('%',:searchName,'%')) " +
+            "OR lower(p.name) like lower(concat('%',:searchName,'%'))" +
+            "OR lower(p.client_name) like lower(concat('%',:searchName,'%')) " +
+            "OR lower(po.name) like lower(concat('%',:searchName,'%')))", nativeQuery = true)
+    List<TimeEntity> findAllBySearchName(@Param("idWorkspace") Integer idWorkspace,
+                                         @Param("searchName") String searchName);
 }

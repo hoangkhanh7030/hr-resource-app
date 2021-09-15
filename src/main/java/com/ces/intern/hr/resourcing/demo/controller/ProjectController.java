@@ -228,22 +228,22 @@ public class ProjectController {
             if (isActivate.isEmpty()) {
 
                 sizeListProject = listSearch(idWorkspace, searchName).size();
-                return new NumberSizeResponse(projectService.listSortAndSearch(idWorkspace, page, size, searchName, sortName, type), numberSize(sizeListProject, size));
+                return new NumberSizeResponse(projectService.sortAndSearchListProject(idWorkspace, page, size, searchName, sortName, type), numberSize(sizeListProject, size));
             } else {
                 Boolean is_Activate = isActivate.equals(ACTIVE);
                 sizeListProject = listSearchIsActivate(idWorkspace, searchName, is_Activate).size();
-                return new NumberSizeResponse(projectService.listSortAndSearchAndIsActivate(idWorkspace, page, size, is_Activate, searchName, sortName, type),
+                return new NumberSizeResponse(projectService.sortAndSearchProjectListWithStatusFilter(idWorkspace, page, size, is_Activate, searchName, sortName, type),
                         numberSize(sizeListProject, size));
             }
         } else if (!sortName.isEmpty() && searchName.isEmpty() && !type.isEmpty()) {
             Boolean is_Activate = isActivate.equals(ACTIVE);
             sizeListProject = listSearchIsActivate(idWorkspace, searchName, is_Activate).size();
-            return new NumberSizeResponse(projectService.listSortAndSearchAndIsActivate(idWorkspace, page, size, is_Activate, searchName, sortName, type),
+            return new NumberSizeResponse(projectService.sortAndSearchProjectListWithStatusFilter(idWorkspace, page, size, is_Activate, searchName, sortName, type),
                     numberSize(sizeListProject, size));
         } else {
             if (isActivate.isEmpty()) {
                 sizeListProject = listSearch(idWorkspace, searchName).size();
-                return new NumberSizeResponse(projectService.searchParameterNotIsActivate(searchName, idWorkspace, page, size), numberSize(sizeListProject, size));
+                return new NumberSizeResponse(projectService.searchParameterWithoutStatus(searchName, idWorkspace, page, size), numberSize(sizeListProject, size));
             } else {
                 Boolean is_Activate = isActivate.equals(ACTIVE);
                 sizeListProject = listSearchIsActivate(idWorkspace, searchName, is_Activate).size();

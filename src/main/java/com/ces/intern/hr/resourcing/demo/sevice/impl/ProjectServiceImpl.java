@@ -89,7 +89,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDTO> searchParameterNotIsActivate(String name, Integer idWorkspace, int page, int size) {
+    public List<ProjectDTO> searchParameterWithoutStatus(String name, Integer idWorkspace, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientName(idWorkspace, name, pageable);
         List<ProjectEntity> projectEntities = projectEntityPage.getContent();
@@ -153,16 +153,12 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDTO> listSortAndSearchAndIsActivate(Integer idWorkspace, int page, int size,
+    public List<ProjectDTO> sortAndSearchProjectListWithStatusFilter(Integer idWorkspace, int page, int size,
                                                            Boolean isActivate, String nameSearch,
                                                            String sortColumn, String type) {
         Page<ProjectEntity> projectEntityPage;
         Pageable pageable;
-        if (type.equals(SortPara.ASC.getName())) {
-            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortColumn));
-        } else {
-            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
-        }
+        pageable = PageRequest.of(page, size, Sort.by(getSortDirection(type), sortColumn));
         projectEntityPage = projectRepository.findAllByNameAndClientNameAndIsActivate(idWorkspace, nameSearch, isActivate, pageable);
         List<ProjectEntity> projectEntities = projectEntityPage.getContent();
         return projectEntities.stream().map(projectEntity -> modelMapper.map(projectEntity, ProjectDTO.class)).collect(Collectors.toList());
@@ -181,13 +177,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDTO> listSortAndSearch(Integer idWorkspace, int page, int size, String nameSearch, String sortColumn, String type) {
+    public List<ProjectDTO> sortAndSearchListProject(Integer idWorkspace, int page, int size, String nameSearch, String sortColumn, String type) {
         Pageable pageable;
-        if (type.equals(SortPara.ASC.getName())) {
-            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortColumn));
-        } else {
-            pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sortColumn));
-        }
+        pageable = PageRequest.of(page, size, Sort.by(getSortDirection(type), sortColumn));
         Page<ProjectEntity> projectEntityPage = projectRepository.findAllByNameAndClientName(idWorkspace, nameSearch, pageable);
         List<ProjectEntity> projectEntities = projectEntityPage.getContent();
         return projectEntities.stream().map(projectEntity -> modelMapper.map(
@@ -201,6 +193,16 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectEntity projectEntity = projectRepository.findById(idProject)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         projectRepository.delete(projectEntity);
+    }
+
+    private Sort.Direction getSortDirection(String type){
+        Sort.Direction direction;
+        if (type.equals(SortPara.ASC.getName())) {
+            direction = Sort.Direction.ASC;
+        } else {
+            direction = Sort.Direction.DESC;
+        }
+        return direction;
     }
 
 
