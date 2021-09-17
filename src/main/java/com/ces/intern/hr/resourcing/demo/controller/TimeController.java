@@ -49,15 +49,9 @@ public class TimeController {
 
 
     @DeleteMapping("/{workspaceId}/bookings/{timeId}")
-    public MessageResponse deleteBooking(@PathVariable Integer timeId,
-                                         @PathVariable Integer workspaceId,
-                                         @RequestHeader Integer accountId) {
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId
-                (workspaceId, accountId).orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
+    public MessageResponse deleteBooking(@PathVariable Integer timeId) {
             return timeService.deleteBooking(timeId);
-        }
-        return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
+
     }
 
     @PostMapping("/{idWorkspace}/bookings")
@@ -82,19 +76,7 @@ public class TimeController {
     @PutMapping("/{idWorkspace}/bookings")
     public MessageResponse updateBookings(@RequestBody BookingRequest bookingRequest,
                                           @PathVariable Integer idWorkspace) throws ParseException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date startDay = simpleDateFormat.parse(bookingRequest.getStartDate());
-        Date endDay = simpleDateFormat.parse(bookingRequest.getEndDate());
-        if (bookingRequest.validate()) {
-            return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
-        } else {
-            if (startDay.getTime() > endDay.getTime()) {
-                return new MessageResponse(ResponseMessage.WRONG_TIME, Status.FAIL.getCode());
-            } else {
-                timeService.updateBooking(bookingRequest, idWorkspace);
-                return new MessageResponse(ResponseMessage.UPDATE_BOOKING_SUCCESS, Status.SUCCESS.getCode());
-            }
-        }
+        return timeService.updateBooking(bookingRequest, idWorkspace);
 
 
     }

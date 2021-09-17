@@ -206,7 +206,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Intege
             "OR lower(t.name) like lower(concat('%',:searchName,'%')) " +
             "OR lower(p.name) like lower(concat('%',:searchName,'%'))" +
             "OR lower(p.client_name) like lower(concat('%',:searchName,'%')) " +
-            "OR lower(po.name) like lower(concat('%',:searchName,'%')))", nativeQuery = true)
+            "OR lower(po.name) like lower(concat('%',:searchName,'%'))) and r.is_archived=false", nativeQuery = true)
     List<ResourceEntity> findAllBySearchName(@Param("idWorkspace") Integer idWorkspace,
                                              @Param("searchName") String searchName);
 
@@ -217,7 +217,7 @@ public interface ResourceRepository extends JpaRepository<ResourceEntity, Intege
             "OR lower(t.name) like lower(concat('%',:searchName,'%')) " +
             "OR lower(p.name) like lower(concat('%',:searchName,'%'))" +
             "OR lower(p.client_name) like lower(concat('%',:searchName,'%')) " +
-            "OR lower(po.name) like lower(concat('%',:searchName,'%')))", nativeQuery = true)
+            "OR lower(po.name) like lower(concat('%',:searchName,'%'))) and r.is_archived=false", nativeQuery = true)
     Optional<ResourceEntity> findBySearchName(@Param("searchName") String searchName,
                                               @Param("id") Integer id,
                                               @Param("start") Date start,

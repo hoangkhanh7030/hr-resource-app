@@ -110,6 +110,7 @@ public class ManageUserServiceImpl implements ManageUserService {
 
     @Override
     public void reSendEmail(ReInviteRequest reInviteRequest, Integer idWorkspace) throws Exception {
+
         AccountEntity accountEntity = accoutRepository.findById(reInviteRequest.getId()).orElse(null);
         WorkspaceEntity workspaceEntity=workspaceRepository.findById(idWorkspace).orElse(null);
         assert accountEntity != null;
@@ -224,6 +225,15 @@ public class ManageUserServiceImpl implements ManageUserService {
 
         }
 
+    }
+    private int numberSize(int sizeList, int size) {
+        int numberSize;
+        if (sizeList % size == 0) {
+            numberSize = sizeList / size;
+        } else {
+            numberSize = (sizeList / size) + 1;
+        }
+        return numberSize;
     }
 
 

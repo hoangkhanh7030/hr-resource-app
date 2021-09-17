@@ -49,9 +49,9 @@ public class ResponseMessage {
     public static final String INCRECT_PASSWORD="Password Incorrect";
     public static final String INCRECT_EMAIL="Email Incorrect";
     public static final String NOT_FOUND ="Not Found";
-    public static final String IS_ACTIVATE ="isActivate";
+
     public static final String ENABLE_PROJECT ="Enable project successfully !";
-    public static final String ARCHIVED = "Archive";
+
     public static final String ARCHIVED_PROJECT = "Archive project successfully !";
 
     public static final String SETTING_SUCCESS = "Setting Successfully";

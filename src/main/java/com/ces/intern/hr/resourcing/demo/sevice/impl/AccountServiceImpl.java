@@ -4,8 +4,11 @@ package com.ces.intern.hr.resourcing.demo.sevice.impl;
 import com.ces.intern.hr.resourcing.demo.dto.AccountDTO;
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
+import com.ces.intern.hr.resourcing.demo.http.request.GoogleRequest;
+import com.ces.intern.hr.resourcing.demo.http.response.LoginResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.user.EmailInvitedResponse;
 import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
+import com.ces.intern.hr.resourcing.demo.security.jwt.JwtTokenProvider;
 import com.ces.intern.hr.resourcing.demo.utils.AuthenticationProvider;
 import com.ces.intern.hr.resourcing.demo.http.exception.LoginException;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
@@ -14,6 +17,7 @@ import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.AccountService;
 import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
 
+import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,16 +37,19 @@ public class AccountServiceImpl implements AccountService {
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private final WorkspaceRepository workspaceRepository;
+    private final JwtTokenProvider tokenProvider;
 
     @Autowired
     public AccountServiceImpl(AccoutRepository accoutRepository,
                               PasswordEncoder passwordEncoder,
                               ModelMapper modelMapper,
-                              WorkspaceRepository workspaceRepository) {
+                              WorkspaceRepository workspaceRepository,
+                              JwtTokenProvider tokenProvider) {
         this.accoutRepository = accoutRepository;
         this.passwordEncoder = passwordEncoder;
         this.modelMapper = modelMapper;
         this.workspaceRepository=workspaceRepository;
+        this.tokenProvider=tokenProvider;
     }
 
     @Override
@@ -115,6 +122,43 @@ public class AccountServiceImpl implements AccountService {
             emailInvitedResponse.setEmailSuffixes(new ArrayList<>());
         }
        return emailInvitedResponse;
+    }
+
+    @Override
+    public LoginResponse loginGoogle(GoogleRequest googleRequest) {
+        if (accoutRepository.findByEmailAndProvider(googleRequest.getEmail()).isPresent()){
+            AccountEntity accountEntity=accoutRepository.findByEmail(googleRequest.getEmail()).get();
+            accountEntity.setEmail(googleRequest.getEmail());
+            accountEntity.setFullname(googleRequest.getName());
+            accountEntity.setAvatar(googleRequest.getImageUrl());
+            accountEntity.setAuthenticationProvider(AuthenticationProvider.GOOGLE);
+            accountEntity.setCreatedDate(new Date());
+            accoutRepository.save(accountEntity);
+            AccountDTO  accountDTO =modelMapper.map(accountEntity,AccountDTO.class);
+            String jwt = tokenProvider.generateToken(accountDTO);
+            return new LoginResponse(jwt,accountDTO, Status.SUCCESS.getCode());
+        }
+        else if (accoutRepository.findByEmail(googleRequest.getEmail()).isPresent()){
+            AccountEntity accountEntity = accoutRepository.findByEmail(googleRequest.getEmail())
+                    .orElseThrow(()-> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            AccountDTO accountDTO = modelMapper.map(accountEntity,AccountDTO.class);
+            String jwt =tokenProvider.generateToken(accountDTO);
+            return new LoginResponse(jwt,accountDTO,Status.SUCCESS.getCode());
+
+        }else {
+            AccountEntity accountEntity = new AccountEntity();
+            accountEntity.setEmail(googleRequest.getEmail());
+            accountEntity.setFullname(googleRequest.getName());
+            accountEntity.setAvatar(googleRequest.getImageUrl());
+            accountEntity.setAuthenticationProvider(AuthenticationProvider.GOOGLE);
+            accountEntity.setCreatedDate(new Date());
+            accoutRepository.save(accountEntity);
+            AccountEntity account = accoutRepository.findByEmail(googleRequest.getEmail())
+                    .orElseThrow(()-> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+            AccountDTO  accountDTO =modelMapper.map(account,AccountDTO.class);
+            String jwt = tokenProvider.generateToken(accountDTO);
+            return new LoginResponse(jwt,accountDTO,Status.SUCCESS.getCode());
+        }
     }
 
 

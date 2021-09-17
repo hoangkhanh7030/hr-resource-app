@@ -56,12 +56,7 @@ public class TeamController {
 
     @DeleteMapping("/team/{idTeam}")
     private MessageResponse deleteTeam(@PathVariable Integer idTeam) {
-        teamService.deleteTeam(idTeam);
-        if (teamRepository.findById(idTeam).isPresent()) {
-            return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
-        }
-        return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
-
+        return teamService.deleteTeam(idTeam);
     }
 
     @PutMapping("/{idWorkspace}/team/{idTeam}")
@@ -69,95 +64,22 @@ public class TeamController {
                                        @PathVariable Integer idTeam,
                                        @RequestBody TeamDTO teamDTO) {
 
-        if (teamDTO.getName() == null || teamDTO.getName().isEmpty()) {
-            return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
-        } else {
-            teamService.renameTeam(idWorkspace, idTeam, teamDTO.getName());
-            if (teamRepository.findByNameAndidWorkspace(teamDTO.getName(), idWorkspace).isPresent()) {
-                return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
-            }
-            return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
-        }
+        return teamService.renameTeam(idWorkspace, idTeam, teamDTO);
     }
 
 
     @PostMapping(value = "/{idWorkspace}/teams")
     private MessageResponse created(@PathVariable Integer idWorkspace,
                                     @RequestBody List<TeamRequest> teamRequests) {
-        for (TeamRequest teamRequest : teamRequests) {
-            if (teamRequest.getName().isEmpty()) {
-                return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
-            } else {
-                for (PositionRequest positionRequest : teamRequest.getPositions()) {
-                    if (positionRequest.getName().isEmpty()) {
-                        return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
-                    }
-                }
-            }
-        }
-        teamService.created(teamRequests, idWorkspace);
-        return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
-
+        return teamService.created(teamRequests, idWorkspace);
     }
 
     @PutMapping(value = "/{idWorkspace}/teams")
     private MessageResponse update(@PathVariable Integer idWorkspace,
                                    @RequestBody List<TeamRequest> teamRequests) {
-        List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
-
-
-        teamService.update(teamRequests, idWorkspace);
-        if (listEquals(toDTO(teamRequests), EntitytoDTO(teamEntities))) {
-            return new MessageResponse(ResponseMessage.SETTING_SUCCESS, Status.SUCCESS.getCode());
-        } else {
-            return new MessageResponse(ResponseMessage.SETTING_FAIL, Status.FAIL.getCode());
-        }
+        return teamService.update(teamRequests, idWorkspace);
 
     }
 
-    private List<TeamDTO> toDTO(List<TeamRequest> teamRequests) {
-        List<TeamDTO> teamDTOS = new ArrayList<>();
-        for (TeamRequest teamRequest : teamRequests) {
-            TeamDTO teamDTO = new TeamDTO();
-            teamDTO.setName(teamRequest.getName());
-            List<PositionDTO> positionDTOS = new ArrayList<>();
-            for (PositionRequest positionRequest : teamRequest.getPositions()) {
-                PositionDTO position = new PositionDTO();
-                position.setName(positionRequest.getName());
-                positionDTOS.add(position);
-            }
-            teamDTO.setPositionDTOS(positionDTOS);
-            teamDTOS.add(teamDTO);
-        }
-        return teamDTOS;
-    }
-
-    private List<TeamDTO> EntitytoDTO(List<TeamEntity> teamEntities) {
-        List<TeamDTO> teamDTOS = new ArrayList<>();
-        for (TeamEntity teamEntity : teamEntities) {
-            TeamDTO teamDTO = new TeamDTO();
-            teamDTO.setName(teamEntity.getName());
-            List<PositionDTO> positionDTOS = new ArrayList<>();
-            for (PositionEntity positionEntity : teamEntity.getPositionEntities()) {
-                PositionDTO position = new PositionDTO();
-                position.setName(positionEntity.getName());
-                positionDTOS.add(position);
-            }
-            teamDTO.setPositionDTOS(positionDTOS);
-            teamDTOS.add(teamDTO);
-        }
-        return teamDTOS;
-    }
-
-    private static boolean listEquals(List<TeamDTO> list1, List<TeamDTO> list2) {
-        if (list1.size() != list2.size())
-            return true;
-
-        for (TeamDTO teamDTO : list1) {
-            if (!list2.contains(teamDTO))
-                return true;
-        }
-        return false;
-    }
 
 }

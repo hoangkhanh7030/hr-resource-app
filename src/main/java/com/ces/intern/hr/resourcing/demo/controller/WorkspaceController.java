@@ -1,17 +1,9 @@
 package com.ces.intern.hr.resourcing.demo.controller;
 
 import com.ces.intern.hr.resourcing.demo.dto.WorkspaceDTO;
-import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
-import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.workspace.WorkspaceResponse;
-import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
-import com.ces.intern.hr.resourcing.demo.repository.WorkspaceRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.WorkspaceService;
-import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
-import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
-import com.ces.intern.hr.resourcing.demo.utils.Role;
-import com.ces.intern.hr.resourcing.demo.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,17 +16,12 @@ public class WorkspaceController {
 
 
     private final WorkspaceService workspaceService;
-    private final WorkspaceRepository workspaceRepository;
-    private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
+
 
     @Autowired
-    public WorkspaceController(WorkspaceService workspaceService,
-                               WorkspaceRepository workspaceRepository,
-                               AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository) {
+    public WorkspaceController(WorkspaceService workspaceService) {
 
         this.workspaceService = workspaceService;
-        this.workspaceRepository = workspaceRepository;
-        this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
     }
 
     @GetMapping(value = "/{idWorkspace}")
@@ -50,67 +37,20 @@ public class WorkspaceController {
     @PostMapping(value = "")
     private MessageResponse createWorkspaceByIdAccount(@RequestHeader("AccountId") Integer idAccount, @RequestBody WorkspaceDTO workspaceDTO) {
 
-        if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()) {
-
-            return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
-        } else {
-            if (workspaceDTO.getName() == null || workspaceDTO.getName().isEmpty()) {
-                return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
-            } else {
-                workspaceService.createdWorkspaceByIdAccount(workspaceDTO, idAccount);
-            }
-            if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()) {
-                return new MessageResponse(ResponseMessage.CREATE_WORKSPACE_SUCCESS, Status.SUCCESS.getCode());
-
-            }
-            return new MessageResponse(ResponseMessage.CREATE_WORKSPACE_FAIL, Status.FAIL.getCode());
-        }
+        return workspaceService.createdWorkspaceByIdAccount(workspaceDTO,idAccount);
     }
 
     @PutMapping(value = "/{idWorkspace}")
     private MessageResponse updateWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
                                                          @RequestBody WorkspaceDTO workspaceDTO,
                                                          @RequestHeader("AccountId") Integer idAccount) {
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-
-        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
-            if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()
-                    && !accoutWorkspaceRoleRepository
-                    .findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount)
-                    .get().getWorkspaceEntity().getId().equals(idWorkspace)) {
-                return new MessageResponse(ResponseMessage.ALREADY_EXIST, Status.FAIL.getCode());
-            } else {
-                if (workspaceDTO.getName() == null || workspaceDTO.getName().isEmpty()) {
-                    return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
-                } else {
-
-                    workspaceService.updateWorkspaceByIdWorkspace(workspaceDTO, idWorkspace, idAccount);
-                }
-
-                if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()) {
-                    return new MessageResponse(ResponseMessage.UPDATE_WORKSPACE_SUCCESS, Status.SUCCESS.getCode());
-                }
-                return new MessageResponse(ResponseMessage.UPDATE_WORKSPACE_FAIL, Status.FAIL.getCode());
-
-            }
-
-        } else return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
+        return workspaceService.updateWorkspaceByIdWorkspace(workspaceDTO, idWorkspace, idAccount);
     }
 
     @DeleteMapping(value = "/{idWorkspace}")
     private MessageResponse deleteWorkspaceByIdWorkspace(@PathVariable Integer idWorkspace,
                                                          @RequestHeader("AccountId") Integer idAccount) {
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
-                .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
-        if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
-            workspaceService.deleteWorkspaceByIdWorkspace(idWorkspace, idAccount);
-            if (workspaceRepository.findById(idWorkspace).isPresent()) {
-                return new MessageResponse(ResponseMessage.DELETE_WORKSPACE_FAIL, Status.FAIL.getCode());
-
-            }
-            return new MessageResponse(ResponseMessage.DELETE_WORKSPACE_SUCCESS, Status.SUCCESS.getCode());
-        } else return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
+        return workspaceService.deleteWorkspaceByIdWorkspace(idWorkspace, idAccount);
     }
 
     @GetMapping(value = "/search/{name}")

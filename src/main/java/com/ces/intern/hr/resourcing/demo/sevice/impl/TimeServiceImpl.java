@@ -49,13 +49,13 @@ public class TimeServiceImpl implements TimeService {
 
     @Autowired
     private TimeServiceImpl(
-                            TimeRepository timeRepository,
-                            ProjectRepository projectRepository,
-                            ResourceRepository resourceRepository,
-                            ModelMapper modelMapper,
-                            TeamRepository teamRepository,
-                            WorkspaceConverter workspaceConverter,
-                            WorkspaceRepository workspaceRepository) {
+            TimeRepository timeRepository,
+            ProjectRepository projectRepository,
+            ResourceRepository resourceRepository,
+            ModelMapper modelMapper,
+            TeamRepository teamRepository,
+            WorkspaceConverter workspaceConverter,
+            WorkspaceRepository workspaceRepository) {
 
         this.timeRepository = timeRepository;
         this.projectRepository = projectRepository;
@@ -96,7 +96,8 @@ public class TimeServiceImpl implements TimeService {
             timeEntity.setProjectEntity(projectEntity);
             timeEntity.setResourceEntity(resourceEntity);
             if (checkNull) {
-                timeEntity.setTotalHour((8 * bookingRequest.getPercentage()) / 100);
+                double hour = (8 * bookingRequest.getPercentage()) / 100;
+                timeEntity.setTotalHour(DoubleRounder.round(hour, 1));
             } else {
                 timeEntity.setTotalHour((bookingRequest.getDuration() * 8) / 8);
             }
@@ -116,12 +117,10 @@ public class TimeServiceImpl implements TimeService {
             calendarEnd.set(Calendar.MILLISECOND, 0);
             List<Date> dateRangeList = new ArrayList<>();
             dateRangeList.add(calendarStart.getTime());
-            //System.out.println(calendar1.getTime());
             do {
                 calendarStart.add(Calendar.DATE, 1);
                 dateRangeList.add(calendarStart.getTime());
             } while (!calendarStart.equals(calendarEnd));
-            //
             List<List<Date>> listOfDateRangeLists = new ArrayList<>();
             List<Date> listToAdd = new ArrayList<>();
             int totalDays = 0;
@@ -189,18 +188,28 @@ public class TimeServiceImpl implements TimeService {
     }
 
     @Override
-    public void updateBooking(BookingRequest bookingRequest, Integer idWorkspace) throws ParseException {
+    public MessageResponse updateBooking(BookingRequest bookingRequest, Integer idWorkspace) throws ParseException {
         Date startDay = SIMPLE_DATE_FORMAT.parse(bookingRequest.getStartDate());
         Date endDay = SIMPLE_DATE_FORMAT.parse(bookingRequest.getEndDate());
-        if (timeRepository.findById(bookingRequest.getId()).isPresent()) {
-            TimeEntity timeEntity = timeRepository.findById(bookingRequest.getId()).get();
-            Boolean checkStartDay = startDay.equals(timeEntity.getStartTime()) || startDay.after(timeEntity.getStartTime());
-            Boolean checkEndDay = endDay.equals(timeEntity.getEndTime()) || endDay.before(timeEntity.getEndTime());
-            if (checkStartDay && checkEndDay) {
-                update(timeEntity, bookingRequest, startDay, endDay);
+        if (bookingRequest.validate()) {
+            return new MessageResponse(ResponseMessage.IS_EMPTY, Status.FAIL.getCode());
+        } else {
+            if (startDay.getTime() > endDay.getTime()) {
+                return new MessageResponse(ResponseMessage.WRONG_TIME, Status.FAIL.getCode());
             } else {
-                timeRepository.delete(timeEntity);
-                newBooking(bookingRequest, idWorkspace);
+
+                if (timeRepository.findById(bookingRequest.getId()).isPresent()) {
+                    TimeEntity timeEntity = timeRepository.findById(bookingRequest.getId()).get();
+                    Boolean checkStartDay = startDay.equals(timeEntity.getStartTime()) || startDay.after(timeEntity.getStartTime());
+                    Boolean checkEndDay = endDay.equals(timeEntity.getEndTime()) || endDay.before(timeEntity.getEndTime());
+                    if (checkStartDay && checkEndDay) {
+                        update(timeEntity, bookingRequest, startDay, endDay);
+                    } else {
+                        timeRepository.delete(timeEntity);
+                        newBooking(bookingRequest, idWorkspace);
+                    }
+                }
+                return new MessageResponse(ResponseMessage.UPDATE_BOOKING_SUCCESS, Status.SUCCESS.getCode());
             }
         }
     }
@@ -297,6 +306,7 @@ public class TimeServiceImpl implements TimeService {
         dashboardListResponse.setStatus(Status.SUCCESS.getCode());
         List<Boolean> workDays = new ArrayList<>();
         WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).orElse(null);
+        assert workspaceEntity != null;
         String[] arrayWorkDays = workspaceEntity.getWorkDays().split(",");
         for (String string : arrayWorkDays) {
             workDays.add(Boolean.parseBoolean(string));
@@ -335,8 +345,7 @@ public class TimeServiceImpl implements TimeService {
     }
 
     private ProjectDTO toDTO(ProjectEntity projectEntity) {
-        ProjectDTO projectDTO = modelMapper.map(projectEntity, ProjectDTO.class);
-        return projectDTO;
+        return modelMapper.map(projectEntity, ProjectDTO.class);
     }
 
     private List<List<DashboardResponse>> sort(ResourceEntity resourceEntity, Date startDay, Date endDay) {
@@ -365,7 +374,7 @@ public class TimeServiceImpl implements TimeService {
 
     private void findArr(List<TimeDTO> input, List<List<TimeDTO>> result) {
         if (input.isEmpty()) {
-            result.isEmpty();
+            result.clear();
         } else {
             List<TimeDTO> tempList = new ArrayList<>();
             tempList.add(input.get(0));
