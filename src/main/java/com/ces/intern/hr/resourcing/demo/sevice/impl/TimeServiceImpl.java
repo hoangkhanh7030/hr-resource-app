@@ -1,6 +1,6 @@
 package com.ces.intern.hr.resourcing.demo.sevice.impl;
 
-import com.ces.intern.hr.resourcing.demo.converter.TimeConverter;
+
 import com.ces.intern.hr.resourcing.demo.converter.WorkspaceConverter;
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
 import com.ces.intern.hr.resourcing.demo.dto.TimeDTO;
@@ -8,7 +8,6 @@ import com.ces.intern.hr.resourcing.demo.dto.WorkspaceDTO;
 import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.BookingRequest;
-import com.ces.intern.hr.resourcing.demo.http.response.dashboard.BookingResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.dashboard.DashboardListResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.dashboard.DashboardResponse;
 import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
@@ -36,12 +35,10 @@ public class TimeServiceImpl implements TimeService {
     private static final int MILLISECOND = (1000 * 60 * 60 * 24);
     private static final int ONE_WEEK = 7;
     private static final int TWO_WEEK = 14;
-    private static final int FOUR_WEEK = 28;
     private static final int ONE_WEEK_WORK_HOUR = 40;
     private static final int TWO_WEEK_WORK_HOUR = 80;
     private static final int FOUR_WEEK_WORK_HOUR = 160;
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    private final TimeConverter timeConverter;
     private final TimeRepository timeRepository;
     private final ProjectRepository projectRepository;
     private final ResourceRepository resourceRepository;
@@ -51,7 +48,7 @@ public class TimeServiceImpl implements TimeService {
     private final WorkspaceRepository workspaceRepository;
 
     @Autowired
-    private TimeServiceImpl(TimeConverter timeConverter,
+    private TimeServiceImpl(
                             TimeRepository timeRepository,
                             ProjectRepository projectRepository,
                             ResourceRepository resourceRepository,
@@ -59,7 +56,7 @@ public class TimeServiceImpl implements TimeService {
                             TeamRepository teamRepository,
                             WorkspaceConverter workspaceConverter,
                             WorkspaceRepository workspaceRepository) {
-        this.timeConverter = timeConverter;
+
         this.timeRepository = timeRepository;
         this.projectRepository = projectRepository;
         this.resourceRepository = resourceRepository;
@@ -74,9 +71,9 @@ public class TimeServiceImpl implements TimeService {
     public MessageResponse deleteBooking(Integer id) {
         if (timeRepository.findById(id).isPresent()) {
             timeRepository.deleteById(id);
-            return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
+            return new MessageResponse(ResponseMessage.DELETE_BOOKING_SUCCESS, Status.SUCCESS.getCode());
         }
-        return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
+        return new MessageResponse(ResponseMessage.DELETE_BOOKING_FAIL, Status.FAIL.getCode());
     }
 
     @Override
@@ -89,14 +86,21 @@ public class TimeServiceImpl implements TimeService {
 
         WorkspaceDTO workspaceDTO = workspaceConverter.convertToDTO(workspaceRepository.getById(idWorkspace));
         List<Boolean> workingDays = new ArrayList<>(workspaceDTO.getWorkDays());
-        //Boolean[] workDays = workspaceDTO.getWorkDays().toArray(new Boolean[0]);
-        List<BookingResponse> bookingResponseList = new ArrayList<>();
-        //Long hourTotal;
+
         if (startDay.equals(endDay)) {
-            //hourTotal = (((endDay.getTime() - startDay.getTime()) / MILLISECOND) + 1) * 8;
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(startDay);
-
+            TimeEntity timeEntity = new TimeEntity();
+            timeEntity.setStartTime(startDay);
+            timeEntity.setEndTime(endDay);
+            timeEntity.setProjectEntity(projectEntity);
+            timeEntity.setResourceEntity(resourceEntity);
+            if (checkNull) {
+                timeEntity.setTotalHour((8 * bookingRequest.getPercentage()) / 100);
+            } else {
+                timeEntity.setTotalHour((bookingRequest.getDuration() * 8) / 8);
+            }
+            timeRepository.save(timeEntity);
         } else {
             Calendar calendarStart = Calendar.getInstance();
             Calendar calendarEnd = Calendar.getInstance();
@@ -221,16 +225,17 @@ public class TimeServiceImpl implements TimeService {
         Date startDay = SIMPLE_DATE_FORMAT.parse(startDate);
         Date endDay = SIMPLE_DATE_FORMAT.parse(endDate);
         long viewType = ((endDay.getTime() - startDay.getTime()) / MILLISECOND) + 1;
-        Double percent;
+        double percent;
         DashboardListResponse dashboardListResponse = new DashboardListResponse();
         List<ResourceEntity> resourceEntities = resourceRepository.findAllBySearchName(idWorkspace, searchName);
-        Collections.sort(resourceEntities, (o1, o2) -> (int) (o1.getCreatedDate().getTime() - o2.getCreatedDate().getTime()));
-        List<Integer> result = resourceEntities.stream().map(resourceEntity -> resourceEntity.getId()).distinct().collect(Collectors.toList());
+        resourceEntities.sort((o1, o2) -> (int) (o1.getCreatedDate().getTime() - o2.getCreatedDate().getTime()));
+        List<Integer> result = resourceEntities.stream().map(BaseEnity::getId).distinct().collect(Collectors.toList());
         List<ResourceResponse> resourceResponses = new ArrayList<>();
         for (Integer integer : result) {
-            ResourceEntity resourceEntity = resourceRepository.findById(integer).get();
+            ResourceEntity resourceEntity = resourceRepository.findById(integer).orElse(null);
             if (searchName.isEmpty()) {
                 ResourceResponse resourceResponse = new ResourceResponse();
+                assert resourceEntity != null;
                 resourceResponse.setId(resourceEntity.getId());
                 resourceResponse.setName(resourceEntity.getName());
                 resourceResponse.setAvatar(resourceEntity.getAvatar());
@@ -256,6 +261,7 @@ public class TimeServiceImpl implements TimeService {
                             timeEntities.get(i).getEndTime().getTime() <= endDay.getTime()) {
                         if (resourceRepository.findBySearchName(searchName, integer, timeEntities.get(i).getStartTime(), timeEntities.get(i).getEndTime()).isPresent()) {
                             ResourceResponse resourceResponse = new ResourceResponse();
+                            assert resourceEntity != null;
                             resourceResponse.setId(resourceEntity.getId());
                             resourceResponse.setName(resourceEntity.getName());
                             resourceResponse.setAvatar(resourceEntity.getAvatar());
@@ -282,7 +288,7 @@ public class TimeServiceImpl implements TimeService {
         }
         dashboardListResponse.setResources(resourceResponses);
         List<TeamEntity> teamEntities = teamRepository.findAllByidWorkspace(idWorkspace);
-        Collections.sort(teamEntities, (o1, o2) -> (int) (o1.getCreatedDate().getTime() - o2.getCreatedDate().getTime()));
+        teamEntities.sort((o1, o2) -> (int) (o1.getCreatedDate().getTime() - o2.getCreatedDate().getTime()));
         List<TeamResponse> teamResponses = teamEntities.stream().map(
                 teamEntity -> modelMapper.map(teamEntity, TeamResponse.class))
                 .collect(Collectors.toList());
@@ -336,7 +342,7 @@ public class TimeServiceImpl implements TimeService {
     private List<List<DashboardResponse>> sort(ResourceEntity resourceEntity, Date startDay, Date endDay) {
         List<TimeEntity> timeEntities = timeRepository.findAllByIdResource(resourceEntity.getId());
         List<TimeDTO> timeDTOS = entityToDTO(timeEntities, startDay, endDay);
-        Collections.sort(timeDTOS, (o1, o2) -> (int) (o1.getStartDate().getTime() - o2.getStartDate().getTime()));
+        timeDTOS.sort((o1, o2) -> (int) (o1.getStartDate().getTime() - o2.getStartDate().getTime()));
         List<List<TimeDTO>> list = new ArrayList<>();
         findArr(timeDTOS, list);
         List<List<DashboardResponse>> result = new ArrayList<>();

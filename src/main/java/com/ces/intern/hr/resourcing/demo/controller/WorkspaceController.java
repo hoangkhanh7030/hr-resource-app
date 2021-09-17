@@ -60,10 +60,10 @@ public class WorkspaceController {
                 workspaceService.createdWorkspaceByIdAccount(workspaceDTO, idAccount);
             }
             if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()) {
-                return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
+                return new MessageResponse(ResponseMessage.CREATE_WORKSPACE_SUCCESS, Status.SUCCESS.getCode());
 
             }
-            return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
+            return new MessageResponse(ResponseMessage.CREATE_WORKSPACE_FAIL, Status.FAIL.getCode());
         }
     }
 
@@ -89,9 +89,10 @@ public class WorkspaceController {
                 }
 
                 if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()) {
-                    return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+                    return new MessageResponse(ResponseMessage.UPDATE_WORKSPACE_SUCCESS, Status.SUCCESS.getCode());
                 }
-                return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+                return new MessageResponse(ResponseMessage.UPDATE_WORKSPACE_FAIL, Status.FAIL.getCode());
+
             }
 
         } else return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
@@ -105,10 +106,10 @@ public class WorkspaceController {
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
             workspaceService.deleteWorkspaceByIdWorkspace(idWorkspace, idAccount);
             if (workspaceRepository.findById(idWorkspace).isPresent()) {
-                return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
+                return new MessageResponse(ResponseMessage.DELETE_WORKSPACE_FAIL, Status.FAIL.getCode());
 
             }
-            return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
+            return new MessageResponse(ResponseMessage.DELETE_WORKSPACE_SUCCESS, Status.SUCCESS.getCode());
         } else return new MessageResponse(ResponseMessage.ROLE, Status.FAIL.getCode());
     }
 

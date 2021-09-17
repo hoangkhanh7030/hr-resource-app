@@ -167,7 +167,6 @@ public class ResourceController {
         AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId
                 (workspaceId, accountId).orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.EDIT.getCode())) {
-            //resourceService.addNewResource(resourceRequest, workspaceId, accountId);
             resourceRequest.setName(resourceRequest.getName() == null? "" : resourceRequest.getName());
             resourceRequest.setPositionId(resourceRequest.getPositionId() == null? 0 : resourceRequest.getPositionId());
             return resourceService.addNewResource(resourceRequest, accountId,workspaceId);

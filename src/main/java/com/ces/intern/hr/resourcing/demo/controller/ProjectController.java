@@ -75,29 +75,33 @@ public class ProjectController {
 
 
     @GetMapping(value = "/{idWorkspace}/projects/export")
-    public void exportToCSV(HttpServletResponse response,
-                            @PathVariable Integer idWorkspace) throws IOException {
-        response.setContentType(CSVFile.CONTENT_TYPE);
-        DateFormat dateFormat = new SimpleDateFormat(CSVFile.DATE);
-        String currentDateTime = dateFormat.format(new Date());
+    public MessageResponse exportToCSV(HttpServletResponse response,
+                                       @PathVariable Integer idWorkspace) throws IOException {
+        try {
+            response.setContentType(CSVFile.CONTENT_TYPE);
+            DateFormat dateFormat = new SimpleDateFormat(CSVFile.DATE);
+            String currentDateTime = dateFormat.format(new Date());
 
-        String headerKey = CSVFile.HEADER_KEY;
-        String headerValue = CSVFile.HEADER_VALUE + currentDateTime + CSVFile.FILE_TYPE;
-        response.setHeader(headerKey, headerValue);
-        List<ProjectEntity> projectEntityList = projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
-        List<ProjectDTO> projectDTOList = projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
+            String headerKey = CSVFile.HEADER_KEY;
+            String headerValue = CSVFile.HEADER_VALUE + currentDateTime + CSVFile.FILE_TYPE;
+            response.setHeader(headerKey, headerValue);
+            List<ProjectEntity> projectEntityList = projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
+            List<ProjectDTO> projectDTOList = projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
 
-        ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
-        String[] csvHeader = CSVFile.CSV_HEADER;
-        String[] nameMapping = CSVFile.NAME_MAPPING;
+            ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
+            String[] csvHeader = CSVFile.CSV_HEADER;
+            String[] nameMapping = CSVFile.NAME_MAPPING;
 
-        csvWriter.writeHeader(csvHeader);
+            csvWriter.writeHeader(csvHeader);
 
-        for (ProjectDTO projectDTO : projectDTOList) {
-            csvWriter.write(projectDTO, nameMapping);
+            for (ProjectDTO projectDTO : projectDTOList) {
+                csvWriter.write(projectDTO, nameMapping);
+            }
+            csvWriter.close();
+            return new MessageResponse(ResponseMessage.EXPORT_PROJECT_SUCCESS, Status.SUCCESS.getCode());
+        } catch (Exception e) {
+            return new MessageResponse(ResponseMessage.EXPORT_PROJECT_FAIL,Status.FAIL.getCode());
         }
-
-        csvWriter.close();
     }
 
     @PostMapping(value = "/{idWorkspace}/projects/import")
@@ -142,9 +146,9 @@ public class ProjectController {
             }
             projectService.createdProject(projectRequest, idAccount, idWorkspace);
             if (projectRepository.findByNameAndWorkspaceEntityProject_Id(projectRequest.getName(), idWorkspace).isPresent()) {
-                return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
+                return new MessageResponse(ResponseMessage.CREATE_PROJECT_SUCCESS, Status.SUCCESS.getCode());
             }
-            return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
+            return new MessageResponse(ResponseMessage.CREATE_PROJECT_FAIL, Status.FAIL.getCode());
         }
 
     }
@@ -160,8 +164,8 @@ public class ProjectController {
             projectService.updateProject(projectRequest, idAccount, idProject);
         }
         if (projectRepository.findByNameAndWorkspaceEntityProject_Id(projectRequest.getName(), idWorkspace).isPresent()) {
-            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
-        } else return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+            return new MessageResponse(ResponseMessage.UPDATE_PROJECT_SUCCESS, Status.SUCCESS.getCode());
+        } else return new MessageResponse(ResponseMessage.UPDATE_PROJECT_FAIL, Status.FAIL.getCode());
 
     }
 
@@ -171,9 +175,9 @@ public class ProjectController {
         if (projectRepository.findByIdAndWorkspaceEntityProject_Id(idProject, idWorkspace).isPresent()) {
             projectService.deleteProject(idProject);
             if (projectRepository.findById(idProject).isPresent()) {
-                return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
+                return new MessageResponse(ResponseMessage.DELETE_PROJECT_FAIL, Status.FAIL.getCode());
             } else {
-                return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
+                return new MessageResponse(ResponseMessage.DELETE_PROJECT_SUCCESS, Status.SUCCESS.getCode());
             }
         } else {
             return new MessageResponse(ResponseMessage.NOT_FOUND, Status.FAIL.getCode());
@@ -190,10 +194,10 @@ public class ProjectController {
             ProjectEntity projectEntity = projectRepository.findById(idProject)
                     .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
             if (projectEntity.getIsActivate()) {
-                return new MessageResponse(ResponseMessage.IS_ACTIVATE, Status.SUCCESS.getCode());
+                return new MessageResponse(ResponseMessage.ENABLE_PROJECT, Status.SUCCESS.getCode());
 
             } else {
-                return new MessageResponse(ResponseMessage.ARCHIEVED, Status.SUCCESS.getCode());
+                return new MessageResponse(ResponseMessage.ARCHIVED_PROJECT, Status.SUCCESS.getCode());
             }
         } else {
             return new MessageResponse(ResponseMessage.NOT_FOUND, Status.FAIL.getCode());

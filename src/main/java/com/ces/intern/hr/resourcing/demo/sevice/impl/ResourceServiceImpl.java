@@ -87,7 +87,7 @@ public class ResourceServiceImpl implements ResourceService {
         resourceEntity.setModifiedDate(currentDate);
         resourceEntity.setModifiedBy(accountId);
         resourceRepository.save(resourceEntity);
-        return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
+        return new MessageResponse(ResponseMessage.CREATE_RESOURCE_SUCCESS, Status.SUCCESS.getCode());
     }
 
     @Override
@@ -134,9 +134,9 @@ public class ResourceServiceImpl implements ResourceService {
                 deleteOne(positionRequest);
             }
             resourceRepository.save(resourceEntityTarget);
-            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+            return new MessageResponse(ResponseMessage.UPDATE_RESOURCE_SUCCESS, Status.SUCCESS.getCode());
         }
-        return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+        return new MessageResponse(ResponseMessage.UPDATE_RESOURCE_FAIL, Status.FAIL.getCode());
     }
     private void deleteOneTeam(TeamRequest teamRequest) {
         TeamEntity teamEntity = teamRepository.findById(teamRequest.getId()).orElse(null);
@@ -191,9 +191,9 @@ public class ResourceServiceImpl implements ResourceService {
     public MessageResponse deleteResource(Integer id, Integer workspaceId) {
         if (resourceRepository.findByIdAndPositionEntity_TeamEntity_WorkspaceEntityTeam_Id(id, workspaceId).isPresent()) {
             resourceRepository.deleteById(id);
-            return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
+            return new MessageResponse(ResponseMessage.DELETE_RESOURCE_SUCCESS, Status.SUCCESS.getCode());
         }
-        return new MessageResponse(ResponseMessage.DELETE_FAIL, Status.FAIL.getCode());
+        return new MessageResponse(ResponseMessage.DELETE_RESOURCE_FAIL, Status.FAIL.getCode());
     }
 
     @Override

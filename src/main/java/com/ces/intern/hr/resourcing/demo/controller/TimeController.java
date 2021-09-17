@@ -73,7 +73,7 @@ public class TimeController {
                 return new MessageResponse(ResponseMessage.WRONG_TIME, Status.FAIL.getCode());
             } else {
                 timeService.newBooking(bookingRequest, idWorkspace);
-                return new MessageResponse(ResponseMessage.CREATE_SUCCESS, Status.SUCCESS.getCode());
+                return new MessageResponse(ResponseMessage.CREATE_BOOKING_SUCCESS, Status.SUCCESS.getCode());
             }
         }
 
@@ -92,7 +92,7 @@ public class TimeController {
                 return new MessageResponse(ResponseMessage.WRONG_TIME, Status.FAIL.getCode());
             } else {
                 timeService.updateBooking(bookingRequest, idWorkspace);
-                return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+                return new MessageResponse(ResponseMessage.UPDATE_BOOKING_SUCCESS, Status.SUCCESS.getCode());
             }
         }
 
