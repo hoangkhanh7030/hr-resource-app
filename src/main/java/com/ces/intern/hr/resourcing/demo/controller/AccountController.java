@@ -30,7 +30,7 @@ public class AccountController {
 
     @PostMapping(value = "/signup")
     public MessageResponse create(@RequestBody AccountRequest accountRequest) {
-        String emailRegex = "^(.+)@(codeenginestudio.com)$";
+        String emailRegex = "^(.+)@(.+)$";
         String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
         if (accountRequest.getEmail().matches(emailRegex)) {
             if (accountRequest.getPassword().matches(passwordRegex)) {
@@ -50,15 +50,15 @@ public class AccountController {
                 }
                 return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
             }
-            return new MessageResponse(ResponseMessage.INCRECT_PASSWORD, Status.FAIL.getCode());
+            return new MessageResponse(ResponseMessage.INCORRECT_PASSWORD, Status.FAIL.getCode());
         }
-        return new MessageResponse(ResponseMessage.INCRECT_EMAIL, Status.FAIL.getCode());
+        return new MessageResponse(ResponseMessage.INCORRECT_EMAIL, Status.FAIL.getCode());
     }
 
     @PutMapping(value = "/account")
     public MessageResponse updateAccount(@RequestBody AccountRequest accountRequest,
                                          @RequestHeader(value = "AccountId") Integer accountId) {
-        String emailRegex = "^(.+)@(codeenginestudio.com)$";
+        String emailRegex = "^(.+)@(.+)$";
         String passwordRegex = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$";
         if (accountRequest.getEmail().matches(emailRegex)) {
             if (accountRequest.getPassword().matches(passwordRegex)) {
@@ -77,9 +77,9 @@ public class AccountController {
                     }
                 }
             }
-            return new MessageResponse(ResponseMessage.INCRECT_PASSWORD, Status.FAIL.getCode());
+            return new MessageResponse(ResponseMessage.INCORRECT_PASSWORD, Status.FAIL.getCode());
         }
-        return new MessageResponse(ResponseMessage.INCRECT_EMAIL, Status.FAIL.getCode());
+        return new MessageResponse(ResponseMessage.INCORRECT_EMAIL, Status.FAIL.getCode());
     }
 
     @GetMapping(value = "/workspaces/{idWorkspace}/emails")

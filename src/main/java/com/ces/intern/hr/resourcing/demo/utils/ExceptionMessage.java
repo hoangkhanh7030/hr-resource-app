@@ -5,7 +5,7 @@ public enum ExceptionMessage {
     RECORD_ALREADY_EXISTS("Record Already Exists"),
     MISSING_REQUIRE_FIELD("Missing Require Field !"),
     INTERNAL_SERVER_ERROR("Internal Server Error"),
-    USERNAME_PASSWORD_INVALIDATE("Username or Password Incorrect"),
+    USERNAME_PASSWORD_INVALIDATE("Email or Password does not match"),
     EMAIL_ALREADY_EXIST("Email Already Exist"),
     FIELD_NOT_CORRECT("Format Not Correct");
 

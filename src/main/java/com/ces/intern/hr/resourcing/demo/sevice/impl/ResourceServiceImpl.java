@@ -182,9 +182,9 @@ public class ResourceServiceImpl implements ResourceService {
                     .findByWorkspaceEntityResource_IdAndId(workspaceId, resourceId).get();
             resourceEntityTarget.setIsArchived(!resourceEntityTarget.getIsArchived());
             resourceRepository.save(resourceEntityTarget);
-            return new MessageResponse(ResponseMessage.UPDATE_SUCCESS, Status.SUCCESS.getCode());
+            return new MessageResponse(ResponseMessage.ENABLE_RESOURCE, Status.SUCCESS.getCode());
         }
-        return new MessageResponse(ResponseMessage.UPDATE_FAIL, Status.FAIL.getCode());
+        return new MessageResponse(ResponseMessage.ARCHIVED_RESOURCE, Status.FAIL.getCode());
     }
 
     @Override

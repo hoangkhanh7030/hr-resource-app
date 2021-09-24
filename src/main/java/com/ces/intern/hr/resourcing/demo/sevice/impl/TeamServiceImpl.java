@@ -63,9 +63,9 @@ public class TeamServiceImpl implements TeamService {
                 .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         teamRepository.delete(teamEntity);
         if (teamRepository.findById(idTeam).isPresent()) {
-            return new MessageResponse(ResponseMessage.CREATE_FAIL, Status.FAIL.getCode());
+            return new MessageResponse(ResponseMessage.DELETE_TEAM_FAIL, Status.FAIL.getCode());
         }
-        return new MessageResponse(ResponseMessage.DELETE_SUCCESS, Status.SUCCESS.getCode());
+        return new MessageResponse(ResponseMessage.DELETE_TEAM_SUCCESS, Status.SUCCESS.getCode());
     }
 
     @Override

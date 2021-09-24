@@ -1,4 +1,5 @@
 package com.ces.intern.hr.resourcing.demo.controller;
+
 import com.ces.intern.hr.resourcing.demo.entity.AccountEntity;
 import com.ces.intern.hr.resourcing.demo.entity.AccountWorkspaceRoleEntity;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
@@ -9,10 +10,7 @@ import com.ces.intern.hr.resourcing.demo.http.response.message.MessageResponse;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutRepository;
 import com.ces.intern.hr.resourcing.demo.repository.AccoutWorkspaceRoleRepository;
 import com.ces.intern.hr.resourcing.demo.sevice.ManageUserService;
-import com.ces.intern.hr.resourcing.demo.utils.AuthenticationProvider;
-import com.ces.intern.hr.resourcing.demo.utils.ExceptionMessage;
-import com.ces.intern.hr.resourcing.demo.utils.ResponseMessage;
-import com.ces.intern.hr.resourcing.demo.utils.Status;
+import com.ces.intern.hr.resourcing.demo.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +34,7 @@ public class ManageUserController {
                                 AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository) {
         this.manageUserService = manageUserService;
         this.accoutRepository = accoutRepository;
-        this.accoutWorkspaceRoleRepository=accoutWorkspaceRoleRepository;
+        this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
     }
 
     @GetMapping("/{idWorkspace}/manageUsers")
@@ -51,10 +49,10 @@ public class ManageUserController {
         }
         searchName = searchName == null ? "" : searchName;
         int sizeList = accoutRepository.findAllBysearchNameToList(idWorkspace, searchName).size();
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity=accoutWorkspaceRoleRepository.findByIdWorkspaceAndRoleAdmin(idWorkspace).
-                orElseThrow(()->new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdWorkspaceAndRoleAdmin(idWorkspace).
+                orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         return new ManageResponse(manageUserService.getAll(idWorkspace, page, size, searchName, sortName, type),
-                numberSize(sizeList, size),accountWorkspaceRoleEntity.getAccountEntity().getId());
+                numberSize(sizeList, size), accountWorkspaceRoleEntity.getAccountEntity().getId());
     }
 
     @DeleteMapping("/{idWorkspace}/account/{idAccount}")
@@ -72,18 +70,19 @@ public class ManageUserController {
                                  @PathVariable Integer idWorkspace
     ) {
         try {
-            manageUserService.reSendEmail(reInviteRequest,idWorkspace);
+            manageUserService.reSendEmail(reInviteRequest, idWorkspace);
             AccountEntity accountEntity = accoutRepository.findById(reInviteRequest.getId()).orElse(null);
             final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
             final Runnable runnable = new Runnable() {
                 int countdownStarter = 172800;
+
                 @Override
                 public void run() {
                     countdownStarter--;
-                    if(countdownStarter<0){
+                    if (countdownStarter < 0) {
                         assert accountEntity != null;
-                        if (accountEntity.getAuthenticationProvider().getName().equals(AuthenticationProvider.PENDING.getName())){
-                            AccountWorkspaceRoleEntity accountWorkspaceRoleEntity=accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace,accountEntity.getId()).orElse(null);
+                        if (accountEntity.getAuthenticationProvider().getName().equals(AuthenticationProvider.PENDING.getName())) {
+                            AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, accountEntity.getId()).orElse(null);
                             assert accountWorkspaceRoleEntity != null;
                             accoutWorkspaceRoleRepository.delete(accountWorkspaceRoleEntity);
                         }
@@ -104,9 +103,17 @@ public class ManageUserController {
     private MessageResponse isActive(@PathVariable Integer idAccount,
                                      @PathVariable Integer idWorkspace,
                                      @RequestBody IsActiveRequest isActiveRequest) {
+        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity=accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
+                .orElseThrow(()-> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
         try {
-            manageUserService.isActive(idAccount, idWorkspace,isActiveRequest.getUrl());
-            return new MessageResponse(ResponseMessage.EMAIL_SENDT, Status.SUCCESS.getCode());
+            manageUserService.isActive(idAccount, idWorkspace, isActiveRequest.getUrl());
+            if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.INACTIVE.getCode())){
+                return new MessageResponse(ResponseMessage.ENABLE_EMAIL, Status.SUCCESS.getCode());
+            }else {
+                return new MessageResponse(ResponseMessage.ARCHIVED_EMAIL, Status.SUCCESS.getCode());
+
+            }
+
         } catch (Exception e) {
             return new MessageResponse(ResponseMessage.EMAIL_ERROR + e, Status.FAIL.getCode());
         }
