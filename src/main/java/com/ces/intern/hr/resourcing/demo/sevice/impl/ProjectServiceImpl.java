@@ -107,7 +107,6 @@ public class ProjectServiceImpl implements ProjectService {
             projectEntity.setColor(projectRequest.getColor());
             projectEntity.setIsActivate(projectRequest.getIsActivate());
             projectEntity.setTextColor(projectRequest.getTextColor());
-            projectEntity.setColorPattern(projectRequest.getColorPattern());
             projectEntity.setModifiedBy(idAccount);
             projectEntity.setModifiedDate(new Date());
             projectRepository.save(projectEntity);
@@ -190,34 +189,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    @Override
-    public MessageResponse export(HttpServletResponse response, Integer idWorkspace) {
-        try {
-            response.setContentType(CSVFile.CONTENT_TYPE);
-            DateFormat dateFormat = new SimpleDateFormat(CSVFile.DATE);
-            String currentDateTime = dateFormat.format(new Date());
 
-            String headerKey = CSVFile.HEADER_KEY;
-            String headerValue = CSVFile.HEADER_VALUE + currentDateTime + CSVFile.FILE_TYPE;
-            response.setHeader(headerKey, headerValue);
-            List<ProjectEntity> projectEntityList = projectRepository.findAllByWorkspaceEntityProject_Id(idWorkspace);
-            List<ProjectDTO> projectDTOList = projectEntityList.stream().map(s -> modelMapper.map(s, ProjectDTO.class)).collect(Collectors.toList());
-
-            ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
-            String[] csvHeader = CSVFile.CSV_HEADER;
-            String[] nameMapping = CSVFile.NAME_MAPPING;
-
-            csvWriter.writeHeader(csvHeader);
-
-            for (ProjectDTO projectDTO : projectDTOList) {
-                csvWriter.write(projectDTO, nameMapping);
-            }
-            csvWriter.close();
-            return new MessageResponse(ResponseMessage.EXPORT_PROJECT_SUCCESS, Status.SUCCESS.getCode());
-        } catch (Exception e) {
-            return new MessageResponse(ResponseMessage.EXPORT_PROJECT_FAIL, Status.FAIL.getCode());
-        }
-    }
 
     @Override
     public Response importCSV(Integer idAccount, Integer idWorkspace, MultipartFile file) {

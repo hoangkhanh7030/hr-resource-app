@@ -1,6 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.importCSV;
 
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
+import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
 import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
 import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
@@ -79,17 +80,24 @@ public class CsvFileService {
             WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace)
                     .orElseThrow(() -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
             List<ResourceRequest> resourceRequests = ApacheCommonsCsvUtil.parseCsvFileResource(file);
+            List<PositionEntity> positionEntities = positionRepository.findAllActiveByIdWorkspace(idWorkspace);
 
             for (ResourceRequest resourceRequest : resourceRequests) {
                 ResourceEntity resourceEntity = new ResourceEntity();
                 Date current = new Date();
                 resourceEntity.setName(resourceRequest.getName());
                 resourceEntity.setAvatar(resourceRequest.getAvatar());
-                resourceEntity.setPositionEntity(positionRepository.findById(resourceRequest.getPositionId()).orElse(null));
+                PositionEntity positionEntity = positionRepository.findById(resourceRequest.getPositionId()).orElse(null);
+                if (positionEntity == null){
+                    positionEntity = positionEntities.get(0);
+                }
+                resourceEntity.setPositionEntity(positionEntity);
+                resourceEntity.setTeamEntityResource(positionEntity.getTeamEntity());
                 resourceEntity.setCreatedDate(current);
                 resourceEntity.setCreatedBy(idAccount);
                 resourceEntity.setModifiedBy(idAccount);
                 resourceEntity.setModifiedDate(current);
+                resourceEntity.setWorkspaceEntityResource(workspaceEntity);
                 resourceRepository.save(resourceEntity);
             }
 

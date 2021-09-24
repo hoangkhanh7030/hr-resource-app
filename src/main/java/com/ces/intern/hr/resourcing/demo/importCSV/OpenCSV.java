@@ -14,7 +14,7 @@ import java.util.List;
 
 public class OpenCSV {
     public static List<ProjectDTO> parseCsvFile(InputStream is){
-        String[] CSV_HEADER ={"name","clientName","color","textColor","colorPattern","isActivate"};
+        String[] CSV_HEADER ={"name","clientName","color","textColor","isActivate"};
         Reader fileReader = null;
         CsvToBean<ProjectDTO> csvToBean = null;
         List<ProjectDTO> projectDTOList = new ArrayList<>();

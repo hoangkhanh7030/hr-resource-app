@@ -36,7 +36,7 @@ public interface ProjectService {
     NumberSizeResponse ListProject(Integer idWorkspace,int page,int size,String sortName,
                                    String searchName,String type,String isActivate);
 
-    MessageResponse export(HttpServletResponse response,Integer idWorkspace);
+//    MessageResponse export(HttpServletResponse response,Integer idWorkspace);
 
     Response importCSV(Integer idAccount, Integer idWorkspace, MultipartFile file);
 }

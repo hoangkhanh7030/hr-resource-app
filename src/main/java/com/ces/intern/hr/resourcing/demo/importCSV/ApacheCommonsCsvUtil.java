@@ -33,10 +33,12 @@ public class ApacheCommonsCsvUtil {
             Iterable<CSVRecord> csvRecords = csvParser.getRecords();
 
             for (CSVRecord csvRecord : csvRecords) {
-                ProjectDTO projectDTO = new ProjectDTO(csvRecord.get("name"),
-                        csvRecord.get("clientName"),csvRecord.get("color"),csvRecord.get("textColor"),
-                        csvRecord.get("colorPattern"),Boolean.TRUE);
-
+                ProjectDTO projectDTO = new ProjectDTO();
+                projectDTO.setName(csvRecord.get("Project Name"));
+                projectDTO.setClientName(csvRecord.get("Client Name"));
+                projectDTO.setColor(csvRecord.get("Project Color"));
+                projectDTO.setTextColor(csvRecord.get("Text Color"));
+                projectDTO.setIsActivate(Boolean.TRUE);
                 projectDTOList.add(projectDTO);
             }
 
@@ -73,8 +75,8 @@ public class ApacheCommonsCsvUtil {
                 ResourceRequest resourceRequest = new ResourceRequest();
                 resourceRequest.setName(csvRecord.get("name"));
                 resourceRequest.setAvatar(csvRecord.get("avatar"));
-                resourceRequest.setPositionName(csvRecord.get("positionName"));
-                resourceRequest.setTeamName(csvRecord.get("teamName"));
+                resourceRequest.setPositionId(Integer.parseInt(csvRecord.get("positionId")));
+                //resourceRequest.setTeamName(csvRecord.get("teamId"));
                 resourceRequests.add(resourceRequest);
             }
 

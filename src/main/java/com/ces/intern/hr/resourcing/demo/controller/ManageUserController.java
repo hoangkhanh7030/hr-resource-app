@@ -103,14 +103,15 @@ public class ManageUserController {
     private MessageResponse isActive(@PathVariable Integer idAccount,
                                      @PathVariable Integer idWorkspace,
                                      @RequestBody IsActiveRequest isActiveRequest) {
-        AccountWorkspaceRoleEntity accountWorkspaceRoleEntity=accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
-                .orElseThrow(()-> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
+
         try {
             manageUserService.isActive(idAccount, idWorkspace, isActiveRequest.getUrl());
+            AccountWorkspaceRoleEntity accountWorkspaceRoleEntity=accoutWorkspaceRoleRepository.findByIdAndId(idWorkspace, idAccount)
+                    .orElseThrow(()-> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()));
             if (accountWorkspaceRoleEntity.getCodeRole().equals(Role.INACTIVE.getCode())){
-                return new MessageResponse(ResponseMessage.ENABLE_EMAIL, Status.SUCCESS.getCode());
-            }else {
                 return new MessageResponse(ResponseMessage.ARCHIVED_EMAIL, Status.SUCCESS.getCode());
+            }else {
+                return new MessageResponse(ResponseMessage.ENABLE_EMAIL, Status.SUCCESS.getCode());
 
             }
 

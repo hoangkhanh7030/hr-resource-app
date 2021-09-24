@@ -24,8 +24,6 @@ public class ProjectEntity extends BaseEnity {
     private String color;
     @Column(name = "text_color")
     private String textColor;
-    @Column(name = "color_pattern")
-    private String colorPattern;
     @Column(name = "is_activate")
     private Boolean isActivate;
 

@@ -35,9 +35,9 @@ public class TimeServiceImpl implements TimeService {
     private static final int MILLISECOND = (1000 * 60 * 60 * 24);
     private static final int ONE_WEEK = 7;
     private static final int TWO_WEEK = 14;
-    private static final int ONE_WEEK_WORK_HOUR = 40;
-    private static final int TWO_WEEK_WORK_HOUR = 80;
-    private static final int FOUR_WEEK_WORK_HOUR = 160;
+    private static final int ONE_WEEK_WORK = 1;
+    private static final int TWO_WEEK_WORK = 2;
+    private static final int FOUR_WEEK_WORK = 4;
     private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     private final TimeRepository timeRepository;
     private final ProjectRepository projectRepository;
@@ -235,6 +235,19 @@ public class TimeServiceImpl implements TimeService {
         Date endDay = SIMPLE_DATE_FORMAT.parse(endDate);
         long viewType = ((endDay.getTime() - startDay.getTime()) / MILLISECOND) + 1;
         double percent;
+        List<Boolean> workDays = new ArrayList<>();
+        WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).orElse(null);
+        assert workspaceEntity != null;
+        String[] arrayWorkDays = workspaceEntity.getWorkDays().split(",");
+        for (String string : arrayWorkDays) {
+            workDays.add(Boolean.parseBoolean(string));
+        }
+        int size=0;
+        for (Boolean b:workDays){
+            if (b.equals(true)){
+                size+=1;
+            }
+        }
         DashboardListResponse dashboardListResponse = new DashboardListResponse();
         List<ResourceEntity> resourceEntities = resourceRepository.findAllBySearchName(idWorkspace, searchName);
         resourceEntities.sort((o1, o2) -> (int) (o1.getCreatedDate().getTime() - o2.getCreatedDate().getTime()));
@@ -255,11 +268,11 @@ public class TimeServiceImpl implements TimeService {
                 List<TimeDTO> timeDTOS = entityToDTO(timeEntities, startDay, endDay);
                 Double sumHour = sumHour(timeDTOS);
                 if (viewType == ONE_WEEK) {
-                    percent = (sumHour / ONE_WEEK_WORK_HOUR) * 100;
+                    percent = (sumHour / (size*8*ONE_WEEK_WORK)) * 100;
                 } else if (viewType == TWO_WEEK) {
-                    percent = (sumHour / TWO_WEEK_WORK_HOUR) * 100;
+                    percent = (sumHour / (size*8*TWO_WEEK_WORK)) * 100;
                 } else {
-                    percent = (sumHour / FOUR_WEEK_WORK_HOUR) * 100;
+                    percent = (sumHour / (size*8*FOUR_WEEK_WORK)) * 100;
                 }
                 resourceResponse.setPercent(DoubleRounder.round(percent, 1));
                 resourceResponses.add(resourceResponse);
@@ -280,19 +293,21 @@ public class TimeServiceImpl implements TimeService {
                             List<TimeDTO> timeDTOS = entityToDTO(timeEntities, startDay, endDay);
                             Double sumHour = sumHour(timeDTOS);
                             if (viewType == ONE_WEEK) {
-                                percent = (sumHour / ONE_WEEK_WORK_HOUR) * 100;
+                                percent = (sumHour / (size*8*ONE_WEEK_WORK)) * 100;
                             } else if (viewType == TWO_WEEK) {
-                                percent = (sumHour / TWO_WEEK_WORK_HOUR) * 100;
+                                percent = (sumHour / (size*8*TWO_WEEK_WORK)) * 100;
                             } else {
-                                percent = (sumHour / FOUR_WEEK_WORK_HOUR) * 100;
+                                percent = (sumHour / (size*8*FOUR_WEEK_WORK)) * 100;
                             }
                             resourceResponse.setPercent(DoubleRounder.round(percent, 1));
                             resourceResponses.add(resourceResponse);
                             break;
                         }
+
                     }
                 }
             }
+
 
         }
         dashboardListResponse.setResources(resourceResponses);
@@ -304,13 +319,7 @@ public class TimeServiceImpl implements TimeService {
 
         dashboardListResponse.setTeams(teamResponses);
         dashboardListResponse.setStatus(Status.SUCCESS.getCode());
-        List<Boolean> workDays = new ArrayList<>();
-        WorkspaceEntity workspaceEntity = workspaceRepository.findById(idWorkspace).orElse(null);
-        assert workspaceEntity != null;
-        String[] arrayWorkDays = workspaceEntity.getWorkDays().split(",");
-        for (String string : arrayWorkDays) {
-            workDays.add(Boolean.parseBoolean(string));
-        }
+
         dashboardListResponse.setWorkDays(workDays);
         return dashboardListResponse;
     }
