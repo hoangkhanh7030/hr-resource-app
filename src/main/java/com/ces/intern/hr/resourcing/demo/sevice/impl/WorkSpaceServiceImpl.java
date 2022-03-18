@@ -150,7 +150,7 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
                     ProjectEntity projectEntity = new ProjectEntity();
                     projectEntity.setName("VACATION");
                     projectEntity.setClientName("VACATION");
-                    projectEntity.setIsActivate(true);
+                    projectEntity.setIsActivate(false);
                     projectEntity.setColor("#808080");
                     projectEntity.setTextColor("#000000");
                     projectEntity.setWorkspaceEntityProject(workspaceEntity1);
