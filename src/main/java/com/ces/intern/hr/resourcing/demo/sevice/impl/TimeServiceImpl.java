@@ -25,9 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -70,7 +72,20 @@ public class TimeServiceImpl implements TimeService {
     @Override
     public MessageResponse deleteBooking(Integer id) {
         if (timeRepository.findById(id).isPresent()) {
-            timeRepository.deleteById(id);
+            TimeEntity timeEntity = timeRepository.findById(id).get();
+            if (timeEntity.getStatus()==false){
+                ResourceEntity resourceEntity = resourceRepository.findById(timeEntity.getResourceEntity().getId()).get();
+                long getDiff = timeEntity.getEndTime().getTime() - timeEntity.getStartTime().getTime();
+                long getDaysDiff = TimeUnit.MILLISECONDS.toDays(getDiff);
+                int dayOff =(int)getDaysDiff +1;
+                int curentVacation =resourceEntity.getVacation();
+                resourceEntity.setVacation(curentVacation-dayOff);
+                resourceRepository.save(resourceEntity);
+                timeRepository.deleteById(id);
+            }else {
+                timeRepository.deleteById(id);
+            }
+
             return new MessageResponse(ResponseMessage.DELETE_BOOKING_SUCCESS, Status.SUCCESS.getCode());
         }
         return new MessageResponse(ResponseMessage.DELETE_BOOKING_FAIL, Status.FAIL.getCode());
@@ -93,6 +108,7 @@ public class TimeServiceImpl implements TimeService {
             TimeEntity timeEntity = new TimeEntity();
             timeEntity.setStartTime(startDay);
             timeEntity.setEndTime(endDay);
+            timeEntity.setStatus(true);
             timeEntity.setProjectEntity(projectEntity);
             timeEntity.setResourceEntity(resourceEntity);
             if (checkNull) {
@@ -162,6 +178,7 @@ public class TimeServiceImpl implements TimeService {
                     timeEntity.setStartTime(list.get(0));
                     timeEntity.setEndTime(list.get(list.size() - 1));
                     timeEntity.setTotalHour(hourForEachDay * list.size());
+                    timeEntity.setStatus(true);
                     timeEntity.setProjectEntity(projectEntity);
                     timeEntity.setResourceEntity(resourceEntity);
                     timeRepository.save(timeEntity);

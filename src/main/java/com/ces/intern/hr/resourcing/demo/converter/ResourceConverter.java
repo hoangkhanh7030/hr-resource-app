@@ -22,6 +22,7 @@ public class ResourceConverter {
         resourceDTO.setModifiedDate(resourceEntity.getModifiedDate());
         resourceDTO.setAvatar(resourceEntity.getAvatar());
         resourceDTO.setName(resourceEntity.getName());
+        resourceDTO.setVacation(resourceEntity.getVacation());
         resourceDTO.setIsArchived(resourceEntity.getIsArchived());
         if (resourceEntity.getTeamEntityResource()==null){
             resourceDTO.setTeamDTO(null);

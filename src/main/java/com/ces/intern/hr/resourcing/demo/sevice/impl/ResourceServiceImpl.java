@@ -83,6 +83,7 @@ public class ResourceServiceImpl implements ResourceService {
         resourceEntity.setCreatedBy(accountId);
         resourceEntity.setWorkspaceEntityResource(workspaceEntity);
         resourceEntity.setTeamEntityResource(teamEntity);
+        resourceEntity.setVacation(0);
         resourceEntity.setModifiedDate(currentDate);
         resourceEntity.setModifiedBy(accountId);
         resourceRepository.save(resourceEntity);

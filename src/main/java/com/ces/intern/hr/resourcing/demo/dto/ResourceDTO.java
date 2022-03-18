@@ -17,5 +17,6 @@ public class ResourceDTO extends BaseDTO{
     private TeamDTO teamDTO;
     private PositionDTO positionDTO;
     private Boolean isArchived;
+    private Integer vacation;
     private List<TimeDTO> listTime;
 }

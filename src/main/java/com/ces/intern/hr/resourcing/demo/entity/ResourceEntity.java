@@ -23,6 +23,8 @@ public class ResourceEntity extends BaseEnity{
     private String avatar;
     @Column(name = "is_archived")
     private Boolean isArchived = false;
+    @Column(name = "vacation")
+    private Integer vacation;
     @ManyToOne
     @JoinColumn(name = "team_id")
     private TeamEntity teamEntityResource;

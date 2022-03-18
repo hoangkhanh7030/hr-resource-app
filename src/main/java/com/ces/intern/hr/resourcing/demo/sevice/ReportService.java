@@ -12,5 +12,6 @@ public interface ReportService {
     Report report(Date startDate,Date endDate, Integer idWorkspace,String type);
     ProjectReportResponse reportProject(Date startDate,Date endDate, Integer idWorkspace,Integer time);
     ResourceReportResponse reportResource(Date startDate,Date endDate,Integer idWorkspace,Integer time);
-    void export (HttpServletResponse response,Integer idWorkspace,Date startDate,Date endDate,String type) throws IOException;
+    void export (HttpServletResponse response,Integer idWorkspace,Date startDate,
+                 Date endDate,String type) throws IOException;
 }

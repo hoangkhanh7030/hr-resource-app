@@ -134,16 +134,29 @@ public class WorkSpaceServiceImpl implements WorkspaceService {
                 AccountEntity accountEntity = accoutRepository.findById(idAccount).orElseThrow(
                         () -> new NotFoundException(ExceptionMessage.NOT_FOUND_RECORD.getMessage()
                                 + "with" + idAccount));
-                WorkspaceEntity workspaceEntity = workspaceConverter.convertToEntity(workspaceDTO);
-                Date date = new Date();
-                workspaceEntity.setCreatedDate(date);
-                workspaceEntity.setCreatedBy(idAccount);
-                AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = new AccountWorkspaceRoleEntity();
-                accountWorkspaceRoleEntity.setAccountEntity(accountEntity);
-                accountWorkspaceRoleEntity.setWorkspaceEntity(workspaceEntity);
-                accountWorkspaceRoleEntity.setCodeRole(Role.EDIT.getCode());
-                workspaceRepository.save(workspaceEntity);
-                accoutWorkspaceRoleRepository.save(accountWorkspaceRoleEntity);
+                if (workspaceRepository.findByNameWorkspaceAndId(workspaceDTO.getName(), idAccount).isPresent()) {
+
+                } else {
+                    WorkspaceEntity workspaceEntity = workspaceConverter.convertToEntity(workspaceDTO);
+                    Date date = new Date();
+                    workspaceEntity.setCreatedDate(date);
+                    workspaceEntity.setCreatedBy(idAccount);
+                    AccountWorkspaceRoleEntity accountWorkspaceRoleEntity = new AccountWorkspaceRoleEntity();
+                    accountWorkspaceRoleEntity.setAccountEntity(accountEntity);
+                    accountWorkspaceRoleEntity.setWorkspaceEntity(workspaceEntity);
+                    accountWorkspaceRoleEntity.setCodeRole(Role.EDIT.getCode());
+                    workspaceRepository.save(workspaceEntity);
+                    WorkspaceEntity workspaceEntity1 = workspaceRepository.findByNameWorkspaceAndId(workspaceDTO.getName(), idAccount).get() ;accoutWorkspaceRoleRepository.save(accountWorkspaceRoleEntity);
+                    ProjectEntity projectEntity = new ProjectEntity();
+                    projectEntity.setName("VACATION");
+                    projectEntity.setClientName("VACATION");
+                    projectEntity.setIsActivate(true);
+                    projectEntity.setColor("#808080");
+                    projectEntity.setTextColor("#000000");
+                    projectEntity.setWorkspaceEntityProject(workspaceEntity1);
+                    projectRepository.save(projectEntity);
+
+                }
             }
             if (accoutWorkspaceRoleRepository.findByNameWorkspaceAndIdAccount(workspaceDTO.getName(), idAccount).isPresent()) {
                 return new MessageResponse(ResponseMessage.CREATE_WORKSPACE_SUCCESS, Status.SUCCESS.getCode());

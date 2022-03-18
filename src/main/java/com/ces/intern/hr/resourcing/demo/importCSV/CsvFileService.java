@@ -1,10 +1,7 @@
 package com.ces.intern.hr.resourcing.demo.importCSV;
 
 import com.ces.intern.hr.resourcing.demo.dto.ProjectDTO;
-import com.ces.intern.hr.resourcing.demo.entity.PositionEntity;
-import com.ces.intern.hr.resourcing.demo.entity.ProjectEntity;
-import com.ces.intern.hr.resourcing.demo.entity.ResourceEntity;
-import com.ces.intern.hr.resourcing.demo.entity.WorkspaceEntity;
+import com.ces.intern.hr.resourcing.demo.entity.*;
 import com.ces.intern.hr.resourcing.demo.http.exception.NotFoundException;
 import com.ces.intern.hr.resourcing.demo.http.request.ResourceRequest;
 import com.ces.intern.hr.resourcing.demo.http.response.report.ResourceReportResponse;
@@ -58,7 +55,7 @@ public class CsvFileService {
             List<ProjectDTO> projectDTOList = ApacheCommonsCsvUtil.parseCsvFile(file);
 
             for (ProjectDTO projectDTO : projectDTOList) {
-                if (!projectRepository.findByName(projectDTO.getName()).isPresent()) {
+                if (!projectRepository.findByNameAndWorkspaceId(projectDTO.getName(),idWorkspace).isPresent()) {
                     ProjectEntity projectEntity = modelMapper.map(projectDTO, ProjectEntity.class);
                     projectEntity.setWorkspaceEntityProject(workspaceEntity);
                     projectEntity.setIsActivate(projectDTO.getIsActivate());
@@ -87,18 +84,62 @@ public class CsvFileService {
                 Date current = new Date();
                 resourceEntity.setName(resourceRequest.getName());
                 resourceEntity.setAvatar(resourceRequest.getAvatar());
-                PositionEntity positionEntity = positionRepository.findById(resourceRequest.getPositionId()).orElse(null);
-                if (positionEntity == null){
-                    positionEntity = positionEntities.get(0);
+                if (teamRepository.findByNameAndidWorkspaceAndFalse(resourceRequest.getTeamName(),idWorkspace).isPresent()){
+                    TeamEntity teamEntity = teamRepository.findByNameAndidWorkspaceAndFalse(resourceRequest.getTeamName(),idWorkspace).get();
+                    if (positionRepository.findByNameAndIdTeam(resourceRequest.getPositionName(),teamEntity.getId()).isPresent()) {
+                        PositionEntity positionEntity = positionRepository.findByNameAndIdTeam(resourceRequest.getPositionName(), teamEntity.getId()).get();
+                        resourceEntity.setPositionEntity(positionEntity);
+                        resourceEntity.setTeamEntityResource(teamEntity);
+                        resourceEntity.setCreatedDate(current);
+                        resourceEntity.setCreatedBy(idAccount);
+                        resourceEntity.setModifiedBy(idAccount);
+                        resourceEntity.setModifiedDate(current);
+                        resourceEntity.setVacation(0);
+                        resourceEntity.setWorkspaceEntityResource(workspaceEntity);
+                        resourceRepository.save(resourceEntity);
+                    }else {
+                        PositionEntity position = new PositionEntity();
+                        position.setName(resourceRequest.getPositionName());
+                        position.setTeamEntity(teamEntity);
+                        position.setIsArchived(false);
+                        positionRepository.save(position);
+                        PositionEntity positionEntity = positionRepository.findByNameAndIdTeam(resourceRequest.getPositionName(),teamEntity.getId()).get();
+                        resourceEntity.setPositionEntity(positionEntity);
+                        resourceEntity.setTeamEntityResource(teamEntity);
+                        resourceEntity.setCreatedDate(current);
+                        resourceEntity.setCreatedBy(idAccount);
+                        resourceEntity.setModifiedBy(idAccount);
+                        resourceEntity.setModifiedDate(current);
+                        resourceEntity.setVacation(0);
+                        resourceEntity.setWorkspaceEntityResource(workspaceEntity);
+                        resourceRepository.save(resourceEntity);
+                    }
+                }else {
+                    TeamEntity teamEntity = new TeamEntity();
+                    teamEntity.setName(resourceRequest.getTeamName());
+                    teamEntity.setIsArchived(false);
+                    teamEntity.setCreatedDate(current);
+                    teamEntity.setWorkspaceEntityTeam(workspaceEntity);
+                    teamRepository.save(teamEntity);
+                    TeamEntity team = teamRepository.findByNameAndidWorkspaceAndFalse(resourceRequest.getTeamName(),idWorkspace).get();
+                    PositionEntity positionEntity= new PositionEntity();
+                    positionEntity.setName(resourceRequest.getPositionName());
+                    positionEntity.setTeamEntity(team);
+                    positionEntity.setIsArchived(false);
+                    positionRepository.save(positionEntity);
+                    PositionEntity position = positionRepository.findByNameAndIdTeam(resourceRequest.getPositionName(),team.getId()).get();
+                    resourceEntity.setPositionEntity(position);
+                    resourceEntity.setTeamEntityResource(team);
+                    resourceEntity.setCreatedDate(current);
+                    resourceEntity.setCreatedBy(idAccount);
+                    resourceEntity.setModifiedBy(idAccount);
+                    resourceEntity.setModifiedDate(current);
+                    resourceEntity.setVacation(0);
+                    resourceEntity.setWorkspaceEntityResource(workspaceEntity);
+                    resourceRepository.save(resourceEntity);
                 }
-                resourceEntity.setPositionEntity(positionEntity);
-                resourceEntity.setTeamEntityResource(positionEntity.getTeamEntity());
-                resourceEntity.setCreatedDate(current);
-                resourceEntity.setCreatedBy(idAccount);
-                resourceEntity.setModifiedBy(idAccount);
-                resourceEntity.setModifiedDate(current);
-                resourceEntity.setWorkspaceEntityResource(workspaceEntity);
-                resourceRepository.save(resourceEntity);
+
+
             }
 
 

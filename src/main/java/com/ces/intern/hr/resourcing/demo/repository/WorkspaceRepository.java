@@ -17,5 +17,9 @@ public interface WorkspaceRepository extends JpaRepository<WorkspaceEntity, Inte
 
     List<WorkspaceEntity> findAllByNameContainingIgnoreCase(String name);
 
+    @Query("select w from WorkspaceEntity w where w.name =:name and w.createdBy =:id")
+    Optional<WorkspaceEntity> findByNameWorkspaceAndId(@Param("name") String name,
+                                                       @Param("id") Integer id);
+
 
 }

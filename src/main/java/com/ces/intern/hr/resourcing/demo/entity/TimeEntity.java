@@ -26,6 +26,8 @@ public class TimeEntity {
     private Date endTime;
     @Column(name = "total_hour")
     private Double totalHour;
+    @Column(name = "status")
+    private Boolean status;
 
     @ManyToOne
     @JoinColumn(name = "resource_id")

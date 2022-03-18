@@ -30,7 +30,6 @@ import java.util.List;
 @RequestMapping("api/v1/workspaces")
 public class TimeController {
     private final TimeService timeService;
-    private final AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository;
     private final ProjectService projectService;
     private final ResourceService resourceService;
 
@@ -38,11 +37,9 @@ public class TimeController {
     @Autowired
     private TimeController(
             TimeService timeService,
-            AccoutWorkspaceRoleRepository accoutWorkspaceRoleRepository,
             ProjectService projectService,
             ResourceService resourceService) {
         this.timeService = timeService;
-        this.accoutWorkspaceRoleRepository = accoutWorkspaceRoleRepository;
         this.projectService = projectService;
         this.resourceService = resourceService;
     }
